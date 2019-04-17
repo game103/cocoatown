@@ -1,1 +1,2 @@
-# dogtown
+# Cocoa Town
+Cocoa Town game
