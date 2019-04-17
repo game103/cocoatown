@@ -350,15 +350,15 @@ function drawWorld() {
     for( var i=0; i<25; i++ ) {
         var object;
         while( true ) {
-            var x = Math.random() * 3000;
-            var y = Math.random() * 3000;
+            var x = Math.floor(Math.random() * (canvasWidth-500)/10) * 10 + 250;
+            var y = Math.floor(Math.random() * (canvasHeight-500)/10) * 10 + 250;
             var height = Math.random() * 200 + 100;
             var width = Math.random() * 150 + 100;
-            object = { x1: x, y1: y, x2: x+width, y2: y+height };
-            var overlapObject = { x1: object.x1-30, y1: object.y1-50, x2: object.x2+30, y2: object.y2 };
+            object = { x1: x, y1: y, x2: x+width, y2: y+height-playerAllowedHouseOverlap };
+            var overlapObject = { x1: object.x1-30, y1: object.y1-70, x2: object.x2+30, y2: object.y2+playerAllowedHouseOverlap };
             var overlaps = false;
             for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-50, x2: objects[i].x2+30, y2: objects[i].y2 };
+                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-50, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap };
                 if( collisionTest(overlapObject, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -395,7 +395,7 @@ function moveHorizontal(amount) {
         player.classList.remove("player-flipped");
     }
 
-    var playerObject = { x1: playerX - amount, y1: playerY + playerAllowedHouseOverlap, x2: playerX + playerWidth - amount, y2: playerY + playerHeight };
+    var playerObject = { x1: playerX - amount, y1: playerY, x2: playerX + playerWidth - amount, y2: playerY + playerHeight };
     var colliding = false;
     for(var i=0; i<objects.length;i++) {
         if( collisionTest(objects[i], playerObject) ) {
@@ -404,7 +404,9 @@ function moveHorizontal(amount) {
         }
     }
     if( !colliding ) {
-        world.style.left = (parseInt(window.getComputedStyle(world).getPropertyValue('left').replace("px", "")) + amount) + "px";
+        worldHorizontalOffset -= amount;
+        // Make sure this matches the css
+        world.style.left = "calc(100vw / 2 - " + (canvasWidth/2+worldHorizontalOffset) + "px)";
         playerX -= amount;
     }
 }
@@ -416,7 +418,7 @@ function moveHorizontal(amount) {
 function moveVertical(amount) {
     var world = document.querySelector(".world");
 
-    var playerObject = { x1: playerX, y1: playerY - amount + playerAllowedHouseOverlap, x2: playerX + playerWidth, y2: playerY + playerHeight - amount };
+    var playerObject = { x1: playerX, y1: playerY - amount, x2: playerX + playerWidth, y2: playerY + playerHeight - amount };
     var colliding = false;
     for(var i=0; i<objects.length;i++) {
         if( collisionTest(objects[i], playerObject) ) {
@@ -425,7 +427,9 @@ function moveVertical(amount) {
         }
     }
     if( !colliding ) {
-        world.style.top = (parseInt(window.getComputedStyle(world).getPropertyValue('top').replace("px", "")) + amount) + "px";
+        worldVerticalOffset -= amount;
+        // Make sure this matches the css
+        world.style.top = "calc(100vh / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
         playerY -= amount;
     }
 }
@@ -464,11 +468,15 @@ var keyMap = {
 var playerWidth = 82;
 var playerHeight = 72;
 var playerAllowedHouseOverlap = 60; // How much the player is allowed to overlap with the house
+var worldHorizontalOffset = 0;
+var worldVerticalOffset = 0;
+var canvasWidth = 3000;
+var canvasHeight = 3000;
 // Simply the midpoint minus half the player's width/height (note, these values are in the css too)
-var playerX = 1500 - playerWidth/2;
-var playerY = 1500 - playerHeight/2;
+var playerX = canvasWidth/2 - playerWidth/2;
+var playerY = canvasHeight/2 - playerHeight/2;
 var movementAmount = 10;
-var objects = [];
+var objects = []; // Objects that the player can hit.
 drawWorld();
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
 document.body.onkeyup = function(e) {keyDown[keyMap[e.which]] = false;};

@@ -3,14 +3,16 @@ body {
     height: 100%;
     overflow: hidden;
     margin: 0;
+    background-color: black;
 }
 .world {
     width: 3000px;
     height: 3000px;
     position: absolute;
+    /* Make sure these values are updated in the JS too */
     top: calc(100vh / 2 - 1500px);
     left: calc(100vw / 2 - 1500px);
-    border: 1px solid black;
+    background-color: white;
 }
 .player {
     width: 82px;
