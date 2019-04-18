@@ -395,7 +395,7 @@ function drawDogFrame1(x, y, container) {
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+8;
+    var legOffset = x+6;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+40) + "," + (31+legOffset) + " " + (y+50) + "," + (32+legOffset) + " " + (y+54));
     d.push("C " + (32+legOffset) + " " + (y+54) + "," + (22+legOffset) + " " + (y+62) + "," + (34+legOffset) + " " + (y+60));
@@ -407,7 +407,7 @@ function drawDogFrame1(x, y, container) {
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = 46;
+    var legOffset = x+44;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+48) + "," + (20+legOffset) + " " + (y+50));
@@ -445,7 +445,6 @@ function drawDogFrame1(x, y, container) {
     container.appendChild( ear );
     ear.classList.add("dog");
 
-
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -454,7 +453,7 @@ function drawDogFrame1(x, y, container) {
     d.push("C " + (19+legOffset) + " " + (y+40) + "," + (31+legOffset) + " " + (y+50) + "," + (32+legOffset) + " " + (y+54));
     d.push("C " + (32+legOffset) + " " + (y+54) + "," + (22+legOffset) + " " + (y+62) + "," + (34+legOffset) + " " + (y+60));
     d.push("C " + (34+legOffset) + " " + (y+60) + "," + (35+legOffset) + " " + (y+60) + "," + (38+legOffset) + " " + (y+55));
-    d.push("C " + (36+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+28));
+    d.push("C " + (36+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+45) + "," + (29+legOffset) + " " + (y+28));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -462,7 +461,7 @@ function drawDogFrame1(x, y, container) {
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = 54;
+    var legOffset = x + 52;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+55));
@@ -493,6 +492,110 @@ function drawDogFrame1(x, y, container) {
 
     return path;
 }
+
+function drawDogFrame2(x, y, container) {
+
+    
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+4;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (22+legOffset) + " " + (y+44) + "," + (35+legOffset) + " " + (y+55));
+    d.push("C " + (39+legOffset) + " " + (y+55) + "," + (39+legOffset) + " " + (y+50) + "," + (35+legOffset) + " " + (y+48));
+    d.push("C " + (35+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (23+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+52;
+    d.push("M " + (18+legOffset) + " " + (y+27));
+    d.push("C " + (7+legOffset) + " " + (y+34) + "," + (9+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+50));
+    d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+53) + "," + (legOffset) + " " + (y+56));
+    d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x+5) + " " + (y+10));
+    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
+    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
+    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
+    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
+    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
+    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
+    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
+    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
+
+    path.setAttribute("d", d);
+    container.appendChild( path );
+    path.classList.add("dog");
+
+    drawCircle(x + 13, y-2, 1, container);
+    drawCircle(x+2, y+3, 3, container);
+
+    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    d = [];
+    d.push("M " + (x+18) + " " + (y-5));
+    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
+    ear.setAttribute("d", d);
+    container.appendChild( ear );
+    ear.classList.add("dog");
+
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (17+legOffset) + " " + (y+38) + "," + (22+legOffset) + " " + (y+44));
+    d.push("C " + (22+legOffset) + " " + (y+44) + "," + (19+legOffset) + " " + (y+53) + "," + (22+legOffset) + " " + (y+55));
+    d.push("C " + (22+legOffset) + " " + (y+55) + "," + (22+legOffset) + " " + (y+55) + "," + (27+legOffset) + " " + (y+56));
+    d.push("C " + (27+legOffset) + " " + (y+56) + "," + (30+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+51));
+    d.push("C " + (26+legOffset) + " " + (y+51) + "," + (29+legOffset) + " " + (y+40) + "," + (28+legOffset) + " " + (y+37));
+    d.push("C " + (27+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+28));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
+    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (7+legOffset) + " " + (y+50) + "," + (7+legOffset) + " " + (y+47));
+    d.push("C " + (7+legOffset) + " " + (y+48) + "," + (legOffset) + " " + (y+51) + "," + (7+legOffset) + " " + (y+52));
+    d.push("C " + (7+legOffset) + " " + (y+52) + "," + (13+legOffset) + " " + (y+54) + "," + (27+legOffset) + " " + (y+43));
+    d.push("C " + (27+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+42));
+    d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x+70) + " " + (y+15));
+    d.push("C " + (x+70) + " " + (y+15) + "," + (x+78) + " " + (y+21) + "," + (x+96) + " " + (y+15));
+    d.push("C " + (x+96) + " " + (y+15) + "," + (x+86) + " " + (y+22) + "," + (x+77) + " " + (y+21));
+    tail.setAttribute("d", d);
+    container.appendChild( tail );
+    tail.classList.add("dog");
+
+    // These are all for white space between the body and the tail.
+    var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
+    l.classList.add("dog-cover");
+    l.setAttribute("stroke-width", "1.5");
+    l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
+    l.classList.add("dog-cover");
+    l.setAttribute("stroke-width", "2");
+
+    return path;
+}
+
 
 
 
@@ -658,6 +761,23 @@ drawWorld();
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
 document.body.onkeyup = function(e) {keyDown[keyMap[e.which]] = false;};
 tick();
+
+var frame = 1;
+function draw() {
+    var container = document.querySelector(".player");
+    var player = document.querySelector(".player");
+    player.innerHTML = "";
+
+    if( frame % 2 == 1 ) {
+        drawDogFrame1(2, 11, container);
+    }
+    else {
+        drawDogFrame2(2, 11, container);
+    }
+
+    frame++;
+}
+document.body.onclick =  draw  ;
 
 
 // Old dog

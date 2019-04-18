@@ -3,7 +3,7 @@ body {
     height: 100%;
     overflow: hidden;
     margin: 0;
-    background-color: black;
+    background-color: rgb(0, 94, 5);
 }
 
 .world {
@@ -52,7 +52,7 @@ body {
 }
 
 .dog-cover {
-    fill: rgb(165, 81, 42);
+    stroke: rgb(165, 81, 42);
 }
 
 .window-pane {
