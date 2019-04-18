@@ -35,10 +35,6 @@ body {
     stroke: black;
 }
 
-.roof {
-    fill: rgb(114, 0, 0);
-}
-
 .door {
     fill: white;
 }
@@ -52,11 +48,11 @@ body {
 }
 
 .dog {
-    fill: brown;
+    fill: rgb(165, 81, 42);
 }
 
 .dog-cover {
-    stroke: brown;
+    fill: rgb(165, 81, 42);
 }
 
 .window-pane {
