@@ -411,7 +411,7 @@ function drawDogFrame1(x, y, container) {
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+48) + "," + (20+legOffset) + " " + (y+50));
-    d.push("C " + (20+legOffset) + " " + (y+50) + "," + (20+legOffset) + " " + (y+52) + "," + (22+legOffset) + " " + (y+54));
+    d.push("C " + (20+legOffset) + " " + (y+50) + "," + (18+legOffset) + " " + (y+52) + "," + (22+legOffset) + " " + (y+54));
     d.push("C " + (22+legOffset) + " " + (y+56) + "," + (32+legOffset) + " " + (y+56) + "," + (26+legOffset) + " " + (y+50));
     d.push("C " + (27+legOffset) + " " + (y+48) + "," + (39+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
@@ -553,8 +553,8 @@ function drawDogFrame2(x, y, container) {
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (17+legOffset) + " " + (y+38) + "," + (22+legOffset) + " " + (y+44));
     d.push("C " + (22+legOffset) + " " + (y+44) + "," + (19+legOffset) + " " + (y+53) + "," + (22+legOffset) + " " + (y+55));
-    d.push("C " + (22+legOffset) + " " + (y+55) + "," + (22+legOffset) + " " + (y+55) + "," + (27+legOffset) + " " + (y+56));
-    d.push("C " + (27+legOffset) + " " + (y+56) + "," + (30+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+51));
+    d.push("C " + (22+legOffset) + " " + (y+55) + "," + (22+legOffset) + " " + (y+56) + "," + (27+legOffset) + " " + (y+56));
+    d.push("C " + (27+legOffset) + " " + (y+56) + "," + (32+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+51));
     d.push("C " + (26+legOffset) + " " + (y+51) + "," + (29+legOffset) + " " + (y+40) + "," + (28+legOffset) + " " + (y+37));
     d.push("C " + (27+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+28));
     leg.setAttribute("d", d);
@@ -567,10 +567,10 @@ function drawDogFrame2(x, y, container) {
     var legOffset = x + 52;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
-    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (7+legOffset) + " " + (y+50) + "," + (7+legOffset) + " " + (y+47));
-    d.push("C " + (7+legOffset) + " " + (y+48) + "," + (legOffset) + " " + (y+51) + "," + (7+legOffset) + " " + (y+52));
-    d.push("C " + (7+legOffset) + " " + (y+52) + "," + (13+legOffset) + " " + (y+54) + "," + (27+legOffset) + " " + (y+43));
-    d.push("C " + (27+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+42));
+    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (7+legOffset) + " " + (y+46) + "," + (7+legOffset) + " " + (y+46));
+    d.push("C " + (legOffset) + " " + (y+46) + "," + (legOffset) + " " + (y+50) + "," + (7+legOffset) + " " + (y+51));
+    d.push("C " + (7+legOffset) + " " + (y+51) + "," + (17+legOffset) + " " + (y+50) + "," + (27+legOffset) + " " + (y+46));
+    d.push("C " + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+44) + "," + (25+legOffset) + " " + (y+43));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
