@@ -84,6 +84,7 @@ function drawPath( coordinates, container ) {
 function drawBuilding( width, height, x, y, container ) {
     var rectangle = drawRectangle( width, height, x, y, container );
     rectangle.classList.add( "building" );
+    rectangle.style.fill = getRandomColor();
 
     var brickHouse = Math.floor(Math.random() * 2);
     var brickWidth = brickHouse ? 20 : 100;
@@ -106,13 +107,83 @@ function drawBuilding( width, height, x, y, container ) {
     var doorX = x+width/2 - doorWidth/2;
     var doorY = y+height - doorHeight;
 
+    var roof = drawPath( [ [x,y], [x-roofOut, y], [x, y-roofHeight], [x+width, y-roofHeight], [x+width+roofOut, y], [x+width, y] ], container);
+    roof.classList.add("roof");
+    roof.style.fill = getRandomColor();
+
     drawBricks( width, height, x, y, container, brickWidth, brickHeight );
     drawWindows( windowsAreaWidth-xWindowOffset, windowsAreaHeight-yWindowOffset, x+xWindowOffset+(width-windowsAreaWidth)/2, y+yWindowOffset+(height-windowsAreaHeight)/2, container, windowWidth, windowHeight, windowSpacingHorizontal, windowSpacingVertical, doorX, doorY, doorWidth, doorHeight);
-    drawPath( [ [x,y], [x-roofOut, y], [x, y-roofHeight], [x+width, y-roofHeight], [x+width+roofOut, y], [x+width, y] ], container).classList.add("roof");
-    
+
     var houseNumber = generateHouseNumber();
     drawDoor( doorWidth, doorHeight, doorX, doorY, container, doorHandleRadius, houseNumber );
     return { houseNumber: houseNumber, roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut };
+}
+
+// Get a random color
+// Taken from here: https://stackoverflow.com/questions/1484506/random-color-generator
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 15)];
+    }
+    // Keep generating random colors until we get one light (unlike background color)
+    if( isLightColor(color) ) {
+        return getRandomColor();
+    }
+    return color;
+}
+// Make sure a color has a lightness over 0.8, (background [006633] = 0.4166666666666667)
+// Idea from here: https://stackoverflow.com/questions/13586999/color-difference-similarity-between-two-values-with-js
+function isLightColor(hex1) {
+    var rgb1 = hexToRgb(hex1);
+    var hsv1 = rgbToHsv(rgb1.r, rgb1.g, rgb1.b);
+    if( hsv1[2] < 0.90 ) return true; // We only want light colors
+    return false;
+}
+// rgb to hsv 
+// taken from here: http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+/**
+* Converts an RGB color value to HSV. Conversion formula
+* adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+* Assumes r, g, and b are contained in the set [0, 255] and
+* returns h, s, and v in the set [0, 1].
+*
+* @param   Number  r       The red color value
+* @param   Number  g       The green color value
+* @param   Number  b       The blue color value
+* @return  Array           The HSV representation
+*/
+function rgbToHsv(r, g, b){
+    r = r/255, g = g/255, b = b/255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, v = max;
+
+    var d = max - min;
+    s = max == 0 ? 0 : d / max;
+
+    if(max == min){
+        h = 0; // achromatic
+    }else{
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [h, s, v];
+}
+// hex to rgb
+// Taken from here: https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb/5624139
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
 
 /**
@@ -145,6 +216,7 @@ function generateHouseNumber() {
 function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber ) {
     var rectangle = drawRectangle( width, height, x, y, container );
     rectangle.classList.add("door"); 
+    rectangle.style.fill = getRandomColor();
     drawCircle( x+width/9, y+height/2, doorHandleRadius, container );
     var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.classList.add("door-text");
@@ -282,8 +354,8 @@ function drawDog(x, y, container) {
     container.appendChild( path );
     path.classList.add("dog");
 
-    var eye = drawCircle(x + 13, y-2, 1, container);
-    var nose = drawCircle(x+2, y+3, 3, container);
+    drawCircle(x + 13, y-2, 1, container);
+    drawCircle(x+2, y+3, 3, container);
 
     var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
     d = [];
@@ -310,14 +382,119 @@ function drawDog(x, y, container) {
 
     // These are all for white space between the body and the tail.
     var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
-    l.setAttribute("stroke", "white");
+    l.classList.add("dog-cover");
     l.setAttribute("stroke-width", "1.5");
     l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
-    l.setAttribute("stroke", "white");
+    l.classList.add("dog-cover");
     l.setAttribute("stroke-width", "2");
 
     return path;
 }
+
+function drawDogFrame1(x, y, container) {
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+8;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+40) + "," + (31+legOffset) + " " + (y+50) + "," + (32+legOffset) + " " + (y+54));
+    d.push("C " + (32+legOffset) + " " + (y+54) + "," + (22+legOffset) + " " + (y+62) + "," + (34+legOffset) + " " + (y+60));
+    d.push("C " + (34+legOffset) + " " + (y+60) + "," + (35+legOffset) + " " + (y+60) + "," + (38+legOffset) + " " + (y+55));
+    d.push("C " + (36+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+28));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = 46;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
+    d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+48) + "," + (20+legOffset) + " " + (y+50));
+    d.push("C " + (20+legOffset) + " " + (y+50) + "," + (20+legOffset) + " " + (y+52) + "," + (22+legOffset) + " " + (y+54));
+    d.push("C " + (22+legOffset) + " " + (y+56) + "," + (32+legOffset) + " " + (y+56) + "," + (26+legOffset) + " " + (y+50));
+    d.push("C " + (27+legOffset) + " " + (y+48) + "," + (39+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x+5) + " " + (y+10));
+    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
+    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
+    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
+    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
+    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
+    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
+    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
+    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
+
+    path.setAttribute("d", d);
+    container.appendChild( path );
+    path.classList.add("dog");
+
+    drawCircle(x + 13, y-2, 1, container);
+    drawCircle(x+2, y+3, 3, container);
+
+    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    d = [];
+    d.push("M " + (x+18) + " " + (y-5));
+    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
+    ear.setAttribute("d", d);
+    container.appendChild( ear );
+    ear.classList.add("dog");
+
+
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x;
+    d.push("M " + (19+legOffset) + " " + (y+27));
+    d.push("C " + (19+legOffset) + " " + (y+40) + "," + (31+legOffset) + " " + (y+50) + "," + (32+legOffset) + " " + (y+54));
+    d.push("C " + (32+legOffset) + " " + (y+54) + "," + (22+legOffset) + " " + (y+62) + "," + (34+legOffset) + " " + (y+60));
+    d.push("C " + (34+legOffset) + " " + (y+60) + "," + (35+legOffset) + " " + (y+60) + "," + (38+legOffset) + " " + (y+55));
+    d.push("C " + (36+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+45) + "," + (29+legOffset) + " " + (y+28));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = 54;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
+    d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+55));
+    d.push("C " + (25+legOffset) + " " + (y+55) + "," + (25+legOffset) + " " + (y+55) + "," + (27+legOffset) + " " + (y+57));
+    d.push("C " + (27+legOffset) + " " + (y+57) + "," + (33+legOffset) + " " + (y+57) + "," + (29+legOffset) + " " + (y+51));
+    d.push("C " + (29+legOffset) + " " + (y+51) + "," + (32+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
+    d.push("C " + (27+legOffset) + " " + (y+37) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x+70) + " " + (y+15));
+    d.push("C " + (x+70) + " " + (y+15) + "," + (x+78) + " " + (y+21) + "," + (x+96) + " " + (y+15));
+    d.push("C " + (x+96) + " " + (y+15) + "," + (x+86) + " " + (y+22) + "," + (x+77) + " " + (y+21));
+    tail.setAttribute("d", d);
+    container.appendChild( tail );
+    tail.classList.add("dog");
+
+    // These are all for white space between the body and the tail.
+    var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
+    l.classList.add("dog-cover");
+    l.setAttribute("stroke-width", "1.5");
+    l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
+    l.classList.add("dog-cover");
+    l.setAttribute("stroke-width", "2");
+
+    return path;
+}
+
+
 
 /**
  * Draw a dog leg
@@ -347,7 +524,7 @@ function drawWorld() {
     var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("world");
     document.body.appendChild(container);
-    for( var i=0; i<25; i++ ) {
+    for( var i=0; i<45; i++ ) {
         var object;
         while( true ) {
             var x = Math.floor(Math.random() * (canvasWidth-500)/10) * 10 + 250;
@@ -377,7 +554,7 @@ function drawWorld() {
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDog(2, 11, container);
+    drawDogFrame1(2, 11, container);
 }
 
 /**

@@ -5,6 +5,7 @@ body {
     margin: 0;
     background-color: black;
 }
+
 .world {
     width: 3000px;
     height: 3000px;
@@ -12,8 +13,9 @@ body {
     /* Make sure these values are updated in the JS too */
     top: calc(100vh / 2 - 1500px);
     left: calc(100vw / 2 - 1500px);
-    background-color: white;
+    background-color: rgb(0, 133, 29);
 }
+
 .player {
     width: 82px;
     height: 72px;
@@ -22,21 +24,39 @@ body {
     left: calc(100vw / 2 - 36px);
     overflow: visible;
 }
+
 .player-flipped {
     transform: scaleX(-1);
 }
+
 .building, .brick, .window, .roof, .door, .dog {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
 }
 
-.window, .door {
+.roof {
+    fill: rgb(114, 0, 0);
+}
+
+.door {
+    fill: white;
+}
+
+.window {
+    fill: grey;
+}
+
+.window + .window {
     fill: white;
 }
 
 .dog {
-    fill: white;
+    fill: brown;
+}
+
+.dog-cover {
+    stroke: brown;
 }
 
 .window-pane {
