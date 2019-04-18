@@ -407,7 +407,7 @@ function drawDogFrame1(x, y, container) {
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+44;
+    var legOffset = x+45;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+48) + "," + (20+legOffset) + " " + (y+50));
@@ -498,11 +498,11 @@ function drawDogFrame2(x, y, container) {
     
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+4;
+    var legOffset = x+2.5;
     d.push("M " + (17+legOffset) + " " + (y+27));
-    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (22+legOffset) + " " + (y+44) + "," + (35+legOffset) + " " + (y+55));
-    d.push("C " + (39+legOffset) + " " + (y+55) + "," + (39+legOffset) + " " + (y+50) + "," + (35+legOffset) + " " + (y+48));
-    d.push("C " + (35+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (23+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (22+legOffset) + " " + (y+44) + "," + (38+legOffset) + " " + (y+55));
+    d.push("C " + (42+legOffset) + " " + (y+55) + "," + (42+legOffset) + " " + (y+50) + "," + (38+legOffset) + " " + (y+48));
+    d.push("C " + (35+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -512,7 +512,7 @@ function drawDogFrame2(x, y, container) {
     var legOffset = x+52;
     d.push("M " + (18+legOffset) + " " + (y+27));
     d.push("C " + (7+legOffset) + " " + (y+34) + "," + (9+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+50));
-    d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+53) + "," + (legOffset) + " " + (y+56));
+    d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+56) + "," + (legOffset) + " " + (y+56));
     d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
     leg.setAttribute("d", d);
     container.appendChild( leg );
