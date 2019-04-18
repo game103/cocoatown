@@ -338,59 +338,21 @@ function drawDog(x, y, container) {
         drawDogLeg(x, y, legOffset, container);
     }
 
-    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    var d = [];
-    d.push("M " + (x+5) + " " + (y+10));
-    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
-    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
-    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
-    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
-    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
-    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
-    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
-    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
-
-    path.setAttribute("d", d);
-    container.appendChild( path );
-    path.classList.add("dog");
-
-    drawCircle(x + 13, y-2, 1, container);
-    drawCircle(x+2, y+3, 3, container);
-
-    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    d = [];
-    d.push("M " + (x+18) + " " + (y-5));
-    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
-    ear.setAttribute("d", d);
-    container.appendChild( ear );
-    ear.classList.add("dog");
+    drawDogBody(x, y, container);
 
     var legOffsets = [0, 54];
     for(var i=0; i<legOffsets.length; i++) {
         var legOffset = legOffsets[i];
         drawDogLeg(x, y, legOffset, container);
     }
-
-    var tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    var d = [];
-    d.push("M " + (x+70) + " " + (y+15));
-    d.push("C " + (x+70) + " " + (y+15) + "," + (x+78) + " " + (y+21) + "," + (x+96) + " " + (y+15));
-    d.push("C " + (x+96) + " " + (y+15) + "," + (x+86) + " " + (y+22) + "," + (x+77) + " " + (y+21));
-    tail.setAttribute("d", d);
-    container.appendChild( tail );
-    tail.classList.add("dog");
-
-    // These are all for white space between the body and the tail.
-    var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "1.5");
-    l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "2");
-
-    return path;
 }
 
+/**
+ * Draw the 1st frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
 function drawDogFrame1(x, y, container) {
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -418,32 +380,7 @@ function drawDogFrame1(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    var d = [];
-    d.push("M " + (x+5) + " " + (y+10));
-    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
-    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
-    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
-    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
-    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
-    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
-    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
-    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
-
-    path.setAttribute("d", d);
-    container.appendChild( path );
-    path.classList.add("dog");
-
-    drawCircle(x + 13, y-2, 1, container);
-    drawCircle(x+2, y+3, 3, container);
-
-    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    d = [];
-    d.push("M " + (x+18) + " " + (y-5));
-    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
-    ear.setAttribute("d", d);
-    container.appendChild( ear );
-    ear.classList.add("dog");
+    drawDogBody(x, y, container);
 
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -472,30 +409,16 @@ function drawDogFrame1(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
-
-    var tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    var d = [];
-    d.push("M " + (x+70) + " " + (y+15));
-    d.push("C " + (x+70) + " " + (y+15) + "," + (x+78) + " " + (y+21) + "," + (x+96) + " " + (y+15));
-    d.push("C " + (x+96) + " " + (y+15) + "," + (x+86) + " " + (y+22) + "," + (x+77) + " " + (y+21));
-    tail.setAttribute("d", d);
-    container.appendChild( tail );
-    tail.classList.add("dog");
-
-    // These are all for white space between the body and the tail.
-    var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "1.5");
-    l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "2");
-
-    return path;
 }
 
+/**
+ * Draw the 2nd frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
 function drawDogFrame2(x, y, container) {
 
-    
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x+2.5;
@@ -518,33 +441,7 @@ function drawDogFrame2(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    var d = [];
-    d.push("M " + (x+5) + " " + (y+10));
-    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
-    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
-    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
-    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
-    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
-    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
-    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
-    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
-
-    path.setAttribute("d", d);
-    container.appendChild( path );
-    path.classList.add("dog");
-
-    drawCircle(x + 13, y-2, 1, container);
-    drawCircle(x+2, y+3, 3, container);
-
-    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    d = [];
-    d.push("M " + (x+18) + " " + (y-5));
-    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
-    ear.setAttribute("d", d);
-    container.appendChild( ear );
-    ear.classList.add("dog");
-
+    drawDogBody(x, y, container);
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -575,6 +472,105 @@ function drawDogFrame2(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+}
+
+/**
+ * Draw the 3rd frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogFrame3(x, y, container) {
+
+    /*
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2.5;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (22+legOffset) + " " + (y+44) + "," + (38+legOffset) + " " + (y+55));
+    d.push("C " + (42+legOffset) + " " + (y+55) + "," + (42+legOffset) + " " + (y+50) + "," + (38+legOffset) + " " + (y+48));
+    d.push("C " + (35+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+52;
+    d.push("M " + (18+legOffset) + " " + (y+27));
+    d.push("C " + (7+legOffset) + " " + (y+34) + "," + (9+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+50));
+    d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+56) + "," + (legOffset) + " " + (y+56));
+    d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");*/
+
+    drawDogBody(x, y, container);
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+4;
+    d.push("M " + (17+legOffset) + " " + (y+25));
+    d.push("C " + (15+legOffset) + " " + (y+32) + "," + (13+legOffset) + " " + (y+32) + "," + (17+legOffset) + " " + (y+40));
+    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (12+legOffset) + " " + (y+44) + "," + (10+legOffset) + " " + (y+46));
+    d.push("C " + (8+legOffset) + " " + (y+48) + "," + (10+legOffset) + " " + (y+52) + "," + (10+legOffset) + " " + (y+52.5));
+    d.push("C " + (11+legOffset) + " " + (y+54) + "," + (14+legOffset) + " " + (y+54) + "," + (15+legOffset) + " " + (y+49));
+    d.push("C " + (15+legOffset) + " " + (y+49) + "," + (19+legOffset) + " " + (y+48) + "," + (24+legOffset) + " " + (y+42));
+    d.push("C " + (25+legOffset) + " " + (y+42) + "," + (23+legOffset) + " " + (y+32) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    /*var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
+    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (7+legOffset) + " " + (y+46) + "," + (7+legOffset) + " " + (y+46));
+    d.push("C " + (legOffset) + " " + (y+46) + "," + (legOffset) + " " + (y+50) + "," + (7+legOffset) + " " + (y+51));
+    d.push("C " + (7+legOffset) + " " + (y+51) + "," + (17+legOffset) + " " + (y+50) + "," + (27+legOffset) + " " + (y+46));
+    d.push("C " + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+44) + "," + (25+legOffset) + " " + (y+43));
+    d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");*/
+}
+
+/**
+ * Draw the body of the dog
+ * Note: the body includes everything on the dog but the legs
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogBody(x, y, container) {
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x+5) + " " + (y+10));
+    d.push("C " + (x) + " " + (y+10) + "," + (x-5) + " " + (y) + "," + (x+5) + " " + y);
+    d.push("C " + (x+5) + " " + (y) + "," + (x+10) + " " + (y) + "," + (x+10) + " " + (y-5));
+    d.push("C " + (x+10) + " " + (y-5) + "," + (x+12) + " " + (y-10) + "," + (x+20) + " " + (y-10));
+    d.push("C " + (x+20) + " " + (y-10) + "," + (x+34) + " " + (y-10) + "," + (x+32) + " " + (y+7));
+    d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+70) + " " + (y+15));
+    d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
+    d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
+    d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
+    path.setAttribute("d", d);
+    container.appendChild( path );
+    path.classList.add("dog");
+
+    drawCircle(x + 13, y-2, 1, container);
+    drawCircle(x+2, y+3, 3, container);
+
+    var ear = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    d = [];
+    d.push("M " + (x+18) + " " + (y-5));
+    d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
+    ear.setAttribute("d", d);
+    container.appendChild( ear );
+    ear.classList.add("dog");
 
     var tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -586,18 +582,13 @@ function drawDogFrame2(x, y, container) {
     tail.classList.add("dog");
 
     // These are all for white space between the body and the tail.
-    var l = drawLine(x+76.3, y+20, x+76.3, y+24, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "1.5");
-    l = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
-    l.classList.add("dog-cover");
-    l.setAttribute("stroke-width", "2");
-
-    return path;
+    var cover = drawLine(x+76.3, y+20, x+76.3, y+24, container);
+    cover.classList.add("dog-cover");
+    cover.setAttribute("stroke-width", "1.5");
+    cover = drawLine(x+71.3, y+18.05, x+76.3, y+20, container);
+    cover.classList.add("dog-cover");
+    cover.setAttribute("stroke-width", "2");
 }
-
-
-
 
 /**
  * Draw a dog leg
@@ -657,7 +648,7 @@ function drawWorld() {
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDogFrame1(2, 11, container);
+    drawDogFrame3(2, 11, container);
 }
 
 /**
