@@ -523,19 +523,19 @@ function drawDogFrame3(x, y, container) {
     leg.classList.add("dog");
 
     // Back
-    /*var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x + 52;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
-    d.push("C " + (17+legOffset) + " " + (y+44) + "," + (7+legOffset) + " " + (y+46) + "," + (7+legOffset) + " " + (y+46));
-    d.push("C " + (legOffset) + " " + (y+46) + "," + (legOffset) + " " + (y+50) + "," + (7+legOffset) + " " + (y+51));
-    d.push("C " + (7+legOffset) + " " + (y+51) + "," + (17+legOffset) + " " + (y+50) + "," + (27+legOffset) + " " + (y+46));
-    d.push("C " + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+44) + "," + (25+legOffset) + " " + (y+43));
+    d.push("C " + (17+legOffset) + " " + (y+45) + "," + (20+legOffset) + " " + (y+46) + "," + (17+legOffset) + " " + (y+47.5));
+    d.push("C " + (15+legOffset) + " " + (y+49) + "," + (4+legOffset) + " " + (y+54) + "," + (8+legOffset) + " " + (y+58));
+    d.push("C " + (8+legOffset) + " " + (y+58) + "," + (18+legOffset) + " " + (y+56) + "," + (26.5+legOffset) + " " + (y+46));
+    d.push("C " + (26.5+legOffset) + " " + (y+46) + "," + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+43.5));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
-    leg.classList.add("dog");*/
+    leg.classList.add("dog");
 }
 
 /**
@@ -648,7 +648,7 @@ function drawWorld() {
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDogFrame3(2, 11, container);
+    drawDogFrame1(2, 11, container);
 }
 
 /**
@@ -759,11 +759,14 @@ function draw() {
     var player = document.querySelector(".player");
     player.innerHTML = "";
 
-    if( frame % 2 == 1 ) {
+    if( frame % 3 == 1 ) {
         drawDogFrame1(2, 11, container);
     }
-    else {
+    else if( frame % 3 == 2 ) {
         drawDogFrame2(2, 11, container);
+    }
+    else {
+        drawDogFrame3(2, 11, container);
     }
 
     frame++;
