@@ -399,7 +399,7 @@ function drawDogFrame1(x, y, container) {
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x + 52;
-    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("M " + (15+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+55));
     d.push("C " + (25+legOffset) + " " + (y+55) + "," + (25+legOffset) + " " + (y+55) + "," + (27+legOffset) + " " + (y+57));
@@ -671,6 +671,67 @@ function drawDogFrame5(x, y, container) {
 }
 
 /**
+ * Draw the 6th frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogFrame6(x, y, container) {
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2.5;
+    d.push("M " + (17+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+24) + "," + (18+legOffset) + " " + (y+22) + "," + (legOffset-1) + " " + (y+40.5));
+    d.push("C " + (-3+legOffset) + " " + (y+40) + "," + (-7+legOffset) + " " + (y+38) + "," + (legOffset-7) + " " + (y+43));
+    d.push("C " + (-3+legOffset) + " " + (y+48) + "," + (1.5+legOffset) + " " + (y+47) + "," + (legOffset+11.5) + " " + (y+37));
+    d.push("C " + (11.5+legOffset) + " " + (y+35) + "," + (42+legOffset) + " " + (y+30) + "," + (42+legOffset) + " " + (y+30));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+52;
+    d.push("M " + (20+legOffset) + " " + (y+27));
+    d.push("C " + (legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+25) + "," + (39.5+legOffset) + " " + (y+37));
+    d.push("C " + (46+legOffset) + " " + (y+37) + "," + (44+legOffset) + " " + (y+41) + "," + (44+legOffset) + " " + (y+42));
+    //d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+56) + "," + (legOffset) + " " + (y+56));
+    //d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    drawDogBody(x, y, container);
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x;
+    d.push("M " + (17+legOffset) + " " + (y+26));
+    d.push("C " + (17+legOffset) + " " + (y+27) + "," + (30+legOffset) + " " + (y+33) + "," + (17+legOffset) + " " + (y+55));
+    d.push("C " + (12+legOffset) + " " + (y+56) + "," + (12+legOffset) + " " + (y+60) + "," + (17+legOffset) + " " + (y+60));
+    d.push("C " + (26+legOffset) + " " + (y+59) + "," + (26.5+legOffset) + " " + (y+46) + "," + (30+legOffset) + " " + (y+40));
+    d.push("C " + (31+legOffset) + " " + (y+39) + "," + (30+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+27))
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (17+legOffset) + " " + (y+29));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (12+legOffset) + " " + (y+38) + "," + (28+legOffset) + " " + (y+40));
+    d.push("C " + (39+legOffset) + " " + (y+42) + "," + (38+legOffset) + " " + (y+49) + "," + (42+legOffset) + " " + (y+47));
+    d.push("C " + (49+legOffset) + " " + (y+44) + "," + (48+legOffset) + " " + (y+40) + "," + (41+legOffset) + " " + (y+41));
+    d.push("C " + (23+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+25) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+}
+
+/**
  * Draw the body of the dog
  * Note: the body includes everything on the dog but the legs
  * @param {number} x - the x coordinate of the left side of the dog
@@ -780,7 +841,7 @@ function drawWorld() {
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDogFrame5(2, 11, container);
+    drawDogFrame1(2, 11, container);
 }
 
 /**
@@ -855,11 +916,15 @@ function tick() {
     }
     setTimeout(tick, tickRate);
 }
+function play() {
+    draw();
+    setTimeout(play, 150);
+}
 
 ////////// Main Program ////////////
 
 // Movement
-var tickRate = 30;
+var tickRate = 33;
 var keyDown = {};
 var keyMap = {
     37: "left",
@@ -893,27 +958,30 @@ function draw() {
     var player = document.querySelector(".player");
     player.innerHTML = "";
 
-    if( frame % 5 == 1 ) {
+    if( frame % 6 == 1 ) {
         drawDogFrame1(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 5 == 2 ) {
+    else if( frame % 6 == 2 ) {
         drawDogFrame2(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 5 == 3 ) {
+    else if( frame % 6 == 3 ) {
         drawDogFrame3(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 5 == 4 ) {
+    else if( frame % 6 == 4 ) {
         drawDogFrame4(playerCanvasX, playerCanvasY, container);
     }
-    else {
+    else if( frame % 6 == 5 ) {
         drawDogFrame5(playerCanvasX, playerCanvasY, container);
+    }
+    else {
+        drawDogFrame6(playerCanvasX, playerCanvasY, container);
     }
 
     frame++;
 }
 document.body.onclick =  draw  ;
 
-
+//play();
 // Old dog
 /**
  * d.push("M " + x + " " + (y+10));
