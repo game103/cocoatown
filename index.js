@@ -78,10 +78,11 @@ function drawPath( coordinates, container ) {
  * @param {number} height - the height of the building
  * @param {number} x - the x coordinate of the left side of the building 
  * @param {number} y - the y coordinate of the top of the building
+ * @param {number} houseNumber - the number of the house to write on the door
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns the house number of the new building and the roof height and width
  */
-function drawBuilding( width, height, x, y, container ) {
+function drawBuilding( width, height, x, y, container, houseNumber ) {
     var rectangle = drawRectangle( width, height, x, y, container );
     rectangle.classList.add( "building" );
     rectangle.style.fill = getRandomColor();
@@ -113,10 +114,9 @@ function drawBuilding( width, height, x, y, container ) {
 
     drawBricks( width, height, x, y, container, brickWidth, brickHeight );
     drawWindows( windowsAreaWidth-xWindowOffset, windowsAreaHeight-yWindowOffset, x+xWindowOffset+(width-windowsAreaWidth)/2, y+yWindowOffset+(height-windowsAreaHeight)/2, container, windowWidth, windowHeight, windowSpacingHorizontal, windowSpacingVertical, doorX, doorY, doorWidth, doorHeight);
-
-    var houseNumber = generateHouseNumber();
     drawDoor( doorWidth, doorHeight, doorX, doorY, container, doorHandleRadius, houseNumber );
-    return { houseNumber: houseNumber, roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut };
+
+    return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut };
 }
 
 // Get a random color
@@ -832,11 +832,24 @@ function drawWorld() {
                 break;
             }
         }
-        var buildingResponse = drawBuilding( width, height, x, y, container );
-        object.houseNumber = buildingResponse.houseNumber;
-        // Add the roof to the objects
-        objects.push( { x1: object.x1 - buildingResponse.roofOut, y1: object.y1 - buildingResponse.roofHeight, x2: object.x2 + buildingResponse.roofOut, y2: object.y1 } );
     }
+
+    // TODO replace this with just sorting the objects then assigning house numbers. This is too slow :P
+    var houseNumber = 0;
+    for( var x=0; x<canvasWidth; x++ ) {
+        for( var y=0; y<canvasHeight; y++ ) {
+            for( var i=0; i<45; i++ ) {
+                if( objects[i].x1 == x && objects[i].y1 == y ) {
+                    var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1, objects[i].x1, objects[i].y1, container, houseNumber );
+                    objects[i].houseNumber = houseNumber;
+                    // Add the roof to the objects
+                    objects.push( { x1: object.x1 - buildingResponse.roofOut, y1: object.y1 - buildingResponse.roofHeight, x2: object.x2 + buildingResponse.roofOut, y2: object.y1 } );
+                    houseNumber ++;
+                }
+            }     
+        }
+    }
+
     // We have a seperate container for the player
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
