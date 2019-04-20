@@ -138,7 +138,7 @@ function getRandomColor() {
 function isLightColor(hex1) {
     var rgb1 = hexToRgb(hex1);
     var hsv1 = rgbToHsv(rgb1.r, rgb1.g, rgb1.b);
-    if( hsv1[2] < 0.90 ) return true; // We only want light colors
+    if( hsv1[2] < 0.85 && hsv1[1] < 50 && hsv1[0] < 50 ) return true; // We only want light colors
     return false;
 }
 // rgb to hsv 
@@ -338,7 +338,7 @@ function drawDog(x, y, container) {
         drawDogLeg(x, y, legOffset, container);
     }
 
-    drawDogBody(x, y, container);
+    drawDogBody(container);
 
     var legOffsets = [0, 54];
     for(var i=0; i<legOffsets.length; i++) {
@@ -380,7 +380,8 @@ function drawDogFrame1(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(-6deg)";
 
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -441,7 +442,7 @@ function drawDogFrame2(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    drawDogBody(container);
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -504,7 +505,7 @@ function drawDogFrame3(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    drawDogBody(container);
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -573,7 +574,8 @@ function drawDogFrame4(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(5deg)";
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -639,7 +641,8 @@ function drawDogFrame5(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(5deg)";
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -700,7 +703,8 @@ function drawDogFrame6(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(-2.5deg)";
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -763,7 +767,8 @@ function drawDogFrame7(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(-8.5deg)";
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -789,7 +794,7 @@ function drawDogFrame7(x, y, container) {
     d.push("C " + (25+legOffset) + " " + (y+54) + "," + (26+legOffset) + " " + (y+54.5) + "," + (27+legOffset) + " " + (y+54.5));
     d.push("C " + (32+legOffset) + " " + (y+55) + "," + (35+legOffset) + " " + (y+50.5) + "," + (29.5+legOffset) + " " + (y+49.5));
     d.push("C " + (29+legOffset) + " " + (y+51) + "," + (34+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
-    d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+26));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -829,7 +834,8 @@ function drawDogFrame8(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
-    drawDogBody(x, y, container);
+    var body = drawDogBody(container);
+    body.style.transform = "rotate(-6deg)";
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -864,14 +870,13 @@ function drawDogFrame8(x, y, container) {
 /**
  * Draw the body of the dog
  * Note: the body includes everything on the dog but the legs
- * @param {number} x - the x coordinate of the left side of the dog
- * @param {number} y - the y coordinate of the top of the dog
  * @param {HTMLElement} container - the svg container on which to draw
+ * @returns a group element containing the dog body
  */
-function drawDogBody(x, y, container) {
+function drawDogBody(container) {
     var bodyGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    x = playerCanvasX;
-    y = playerCanvasY;
+    var x = playerCanvasX;
+    var y = playerCanvasY;
 
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -917,6 +922,9 @@ function drawDogBody(x, y, container) {
     cover.setAttribute("stroke-width", "2");
 
     container.appendChild(bodyGroup);
+    bodyGroup.classList.add("dog-body");
+
+    return bodyGroup;
 }
 
 /**
@@ -941,27 +949,43 @@ function drawDogLeg(x, y, legOffset, container) {
 }
 
 /**
+ * Draw an enemy
+ */
+function drawEnemy(x, y, radius, container) {
+    var enemy = drawCircle(x, y, radius, container);
+    enemy.classList.add("enemy");
+}
+
+/**
  * Draw the world
  */
 function drawWorld() {
     var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("world");
     document.body.appendChild(container);
-    for( var i=0; i<45; i++ ) {
+    // Temporarily add an object for the player
+    var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
+
+    for( var i=0; i<numBuildings; i++ ) {
         var object;
         while( true ) {
-            var x = Math.floor(Math.random() * (canvasWidth-500)/10) * 10 + 250;
-            var y = Math.floor(Math.random() * (canvasHeight-500)/10) * 10 + 250;
+            var x = Math.floor(Math.random() * (canvasWidth-600)/10) * 10 + 250;
+            var y = Math.floor(Math.random() * (canvasHeight-600)/10) * 10 + 250;
             var height = Math.random() * 200 + 100;
             var width = Math.random() * 150 + 100;
+            
             object = { x1: x, y1: y, x2: x+width, y2: y+height-playerAllowedHouseOverlap };
-            var overlapObject = { x1: object.x1-30, y1: object.y1-70, x2: object.x2+30, y2: object.y2+playerAllowedHouseOverlap };
+            // This is for checking for overlap when generating the town, so no buldings are too close
+            var overlapObject = { x1: object.x1-40, y1: object.y1-70, x2: object.x2+40, y2: object.y2+playerAllowedHouseOverlap+70 };
             var overlaps = false;
             for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-50, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap };
+                var curOverlapObject = { x1: objects[i].x1-40, y1: objects[i].y1-70, x2: objects[i].x2+40, y2: objects[i].y2+playerAllowedHouseOverlap+70 };
                 if( collisionTest(overlapObject, curOverlapObject) ) {
                     overlaps = true;
                 }
+            }
+            if( collisionTest(playerObject, overlapObject) ) {
+                overlaps = true;
             }
             if( !overlaps ) {
                 objects.push(object);
@@ -978,21 +1002,53 @@ function drawWorld() {
         return 0;
     } );
 
-    // TODO replace this with just sorting the objects then assigning house numbers. This is too slow :P
     var houseNumber = 1;
-    for( var i=0; i<45; i++ ) {
+    for( var i=0; i<numBuildings; i++ ) {
         var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1+playerAllowedHouseOverlap, objects[i].x1, objects[i].y1, container, houseNumber );
         objects[i].houseNumber = houseNumber;
         // Add the roof to the objects
-        objects.push( { x1: object.x1 - buildingResponse.roofOut, y1: object.y1 - buildingResponse.roofHeight, x2: object.x2 + buildingResponse.roofOut, y2: object.y1 } );
+        objects.push( { x1: objects[i].x1 - buildingResponse.roofOut, y1: objects[i].y1 - buildingResponse.roofHeight, x2: objects[i].x2 + buildingResponse.roofOut, y2: objects[i].y1 } );
         houseNumber ++;
+    }
+
+    for( var i=0; i<numEnemies; i++ ) {
+
+        var enemy;
+        while( true ) {
+            var x = Math.floor(Math.random() * (canvasWidth-600)/10) * 10 + 300;
+            var y = Math.floor(Math.random() * (canvasHeight-600)/10) * 10 + 300;
+
+            enemy = { x1: x - enemyRadius/2, y1: y - enemyRadius/2, x2: x + enemyRadius/2, y2: y+enemyRadius/2 };
+            var overlaps = false;
+            for(var i=0; i<objects.length; i++) {
+                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-60, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap+20 };
+                if( collisionTest(enemy, curOverlapObject) ) {
+                    overlaps = true;
+                }
+            }
+            // Add the extra spacing to the current enemy here, since all the enemies are the same size
+            var overlapEnemy = { x1: enemy.x1 - 50, y1: enemy.y1 - 50, x2: enemy.x1 + 50, y2: enemy.y2 + 50 };
+            for(var i=0; i<enemies.length; i++) {
+                if( collisionTest(overlapEnemy, enemies[i]) ) {
+                    overlaps = true;
+                }
+            }
+            if( collisionTest(playerObject, overlapObject) ) {
+                overlaps = true;
+            }
+            if( !overlaps ) {
+                enemies.push(enemy);
+                drawEnemy(x, y, enemyRadius, container);
+                break;
+            }
+        }
     }
 
     // We have a seperate container for the player
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDogFrame6(playerCanvasX, playerCanvasY, container);
+    drawDog(playerCanvasX, playerCanvasY, container);
 }
 
 /**
@@ -1012,10 +1068,15 @@ function moveHorizontal(amount) {
 
     var playerObject = { x1: playerX - amount, y1: playerY, x2: playerX + playerWidth - amount, y2: playerY + playerHeight };
     var colliding = false;
-    for(var i=0; i<objects.length;i++) {
-        if( collisionTest(objects[i], playerObject) ) {
-            colliding = true;
-            break;
+    if( playerX + playerWidth - amount > canvasWidth || playerX - amount < 0 ) {
+        colliding = true;
+    }
+    else {
+        for(var i=0; i<objects.length;i++) {
+            if( collisionTest(objects[i], playerObject) ) {
+                colliding = true;
+                break;
+            }
         }
     }
     if( !colliding ) {
@@ -1035,10 +1096,15 @@ function moveVertical(amount) {
 
     var playerObject = { x1: playerX, y1: playerY - amount, x2: playerX + playerWidth, y2: playerY + playerHeight - amount };
     var colliding = false;
-    for(var i=0; i<objects.length;i++) {
-        if( collisionTest(objects[i], playerObject) ) {
-            colliding = true;
-            break;
+    if( playerY + playerHeight - amount > canvasHeight || playerY - amount < 0 ) {
+        colliding = true;
+    }
+    else {
+        for(var i=0; i<objects.length;i++) {
+            if( collisionTest(objects[i], playerObject) ) {
+                colliding = true;
+                break;
+            }
         }
     }
     if( !colliding ) {
@@ -1086,42 +1152,8 @@ function tick() {
 }
 function play() {
     draw();
-    playTimeout = setTimeout(play, 150);
+    playTimeout = setTimeout(play, dogMoveRate);
 }
-
-////////// Main Program ////////////
-
-// Movement
-var tickRate = 33;
-var keyDown = {};
-var keyMap = {
-    37: "left",
-    38: "up",
-    39: "right",
-    40: "down"
-};
-
-var playerWidth = 82;
-var playerHeight = 72;
-var playerAllowedHouseOverlap = 60; // How much the player is allowed to overlap with the house
-var worldHorizontalOffset = 0;
-var worldVerticalOffset = 0;
-var canvasWidth = 3000;
-var canvasHeight = 3000;
-// Simply the midpoint minus half the player's width/height (note, these values are in the css too)
-var playerX = canvasWidth/2 - playerWidth/2;
-var playerY = canvasHeight/2 - playerHeight/2;
-var playerCanvasX = 2;
-var playerCanvasY = 11;
-var movementAmount = 10;
-var playTimeout = null;
-var objects = []; // Objects that the player can hit.
-drawWorld();
-document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
-document.body.onkeyup = function(e) {keyDown[keyMap[e.which]] = false;};
-tick();
-
-var frame = 1;
 function draw() {
     var container = document.querySelector(".player");
     var player = document.querySelector(".player");
@@ -1158,6 +1190,44 @@ function draw() {
 
     frame++;
 }
+
+////////// Main Program ////////////
+
+// Movement
+var tickRate = 33;
+var keyDown = {};
+var keyMap = {
+    37: "left",
+    38: "up",
+    39: "right",
+    40: "down"
+};
+
+var playerWidth = 82;
+var playerHeight = 72;
+var playerAllowedHouseOverlap = 60; // How much the player is allowed to overlap with the house
+var worldHorizontalOffset = 0;
+var worldVerticalOffset = 0;
+var canvasWidth = 3000;
+var canvasHeight = 3000;
+// Simply the midpoint minus half the player's width/height (note, these values are in the css too)
+var playerX = canvasWidth/2 - playerWidth/2;
+var playerY = canvasHeight/2 - playerHeight/2;
+var playerCanvasX = 2;
+var playerCanvasY = 11;
+var movementAmount = 10;
+var frame = 1;
+var playTimeout = null;
+var dogMoveRate = 100;
+var numBuildings = 30;
+var numEnemies = 10;
+var enemyRadius = 25;
+var objects = []; // Objects that the player can hit.
+var enemies = []; // enemies of the player
+drawWorld();
+document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
+document.body.onkeyup = function(e) {keyDown[keyMap[e.which]] = false;};
+tick();
 
 //play();
 // Old dog

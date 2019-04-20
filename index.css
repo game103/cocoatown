@@ -29,7 +29,7 @@ body {
     transform: scaleX(-1);
 }
 
-.building, .brick, .window, .roof, .door, .dog {
+.building, .brick, .window, .roof, .door, .dog, .enemy {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
@@ -53,6 +53,14 @@ body {
 
 .dog-cover {
     stroke: rgb(165, 81, 42);
+}
+
+.dog-body {
+    transform-origin: 50% 50%;
+}
+
+.enemy {
+    fill: yellow;
 }
 
 .window-pane {
