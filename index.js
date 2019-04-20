@@ -401,11 +401,11 @@ function drawDogFrame1(x, y, container) {
     var legOffset = x + 52;
     d.push("M " + (15+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+44));
-    d.push("C " + (25+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+55));
+    d.push("C " + (27+legOffset) + " " + (y+46) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+55));
     d.push("C " + (25+legOffset) + " " + (y+55) + "," + (25+legOffset) + " " + (y+55) + "," + (27+legOffset) + " " + (y+57));
     d.push("C " + (27+legOffset) + " " + (y+57) + "," + (33+legOffset) + " " + (y+57) + "," + (29+legOffset) + " " + (y+51));
-    d.push("C " + (29+legOffset) + " " + (y+51) + "," + (32+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
-    d.push("C " + (27+legOffset) + " " + (y+37) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    d.push("C " + (29+legOffset) + " " + (y+51) + "," + (34+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
+    d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -486,9 +486,9 @@ function drawDogFrame3(x, y, container) {
     var d = [];
     var legOffset = x+2.5;
     d.push("M " + (17+legOffset) + " " + (y+27));
-    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (20+legOffset) + " " + (y+44) + "," + (34+legOffset) + " " + (y+55));
-    d.push("C " + (42+legOffset) + " " + (y+55) + "," + (39+legOffset) + " " + (y+50) + "," + (34+legOffset) + " " + (y+48));
-    d.push("C " + (32+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+27));
+    d.push("C " + (27+legOffset) + " " + (y+34) + "," + (20+legOffset) + " " + (y+52) + "," + (30+legOffset) + " " + (y+53));
+    d.push("C " + (36+legOffset) + " " + (y+52) + "," + (33+legOffset) + " " + (y+48) + "," + (30+legOffset) + " " + (y+48));
+    d.push("C " + (29+legOffset) + " " + (y+48) + "," + (26+legOffset) + " " + (y+32) + "," + (35+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -683,9 +683,9 @@ function drawDogFrame6(x, y, container) {
     var legOffset = x+2.5;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (27+legOffset) + " " + (y+24) + "," + (18+legOffset) + " " + (y+22) + "," + (legOffset-1) + " " + (y+40.5));
-    d.push("C " + (-3+legOffset) + " " + (y+40) + "," + (-7+legOffset) + " " + (y+38) + "," + (legOffset-7) + " " + (y+43));
-    d.push("C " + (-3+legOffset) + " " + (y+48) + "," + (1.5+legOffset) + " " + (y+47) + "," + (legOffset+11.5) + " " + (y+37));
-    d.push("C " + (11.5+legOffset) + " " + (y+35) + "," + (42+legOffset) + " " + (y+30) + "," + (42+legOffset) + " " + (y+30));
+    d.push("C " + (-3+legOffset) + " " + (y+40) + "," + (-5+legOffset) + " " + (y+38) + "," + (legOffset-6) + " " + (y+42));
+    d.push("C " + (-3+legOffset) + " " + (y+49) + "," + (1.5+legOffset) + " " + (y+47) + "," + (legOffset+9.5) + " " + (y+39));
+    d.push("C " + (12+legOffset) + " " + (y+36) + "," + (42+legOffset) + " " + (y+30) + "," + (42+legOffset) + " " + (y+30));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -696,8 +696,6 @@ function drawDogFrame6(x, y, container) {
     d.push("M " + (20+legOffset) + " " + (y+27));
     d.push("C " + (legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+25) + "," + (39.5+legOffset) + " " + (y+37));
     d.push("C " + (46+legOffset) + " " + (y+37) + "," + (44+legOffset) + " " + (y+41) + "," + (44+legOffset) + " " + (y+42));
-    //d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+56) + "," + (legOffset) + " " + (y+56));
-    //d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -709,10 +707,10 @@ function drawDogFrame6(x, y, container) {
     var d = [];
     var legOffset = x;
     d.push("M " + (17+legOffset) + " " + (y+26));
-    d.push("C " + (17+legOffset) + " " + (y+27) + "," + (30+legOffset) + " " + (y+33) + "," + (17+legOffset) + " " + (y+55));
+    d.push("C " + (17+legOffset) + " " + (y+38) + "," + (30+legOffset) + " " + (y+39) + "," + (17+legOffset) + " " + (y+55));
     d.push("C " + (12+legOffset) + " " + (y+56) + "," + (12+legOffset) + " " + (y+60) + "," + (17+legOffset) + " " + (y+60));
-    d.push("C " + (26+legOffset) + " " + (y+59) + "," + (26.5+legOffset) + " " + (y+46) + "," + (30+legOffset) + " " + (y+40));
-    d.push("C " + (31+legOffset) + " " + (y+39) + "," + (30+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+27))
+    d.push("C " + (26+legOffset) + " " + (y+59) + "," + (27.5+legOffset) + " " + (y+46) + "," + (30+legOffset) + " " + (y+40));
+    d.push("C " + (31+legOffset) + " " + (y+39) + "," + (27+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+27))
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -726,6 +724,138 @@ function drawDogFrame6(x, y, container) {
     d.push("C " + (39+legOffset) + " " + (y+42) + "," + (38+legOffset) + " " + (y+49) + "," + (42+legOffset) + " " + (y+47));
     d.push("C " + (49+legOffset) + " " + (y+44) + "," + (48+legOffset) + " " + (y+40) + "," + (41+legOffset) + " " + (y+41));
     d.push("C " + (23+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+25) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+}
+
+/**
+ * Draw the 7th frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogFrame7(x, y, container) {
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2.5;
+    d.push("M " + (17+legOffset) + " " + (y));
+    d.push("C " + (22+legOffset) + " " + (y) + "," + (18+legOffset) + " " + (y+33) + "," + (legOffset+3) + " " + (y+44.5));
+    d.push("C " + (1+legOffset) + " " + (y+43) + "," + (-5+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+49));
+    d.push("C " + (legOffset) + " " + (y+49) + "," + (5.5+legOffset) + " " + (y+54) + "," + (legOffset+14) + " " + (y+41));
+    d.push("C " + (15+legOffset) + " " + (y+39) + "," + (35+legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+30));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+48.5;
+    d.push("M " + (14+legOffset) + " " + (y+24));
+    d.push("C " + (17+legOffset) + " " + (y+29) + "," + (8+legOffset) + " " + (y+43) + "," + (25+legOffset) + " " + (y+40));
+    d.push("C " + (27+legOffset) + " " + (y+43) + "," + (22+legOffset) + " " + (y+50) + "," + (25+legOffset) + " " + (y+51));
+    d.push("C " + (25+legOffset) + " " + (y+51) + "," + (26+legOffset) + " " + (y+51.5) + "," + (27+legOffset) + " " + (y+51.5));
+    d.push("C " + (32+legOffset) + " " + (y+52) + "," + (35+legOffset) + " " + (y+47.5) + "," + (29.5+legOffset) + " " + (y+46.5));
+    d.push("C " + (29+legOffset) + " " + (y+48) + "," + (34+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+34));
+    d.push("C " + (27+legOffset) + " " + (y+32.9) + "," + (25+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+24));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    drawDogBody(x, y, container);
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+4;
+    d.push("M " + (17+legOffset) + " " + (y+26));
+    d.push("C " + (17+legOffset) + " " + (y+27) + "," + (13+legOffset) + " " + (y+33) + "," + (19+legOffset) + " " + (y+43));
+    d.push("C " + (20+legOffset) + " " + (y+44) + "," + (24+legOffset) + " " + (y+50) + "," + (19+legOffset) + " " + (y+55));
+    d.push("C " + (15+legOffset) + " " + (y+54) + "," + (11+legOffset) + " " + (y+60) + "," + (19+legOffset) + " " + (y+60));
+    d.push("C " + (26+legOffset) + " " + (y+59) + "," + (31+legOffset) + " " + (y+46) + "," + (27+legOffset) + " " + (y+43));
+    d.push("C " + (26+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+36) + "," + (26+legOffset) + " " + (y+29));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (14+legOffset) + " " + (y+27));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (25+legOffset) + " " + (y+43));
+    d.push("C " + (27+legOffset) + " " + (y+46) + "," + (22+legOffset) + " " + (y+53) + "," + (25+legOffset) + " " + (y+54));
+    d.push("C " + (25+legOffset) + " " + (y+54) + "," + (26+legOffset) + " " + (y+54.5) + "," + (27+legOffset) + " " + (y+54.5));
+    d.push("C " + (32+legOffset) + " " + (y+55) + "," + (35+legOffset) + " " + (y+50.5) + "," + (29.5+legOffset) + " " + (y+49.5));
+    d.push("C " + (29+legOffset) + " " + (y+51) + "," + (34+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
+    d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+}
+
+/**
+ * Draw the 8th frame of the running dog
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogFrame8(x, y, container) {
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2;
+    d.push("M " + (17+legOffset) + " " + (y+26));
+    d.push("C " + (17+legOffset) + " " + (y+27) + "," + (13+legOffset) + " " + (y+33) + "," + (19+legOffset) + " " + (y+43));
+    d.push("C " + (20+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+50) + "," + (19+legOffset) + " " + (y+55));
+    d.push("C " + (15+legOffset) + " " + (y+54) + "," + (11+legOffset) + " " + (y+60) + "," + (19+legOffset) + " " + (y+60));
+    d.push("C " + (26+legOffset) + " " + (y+59) + "," + (28+legOffset) + " " + (y+46) + "," + (27+legOffset) + " " + (y+43));
+    d.push("C " + (26+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+36) + "," + (26+legOffset) + " " + (y+29));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 47;
+    d.push("M " + (15+legOffset) + " " + (y+27));
+    d.push("C " + (15+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+39) + "," + (25+legOffset) + " " + (y+43));
+    d.push("C " + (27+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+46) + "," + (21+legOffset) + " " + (y+47));
+    d.push("C " + (20+legOffset) + " " + (y+47.5) + "," + (23+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+48));
+    d.push("C " + (39+legOffset) + " " + (y+50) + "," + (30+legOffset) + " " + (y+42) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    drawDogBody(x, y, container);
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2;
+    d.push("M " + (17+legOffset) + " " + (y+28));
+    d.push("C " + (18+legOffset) + " " + (y+32) + "," + (23+legOffset) + " " + (y+39) + "," + (27+legOffset) + " " + (y+41));
+    d.push("C " + (30+legOffset) + " " + (y+42) + "," + (33+legOffset) + " " + (y+41) + "," + (38+legOffset) + " " + (y+51));
+    d.push("C " + (45+legOffset) + " " + (y+53) + "," + (47+legOffset) + " " + (y+44.5) + "," + (42+legOffset) + " " + (y+45.5));
+    d.push("C " + (39+legOffset) + " " + (y+44) + "," + (39+legOffset) + " " + (y+38) + "," + (34.5+legOffset) + " " + (y+36.5));
+    d.push("C " + (32+legOffset) + " " + (y+34) + "," + (33+legOffset) + " " + (y+31) + "," + (30+legOffset) + " " + (y+28));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (15+legOffset) + " " + (y+27));
+    d.push("C " + (15+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+39) + "," + (25+legOffset) + " " + (y+43));
+    d.push("C " + (27+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+46) + "," + (19+legOffset) + " " + (y+48));
+    d.push("C " + (17+legOffset) + " " + (y+49) + "," + (17+legOffset) + " " + (y+52) + "," + (20+legOffset) + " " + (y+54));
+    d.push("C " + (20+legOffset) + " " + (y+54) + "," + (24+legOffset) + " " + (y+56) + "," + (23.5+legOffset) + " " + (y+51));
+    d.push("C " + (26+legOffset) + " " + (y+50) + "," + (38+legOffset) + " " + (y+42) + "," + (27+legOffset) + " " + (y+37));
+    d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
@@ -834,27 +964,29 @@ function drawWorld() {
         }
     }
 
+    objects.sort( function(a,b) {
+        if( a.y1 < b.y1 ) return -1;
+        if( a.y1 > b.y1 ) return 1;
+        if( a.x1 < b.x1 ) return -1;
+        if( a.x1 > b.x1 ) return 1;
+        return 0;
+    } );
+
     // TODO replace this with just sorting the objects then assigning house numbers. This is too slow :P
-    var houseNumber = 0;
-    for( var x=0; x<canvasWidth; x++ ) {
-        for( var y=0; y<canvasHeight; y++ ) {
-            for( var i=0; i<45; i++ ) {
-                if( objects[i].x1 == x && objects[i].y1 == y ) {
-                    var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1, objects[i].x1, objects[i].y1, container, houseNumber );
-                    objects[i].houseNumber = houseNumber;
-                    // Add the roof to the objects
-                    objects.push( { x1: object.x1 - buildingResponse.roofOut, y1: object.y1 - buildingResponse.roofHeight, x2: object.x2 + buildingResponse.roofOut, y2: object.y1 } );
-                    houseNumber ++;
-                }
-            }     
-        }
+    var houseNumber = 1;
+    for( var i=0; i<45; i++ ) {
+        var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1+playerAllowedHouseOverlap, objects[i].x1, objects[i].y1, container, houseNumber );
+        objects[i].houseNumber = houseNumber;
+        // Add the roof to the objects
+        objects.push( { x1: object.x1 - buildingResponse.roofOut, y1: object.y1 - buildingResponse.roofHeight, x2: object.x2 + buildingResponse.roofOut, y2: object.y1 } );
+        houseNumber ++;
     }
 
     // We have a seperate container for the player
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("player");
     document.body.appendChild(container);
-    drawDogFrame1(2, 11, container);
+    drawDogFrame7(2, 11, container);
 }
 
 /**
@@ -914,7 +1046,10 @@ function moveVertical(amount) {
 /**
  * Tick (basically mimicing frames)
  */
-function tick() {				
+function tick() {
+    var curPlayerX = playerX;
+    var curPlayerY = playerY;
+
     if( keyDown['up'] ) {
         moveVertical(movementAmount);
     }
@@ -927,11 +1062,25 @@ function tick() {
     if( keyDown['right'] ) {
         moveHorizontal(-movementAmount);
     }
+    
+    if( playerX != curPlayerX || playerY != curPlayerY ) {
+        if( !playTimeout ) {
+            play();
+        }
+    }
+    else {
+        if( playTimeout ) {
+            
+            clearTimeout(playTimeout);
+            playTimeout = null;
+        }
+    }
+
     setTimeout(tick, tickRate);
 }
 function play() {
     draw();
-    setTimeout(play, 150);
+    playTimeout = setTimeout(play, 150);
 }
 
 ////////// Main Program ////////////
@@ -959,6 +1108,7 @@ var playerY = canvasHeight/2 - playerHeight/2;
 var playerCanvasX = 2;
 var playerCanvasY = 11;
 var movementAmount = 10;
+var playTimeout = null;
 var objects = []; // Objects that the player can hit.
 drawWorld();
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
@@ -971,28 +1121,37 @@ function draw() {
     var player = document.querySelector(".player");
     player.innerHTML = "";
 
-    if( frame % 6 == 1 ) {
+    if( frame % 8 == 1 ) {
         drawDogFrame1(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 6 == 2 ) {
+    else if( frame % 8 == 2 ) {
         drawDogFrame2(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 6 == 3 ) {
+    else if( frame % 8 == 3 ) {
         drawDogFrame3(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 6 == 4 ) {
+    else if( frame % 8 == 4 ) {
         drawDogFrame4(playerCanvasX, playerCanvasY, container);
     }
-    else if( frame % 6 == 5 ) {
+    else if( frame % 8 == 5 ) {
         drawDogFrame5(playerCanvasX, playerCanvasY, container);
     }
-    else {
+    else if( frame % 8 == 5 ) {
+        drawDogFrame5(playerCanvasX, playerCanvasY, container);
+    }
+    else if( frame % 8 == 6 ) {
         drawDogFrame6(playerCanvasX, playerCanvasY, container);
+    }
+    else if( frame % 8 == 7 ) {
+        drawDogFrame7(playerCanvasX, playerCanvasY, container);
+    }
+    else {
+        drawDogFrame8(playerCanvasX, playerCanvasY, container);
+        frame = 0;
     }
 
     frame++;
 }
-document.body.onclick =  draw  ;
 
 //play();
 // Old dog
