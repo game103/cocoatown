@@ -116,7 +116,7 @@ function drawBuilding( width, height, x, y, container, houseNumber ) {
     drawWindows( windowsAreaWidth-xWindowOffset, windowsAreaHeight-yWindowOffset, x+xWindowOffset+(width-windowsAreaWidth)/2, y+yWindowOffset+(height-windowsAreaHeight)/2, container, windowWidth, windowHeight, windowSpacingHorizontal, windowSpacingVertical, doorX, doorY, doorWidth, doorHeight);
     drawDoor( doorWidth, doorHeight, doorX, doorY, container, doorHandleRadius, houseNumber );
 
-    return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut };
+    return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut, door: { x1: doorX, y1: doorY, x2: doorX+doorWidth, y2: doorY+doorHeight } };
 }
 
 // Get a random color
@@ -954,6 +954,7 @@ function drawDogLeg(x, y, legOffset, container) {
 function drawEnemy(x, y, radius, container) {
     var enemy = drawCircle(x, y, radius, container);
     enemy.classList.add("enemy");
+
     return enemy;
 }
 
@@ -990,7 +991,8 @@ function drawWorld() {
             }
             if( !overlaps ) {
                 objects.push(object);
-                enemyObjects.push(JSON.parse(JSON.stringify(object)));
+                enemyBuildings.push(JSON.parse(JSON.stringify(object)));
+                enemyBuildings[enemyBuildings.length-1].y2 += playerAllowedHouseOverlap;
                 break;
             }
         }
@@ -1007,12 +1009,13 @@ function drawWorld() {
     var houseNumber = 1;
     for( var i=0; i<numBuildings; i++ ) {
         var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1+playerAllowedHouseOverlap, objects[i].x1, objects[i].y1, container, houseNumber );
-        objects[i].houseNumber = houseNumber;
         // Add the roof to the objects
         objects.push( { x1: objects[i].x1 - buildingResponse.roofOut, y1: objects[i].y1 - buildingResponse.roofHeight, x2: objects[i].x2 + buildingResponse.roofOut, y2: objects[i].y1 } );
-        enemyObjects[i].x1 = enemyObjects[i].x1 - buildingResponse.roofOut;
-        enemyObjects[i].x2 = enemyObjects[i].x2 + buildingResponse.roofOut;
-        enemyObjects[i].y1 = enemyObjects[i].y1 - buildingResponse.roofHeight;
+        enemyBuildings[i].x1 = enemyBuildings[i].x1 - buildingResponse.roofOut;
+        enemyBuildings[i].x2 = enemyBuildings[i].x2 + buildingResponse.roofOut;
+        enemyBuildings[i].y1 = enemyBuildings[i].y1 - buildingResponse.roofHeight;
+        objects[i].houseNumber = houseNumber;
+        objects[i].door = buildingResponse.door;
         houseNumber ++;
     }
 
@@ -1038,12 +1041,14 @@ function drawWorld() {
                     overlaps = true;
                 }
             }
-            if( collisionTest(playerObject, overlapObject) ) {
+            // Really don't get close to the player
+            overlapEnemy = { x1: enemy.x1 - enemySightedDistance - 50, y1: enemy.y1 - enemySightedDistance - 50, x2: enemy.x1 + enemySightedDistance + 50, y2: enemy.y2 + enemySightedDistance + 50 };
+            if( collisionTest(playerObject, overlapEnemy) ) {
                 overlaps = true;
             }
             if( !overlaps ) {
-                var enemyObject = drawEnemy(x, y, enemyRadius, container);
-                enemy.object = enemyObject;
+                var enemyShape = drawEnemy(x, y, enemyRadius, container);
+                enemy.shape = enemyShape;
                 enemies.push(enemy);
                 break;
             }
@@ -1155,6 +1160,9 @@ function tick() {
     }
 
     existEnemies();
+    console.log("Health: " + playerHealth);
+    console.log("Deliver to: " + (currentBuilding + 1));
+    console.log("Player Score: " + playerScore);
 
     setTimeout(tick, tickRate);
 }
@@ -1192,7 +1200,32 @@ function existEnemies() {
     for( var i=0; i<enemies.length; i++ ) {
         var enemy = enemies[i];
         
-        chasePlayer(enemy);
+        var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
+        var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
+        // TODO increase difficulty by adding more enemies and increasing speed / sight
+        // TODO add class for when aggro
+        // TODO add bar on screen
+        // TODO finish tennis ball drawing
+        // TODO add house and high score.
+        // TODO add pause and game over and restart
+        // TODO prevent zoom in on phone and add zoom
+
+        // If this hits the player
+        if( !playerInvincible && collisionTest(enemy, playerObject) ) {
+            playerHealth --;
+            playerInvincible = true;
+            document.querySelector(".player").classList.add("player-invincible");
+            setTimeout( function() { playerInvincible = false; document.querySelector(".player").classList.remove("player-invincible"); }, playerInvincibilityTime );
+        }
+
+        if( !playerInvincible && collisionTest(playerObject, enemySightedObject) ) {
+            enemy.shape.classList.add("enemy-aggro");
+            chasePlayer(enemy);
+        }
+        else {
+            enemy.shape.classList.remove("enemy-aggro");
+            randomWalk(enemy);
+        }
     }
 
 }
@@ -1204,13 +1237,13 @@ function existEnemies() {
 function moveEnemy(amount, enemy, noActualMove) {
 
     var colliding = false;
-    if( enemy.x2 + amount.x > canvasWidth || enemy.x1 + amount.x < 0 || enemy.y2 + amount.y > canvasHeight || enemy.y2 + amount.y < 0 ) {
+    if( enemy.x2 + amount.x + enemyPadding > canvasWidth || enemy.x1 + amount.x - enemyPadding < 0 || enemy.y2 + amount.y + enemyPadding > canvasHeight || enemy.y2 + amount.y - enemyPadding < 0 ) {
         colliding = true;
     }
     else {
         var enemyObject = { x1: enemy.x1 + amount.x - enemyPadding, y1: enemy.y1 + amount.y - enemyPadding, x2: enemy.x2 + amount.x + enemyPadding, y2: enemy.y2 + amount.y + enemyPadding };
-        for(var i=0; i<enemyObjects.length;i++) {
-            if( collisionTest(enemyObjects[i], enemyObject) ) {
+        for(var i=0; i<enemyBuildings.length;i++) {
+            if( collisionTest(enemyBuildings[i], enemyObject) ) {
                 colliding = true;
                 break;
             }
@@ -1227,8 +1260,8 @@ function moveEnemy(amount, enemy, noActualMove) {
         enemy.x2 += amount.x;
         enemy.y1 += amount.y;
         enemy.y2 += amount.y;
-        enemy.object.setAttribute( "cx", parseInt(enemy.object.getAttribute("cx")) + amount.x );
-        enemy.object.setAttribute( "cy", parseInt(enemy.object.getAttribute("cy")) + amount.y );
+        enemy.shape.setAttribute( "cx", parseInt(enemy.shape.getAttribute("cx")) + amount.x );
+        enemy.shape.setAttribute( "cy", parseInt(enemy.shape.getAttribute("cy")) + amount.y );
     }
 
     return colliding;
@@ -1296,6 +1329,7 @@ function chasePlayer(enemy) {
     var xMove = 0;
     var yMove = 0;
 
+    // If we have a force to get around something
     if( enemy.chaseDirectionX ) {
         xMove = enemy.chaseDirectionX;
     }
@@ -1389,6 +1423,27 @@ function chasePlayer(enemy) {
     // which y direction to go, we add and subtract some values to X too.
 }
 
+/**
+ * Generate the next building to deliver to
+ */
+function generateNextBuilding() {
+    var nextBuilding = Math.floor(Math.random() * numBuildings);
+    if(currentBuilding && nextBuilding == currentBuilding) {
+        return generateNextBuilding();
+    }
+    return nextBuilding;
+}
+
+function deliver() {
+    var door = objects[currentBuilding].door;
+    var playerObject = { x1: playerX, y1: playerY, x2: playerX + playerWidth, y2: playerY + playerHeight };
+
+    if( collisionTest(playerObject, door) ) {
+        playerScore ++;
+        currentBuilding = generateNextBuilding();
+    }
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -1415,22 +1470,33 @@ var playerCanvasX = 2;
 var playerCanvasY = 11;
 var playerHealth = 5;
 var playerScore = 0;
+var playerInvincible = false;
+var playerInvincibilityTime = 1500;
+var playerHitboxReduction = 10;
+var dogMoveRate = 100;
 var movementAmount = 10;
 var frame = 1;
 var playTimeout = null;
-var dogMoveRate = 100;
 var numBuildings = 25;
-var numEnemies = 50;
+var currentBuilding = generateNextBuilding(); // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
+var numEnemies = 10;
 var enemyRadius = 15;
-var enemySightedDistance = 100;
-var enemyMovementAmount = 5;
-var enemyPadding = 10; // Distance an enemy must remain from an object beyond a direct collision
+var enemySightedDistance = 300;
+var enemyMovementAmount = 6;
+var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
 var objects = []; // Objects that the player can hit.
-var enemyObjects = []; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
+var enemyBuildings = []; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
 var enemies = []; // enemies of the player
 drawWorld();
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
-document.body.onkeyup = function(e) {keyDown[keyMap[e.which]] = false;};
+document.body.onkeyup = function(e) {
+    keyDown[keyMap[e.which]] = false; // This is not for just press
+
+    // On space press
+    if( e.keyCode == 32 ) {
+        deliver();
+    }
+};
 tick();
 
 //play();

@@ -25,6 +25,10 @@ body {
     overflow: visible;
 }
 
+.player-invincible {
+    opacity: 0.5;
+}
+
 .player-flipped {
     transform: scaleX(-1);
 }
@@ -61,6 +65,10 @@ body {
 
 .enemy {
     fill: yellow;
+}
+
+.enemy-aggro {
+    fill: orangered;
 }
 
 .window-pane {
