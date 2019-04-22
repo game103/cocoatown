@@ -954,6 +954,7 @@ function drawDogLeg(x, y, legOffset, container) {
 function drawEnemy(x, y, radius, container) {
     var enemy = drawCircle(x, y, radius, container);
     enemy.classList.add("enemy");
+    return enemy;
 }
 
 /**
@@ -976,10 +977,10 @@ function drawWorld() {
             
             object = { x1: x, y1: y, x2: x+width, y2: y+height-playerAllowedHouseOverlap };
             // This is for checking for overlap when generating the town, so no buldings are too close
-            var overlapObject = { x1: object.x1-40, y1: object.y1-70, x2: object.x2+40, y2: object.y2+playerAllowedHouseOverlap+70 };
+            var overlapObject = { x1: object.x1-80, y1: object.y1-110, x2: object.x2+80, y2: object.y2+playerAllowedHouseOverlap+110 };
             var overlaps = false;
             for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-40, y1: objects[i].y1-70, x2: objects[i].x2+40, y2: objects[i].y2+playerAllowedHouseOverlap+70 };
+                var curOverlapObject = { x1: objects[i].x1-80, y1: objects[i].y1-110, x2: objects[i].x2+80, y2: objects[i].y2+playerAllowedHouseOverlap+110 };
                 if( collisionTest(overlapObject, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -989,6 +990,7 @@ function drawWorld() {
             }
             if( !overlaps ) {
                 objects.push(object);
+                enemyObjects.push(JSON.parse(JSON.stringify(object)));
                 break;
             }
         }
@@ -1008,6 +1010,9 @@ function drawWorld() {
         objects[i].houseNumber = houseNumber;
         // Add the roof to the objects
         objects.push( { x1: objects[i].x1 - buildingResponse.roofOut, y1: objects[i].y1 - buildingResponse.roofHeight, x2: objects[i].x2 + buildingResponse.roofOut, y2: objects[i].y1 } );
+        enemyObjects[i].x1 = enemyObjects[i].x1 - buildingResponse.roofOut;
+        enemyObjects[i].x2 = enemyObjects[i].x2 + buildingResponse.roofOut;
+        enemyObjects[i].y1 = enemyObjects[i].y1 - buildingResponse.roofHeight;
         houseNumber ++;
     }
 
@@ -1018,7 +1023,7 @@ function drawWorld() {
             var x = Math.floor(Math.random() * (canvasWidth-600)/10) * 10 + 300;
             var y = Math.floor(Math.random() * (canvasHeight-600)/10) * 10 + 300;
 
-            enemy = { x1: x - enemyRadius/2, y1: y - enemyRadius/2, x2: x + enemyRadius/2, y2: y+enemyRadius/2 };
+            enemy = { x1: x - enemyRadius, y1: y - enemyRadius, x2: x + enemyRadius, y2: y+enemyRadius };
             var overlaps = false;
             for(var i=0; i<objects.length; i++) {
                 var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-60, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap+20 };
@@ -1037,8 +1042,9 @@ function drawWorld() {
                 overlaps = true;
             }
             if( !overlaps ) {
+                var enemyObject = drawEnemy(x, y, enemyRadius, container);
+                enemy.object = enemyObject;
                 enemies.push(enemy);
-                drawEnemy(x, y, enemyRadius, container);
                 break;
             }
         }
@@ -1148,43 +1154,30 @@ function tick() {
         }
     }
 
+    existEnemies();
+
     setTimeout(tick, tickRate);
 }
+
+/**
+ * Play the dog moving
+ */
 function play() {
     draw();
     playTimeout = setTimeout(play, dogMoveRate);
 }
+
+/**
+ * Draw the dog's correct frame
+ */
 function draw() {
     var container = document.querySelector(".player");
     var player = document.querySelector(".player");
     player.innerHTML = "";
 
-    if( frame % 8 == 1 ) {
-        drawDogFrame1(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 2 ) {
-        drawDogFrame2(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 3 ) {
-        drawDogFrame3(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 4 ) {
-        drawDogFrame4(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 5 ) {
-        drawDogFrame5(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 5 ) {
-        drawDogFrame5(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 6 ) {
-        drawDogFrame6(playerCanvasX, playerCanvasY, container);
-    }
-    else if( frame % 8 == 7 ) {
-        drawDogFrame7(playerCanvasX, playerCanvasY, container);
-    }
-    else {
-        drawDogFrame8(playerCanvasX, playerCanvasY, container);
+    window["drawDogFrame" + frame](playerCanvasX, playerCanvasY, container);
+
+    if( frame == 8 ) {
         frame = 0;
     }
 
@@ -1196,6 +1189,204 @@ function draw() {
 // controls a single tick of the enemies existence.
 function existEnemies() {
 
+    for( var i=0; i<enemies.length; i++ ) {
+        var enemy = enemies[i];
+        
+        chasePlayer(enemy);
+    }
+
+}
+
+/**
+ * Move enemy
+ * @param {number} amount - the number of pixels to move horizontally and vertically {x: <int>, y: <int>}
+ */
+function moveEnemy(amount, enemy, noActualMove) {
+
+    var colliding = false;
+    if( enemy.x2 + amount.x > canvasWidth || enemy.x1 + amount.x < 0 || enemy.y2 + amount.y > canvasHeight || enemy.y2 + amount.y < 0 ) {
+        colliding = true;
+    }
+    else {
+        var enemyObject = { x1: enemy.x1 + amount.x - enemyPadding, y1: enemy.y1 + amount.y - enemyPadding, x2: enemy.x2 + amount.x + enemyPadding, y2: enemy.y2 + amount.y + enemyPadding };
+        for(var i=0; i<enemyObjects.length;i++) {
+            if( collisionTest(enemyObjects[i], enemyObject) ) {
+                colliding = true;
+                break;
+            }
+        }
+        /*for(var i=0; i<enemies.length; i++) {
+            if( enemies[i] != enemy && collisionTest(enemies[i], enemyObject) ) {
+                colliding = true;
+                break;
+            }
+        }*/
+    }
+    if( !colliding && !noActualMove ) {
+        enemy.x1 += amount.x;
+        enemy.x2 += amount.x;
+        enemy.y1 += amount.y;
+        enemy.y2 += amount.y;
+        enemy.object.setAttribute( "cx", parseInt(enemy.object.getAttribute("cx")) + amount.x );
+        enemy.object.setAttribute( "cy", parseInt(enemy.object.getAttribute("cy")) + amount.y );
+    }
+
+    return colliding;
+}
+
+/**
+ * Have an enemy randomly walk
+ * @param {object} enemy 
+ */
+function randomWalk(enemy) {
+    // Get the current enemy direction
+    var direction = enemy.direction;
+
+    // Get a new direction potentially
+    // We don't want to generate a new direction every single time
+    if( Math.floor(Math.random() * 10) == 0 ) {
+        direction = Math.floor(Math.random() * 16);
+        enemy.direction = direction;
+    }
+
+    var xMove = 0;
+    var yMove = 0;
+    if( direction == 0 ) {
+        xMove = enemyMovementAmount;
+    }
+    if( direction == 1 ) {
+        xMove = enemyMovementAmount;
+        yMove = enemyMovementAmount;
+    }
+    if( direction == 2 ) {
+        yMove = enemyMovementAmount;
+    }
+    if( direction == 3 ) {
+        xMove = -enemyMovementAmount;
+        yMove = enemyMovementAmount;
+    }
+    if( direction == 4 ) {
+        xMove = -enemyMovementAmount;
+    }
+    if( direction == 5 ) {
+        xMove = -enemyMovementAmount;
+        yMove = -enemyMovementAmount;
+    }
+    if( direction == 6 ) {
+        yMove = -enemyMovementAmount;
+    }
+    if( direction == 7 ) {
+        xMove = enemyMovementAmount;
+        yMove = -enemyMovementAmount;
+    }
+    
+    // Move the enemy
+    var collided = moveEnemy({x: xMove, y: yMove}, enemy);
+    if( collided ) {
+        direction = Math.floor(Math.random() * 16);
+        enemy.direction = direction;
+    }
+}
+
+/**
+ * Have an enemy chase the player
+ * @param {object} enemy 
+ */
+function chasePlayer(enemy) {
+    var xMove = 0;
+    var yMove = 0;
+
+    if( enemy.chaseDirectionX ) {
+        xMove = enemy.chaseDirectionX;
+    }
+    else {
+        if( enemy.x1 + enemyMovementAmount < playerX + playerWidth/2 ) {
+            xMove = enemyMovementAmount;
+        }
+        else if( enemy.x1 - enemyMovementAmount > playerX + playerWidth/2 ) {
+            xMove = -enemyMovementAmount;
+        }
+    }
+
+    if( enemy.chaseDirectionY ) {
+        yMove = enemy.chaseDirectionY;
+    }
+    else {
+        if( enemy.y1 + enemyMovementAmount < playerY + playerHeight/2 ) {
+            yMove = enemyMovementAmount;
+        }
+        else if( enemy.y1 - enemyMovementAmount > playerY + playerHeight/2 ) {
+            yMove = -enemyMovementAmount;
+        }
+    }
+
+    // Move seperately, so if one enemy collides, we still have the other
+    var xCollided = null;
+    var yCollided = null;
+    if( xMove ) {
+        xCollided = moveEnemy({x: xMove, y:0}, enemy);
+        // We can't move horizontally, and we're not moving up or down.
+        // force a Y direction until we move horizontally.
+        if( xCollided && !yMove ) {
+            // Random is default
+            enemy.chaseDirectionY = (Math.floor(Math.random() * 2) == 0 ? -1 : 1) * enemyMovementAmount;
+            
+            // But try to find the quickest path around
+            for( var i=0; i<100; i+=10 ) {
+                var downCollideTest = moveEnemy({x: xMove, y: i}, enemy, true);
+                var upCollideTest = moveEnemy({x: xMove, y: -i}, enemy, true);
+                if( !downCollideTest ) {
+                    enemy.chaseDirectionY = enemyMovementAmount;
+                    break;
+                }
+                if( !upCollideTest ) {
+                    enemy.chaseDirectionY = -enemyMovementAmount;
+                    break;
+                }
+            }
+        }
+        if( !xCollided ) {
+            enemy.chaseDirectionY = null;
+        }
+    }
+    if( yMove ) {
+        yCollided = moveEnemy({x: 0, y:yMove}, enemy);
+        // We can't move vertically, and we're not moving side to side.
+        // force an X direction until we move vertically.
+        if( yCollided && !xMove ) {
+            // Random is default
+            enemy.chaseDirectionX = (Math.floor(Math.random() * 2) == 0 ? -1 : 1) * enemyMovementAmount;
+            // But try to find quickest path around
+            for( var i=0; i<100; i+=10 ) {
+                var rightCollideTest = moveEnemy({x: i, y: yMove}, enemy, true);
+                var leftCollideTest = moveEnemy({x: -i, y: yMove}, enemy, true);
+                if( !rightCollideTest ) {
+                    enemy.chaseDirectionX = enemyMovementAmount;
+                    break;
+                }
+                if( !leftCollideTest ) {
+                    enemy.chaseDirectionX = -enemyMovementAmount;
+                    break;
+                }
+            }
+        }
+        if( ! yCollided ) {
+            enemy.chaseDirectionX = null;
+        }
+    }
+
+    // Consider the following
+    // The player is on the opposite side of the house just above
+    // the transition from roof to building. The enemy is in the corner, and has
+    // both a moveX and moveY to get to the player. Since both X and Y are colliding,
+    // we'll flip the x direction until we can move on the Y axis.
+    // We do this, and then move up as necessary to get to the player.
+    // However, once we get to the same vertical level as the player, we are now "stuck"
+    // since we need only to move horizontally, but we can't. As such, we calculate the
+    // quickest distance to no longer be stuck moving horizontally. Which, is, moving down.
+    // But then, we'll move towards the player until we get stuck in the corner again and repeat.
+    // To combat this, we do our checks assuming there might be a roof, so when we check
+    // which y direction to go, we add and subtract some values to X too.
 }
 
 ////////// Main Program ////////////
@@ -1222,15 +1413,20 @@ var playerX = canvasWidth/2 - playerWidth/2;
 var playerY = canvasHeight/2 - playerHeight/2;
 var playerCanvasX = 2;
 var playerCanvasY = 11;
+var playerHealth = 5;
+var playerScore = 0;
 var movementAmount = 10;
 var frame = 1;
 var playTimeout = null;
 var dogMoveRate = 100;
-var numBuildings = 30;
-var numEnemies = 10;
-var enemyRadius = 25;
+var numBuildings = 25;
+var numEnemies = 50;
+var enemyRadius = 15;
 var enemySightedDistance = 100;
+var enemyMovementAmount = 5;
+var enemyPadding = 10; // Distance an enemy must remain from an object beyond a direct collision
 var objects = []; // Objects that the player can hit.
+var enemyObjects = []; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
 var enemies = []; // enemies of the player
 drawWorld();
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
