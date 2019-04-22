@@ -1191,6 +1191,13 @@ function draw() {
     frame++;
 }
 
+// Control the existence of the enemies
+// This function should be called from within a tick function as this
+// controls a single tick of the enemies existence.
+function existEnemies() {
+
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -1222,6 +1229,7 @@ var dogMoveRate = 100;
 var numBuildings = 30;
 var numEnemies = 10;
 var enemyRadius = 25;
+var enemySightedDistance = 100;
 var objects = []; // Objects that the player can hit.
 var enemies = []; // enemies of the player
 drawWorld();
