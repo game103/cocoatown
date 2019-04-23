@@ -56,9 +56,10 @@ function drawCircle( x, y, r, container ) {
  * Draw a straight path
  * @param {Array<Array<number>>} coordinates - An array of coordinate pairs for the path
  * @param {HTMLElement} container - the svg container on which to draw
+ * @param {boolean} connectAtEnd - whether to connect the lines at the end
  * @returns the newly drawn path
  */
-function drawPath( coordinates, container ) {
+function drawPath( coordinates, container, connectAtEnd ) {
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     if( coordinates.length > 0 ) {
@@ -66,6 +67,9 @@ function drawPath( coordinates, container ) {
     }
     for( var i=1; i<coordinates.length; i++ ) {
         d.push("L " + coordinates[i][0] + " " + coordinates[i][1]);
+    }
+    if( connectAtEnd ) {
+        d.push("Z");
     }
     path.setAttribute("d", d);
     container.appendChild( path );
@@ -948,14 +952,77 @@ function drawDogLeg(x, y, legOffset, container) {
     leg.classList.add("dog");
 }
 
+function drawIceCream(x, y, container) {
+    // Note how y is the BOTTOM here, since that is more useful with the cone
+    // and varying heights due to different scoops
+    var iceCreamGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    iceCreamGroup.classList.add("ice-cream");
+
+    var coneHeight = 10;
+    var scoopRadius = 4;
+    var coneWidth = (scoopRadius+1) * 2;
+    var maxScoops = 4;
+
+    var numScoops = Math.floor(Math.random() * maxScoops) + 1;
+
+    for( var i=0; i<numScoops; i++ ) {
+        var scoop = drawCircle( scoopRadius+1, -scoopRadius*i, scoopRadius, iceCreamGroup );
+        scoop.style.fill = getRandomColor();
+        scoop.classList.add("scoop");
+    }
+
+    var cone = drawPath( [ [0, 0], [coneWidth/2, coneHeight], [coneWidth, 0] ] , iceCreamGroup, true );
+    cone.classList.add("cone");
+
+    iceCreamGroup.setAttribute("x", x);
+    iceCreamGroup.setAttribute("y", y);
+
+    if( container ) {
+        container.appendChild(iceCreamGroup);
+    }
+
+    return iceCreamGroup;
+}
+
 /**
  * Draw an enemy
  */
 function drawEnemy(x, y, radius, container) {
-    var enemy = drawCircle(x, y, radius, container);
-    enemy.classList.add("enemy");
+    var enemyGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    enemyGroup.classList.add("enemy");
 
-    return enemy;
+    // Since the enemy is mainly a circle, we'll have the x and y coordinates of the group
+    // correspond to the center of the circle, not the top left like usual
+    var enemy = drawCircle(0, 0, radius, enemyGroup);
+
+    var rightTopCoordinates = getPointOnCircumference(0, 0, radius, -Math.PI/4);
+    var rightBottomCoordinates = getPointOnCircumference(0, 0, radius, Math.PI/4);
+    var leftTopCoordinates = getPointOnCircumference(0, 0, radius, -3*Math.PI/4);
+    var leftBottomCoordinates = getPointOnCircumference(0, 0, radius, Math.PI*3/4);
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (rightTopCoordinates[0]) + " " + (rightTopCoordinates[1]));
+    d.push("C " + (rightTopCoordinates[0]-6) + " " + (rightTopCoordinates[1]+5) + "," + (rightBottomCoordinates[0]-6) + " " + (rightBottomCoordinates[1]-5) + "," + (rightBottomCoordinates[0]) + " " + (rightBottomCoordinates[1]));
+    path.setAttribute("d", d);
+    enemyGroup.appendChild( path );
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (leftTopCoordinates[0]) + " " + (leftTopCoordinates[1]));
+    d.push("C " + (leftTopCoordinates[0]+6) + " " + (leftTopCoordinates[1]+5) + "," + (leftBottomCoordinates[0]+6) + " " + (leftBottomCoordinates[1]-5) + "," + (leftBottomCoordinates[0]) + " " + (leftBottomCoordinates[1]));
+    path.setAttribute("d", d);
+    enemyGroup.appendChild( path );
+
+    container.appendChild(enemyGroup);
+    enemyGroup.setAttribute("x", x);
+    enemyGroup.setAttribute("y", y);
+
+    return enemyGroup;
+}
+
+function getPointOnCircumference(cx, cy, radius, radians) {
+    return [ cx + radius * Math.cos(radians), cy + radius * Math.sin(radians) ];
 }
 
 /**
@@ -1019,7 +1086,28 @@ function drawWorld() {
         houseNumber ++;
     }
 
-    for( var i=0; i<numEnemies; i++ ) {
+    spawnEnemies(numEnemies, container);
+    spawnPowerups(numPowerups, container);
+
+    // We have a seperate container for the player
+    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    container.classList.add("player");
+    document.body.appendChild(container);
+    drawDog(playerCanvasX, playerCanvasY, container);
+    drawIceCream(-1, 0, container);
+
+    drawBar();
+}
+
+/**
+ * 
+ * @param {number} enemyCount - the number of enemies to add
+ * @param {HTMLElement} container - the svg canvas to add the enemies to
+ */
+function spawnEnemies(enemyCount, container) {
+    var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
+
+    for( var i=0; i<enemyCount; i++ ) {
 
         var enemy;
         while( true ) {
@@ -1054,12 +1142,6 @@ function drawWorld() {
             }
         }
     }
-
-    // We have a seperate container for the player
-    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    container.classList.add("player");
-    document.body.appendChild(container);
-    drawDog(playerCanvasX, playerCanvasY, container);
 }
 
 /**
@@ -1072,9 +1154,17 @@ function moveHorizontal(amount) {
 
     if( amount < 0 ) {
         player.classList.add("player-flipped");
+        // If the player is scaled, we'll have to update the transform manually
+        if( player.style.transform.indexOf("scale") != -1 && player.style.transform.indexOf("scaleX") == -1 ) {
+            player.style.transform = player.style.transform + "scaleX(-1)";
+        }
     }
     else {
         player.classList.remove("player-flipped");
+        // If the player is scaled, we'll have to update the transform manually
+        if( player.style.transform.indexOf("scale") != -1 ) {
+            player.style.transform = player.style.transform.replace("scaleX(-1)","");
+        }
     }
 
     var playerObject = { x1: playerX - amount, y1: playerY, x2: playerX + playerWidth - amount, y2: playerY + playerHeight };
@@ -1083,10 +1173,12 @@ function moveHorizontal(amount) {
         colliding = true;
     }
     else {
-        for(var i=0; i<objects.length;i++) {
-            if( collisionTest(objects[i], playerObject) ) {
-                colliding = true;
-                break;
+        if( !powerups.fly ) {
+            for(var i=0; i<objects.length;i++) {
+                if( collisionTest(objects[i], playerObject) ) {
+                    colliding = true;
+                    break;
+                }
             }
         }
     }
@@ -1111,10 +1203,12 @@ function moveVertical(amount) {
         colliding = true;
     }
     else {
-        for(var i=0; i<objects.length;i++) {
-            if( collisionTest(objects[i], playerObject) ) {
-                colliding = true;
-                break;
+        if( !powerups.fly ) {
+            for(var i=0; i<objects.length;i++) {
+                if( collisionTest(objects[i], playerObject) ) {
+                    colliding = true;
+                    break;
+                }
             }
         }
     }
@@ -1130,48 +1224,77 @@ function moveVertical(amount) {
  * Tick (basically mimicing frames)
  */
 function tick() {
-    var curPlayerX = playerX;
-    var curPlayerY = playerY;
+    if( !stopped ) {
+        var curPlayerX = playerX;
+        var curPlayerY = playerY;
 
-    if( keyDown['up'] ) {
-        moveVertical(movementAmount);
-    }
-    if( keyDown['down'] ) {
-        moveVertical(-movementAmount);
-    }
-    if( keyDown['left'] ) {
-        moveHorizontal(movementAmount);
-    }
-    if( keyDown['right'] ) {
-        moveHorizontal(-movementAmount);
-    }
-    
-    if( playerX != curPlayerX || playerY != curPlayerY ) {
-        if( !playTimeout ) {
-            play();
+        var curMoveAmount = movementAmount * (powerups["speed"] ? 2 : 1);
+
+        if( keyDown['up'] ) {
+            moveVertical(curMoveAmount);
         }
-    }
-    else {
-        if( playTimeout ) {
-            
-            clearTimeout(playTimeout);
-            playTimeout = null;
+        if( keyDown['down'] ) {
+            moveVertical(-curMoveAmount);
         }
+        if( keyDown['left'] ) {
+            moveHorizontal(curMoveAmount);
+        }
+        if( keyDown['right'] ) {
+            moveHorizontal(-curMoveAmount);
+        }
+        
+        if( playerX != curPlayerX || playerY != curPlayerY ) {
+            if( !playTimeout ) {
+                play();
+            }
+        }
+        else {
+            if( playTimeout ) {
+                
+                clearTimeout(playTimeout);
+                playTimeout = null;
+            }
+        }
+
+        existEnemies();
+        existPowerups();
+
+        // Take time off powerups
+        var powerupKeys = Object.keys(powerups);
+        for( var i=0; i<powerupKeys.length; i++ ) {
+            // We need this to be 1 here, so we don't keep doing it (once at 0), but it'll hit this on the last loop
+            if( powerups[powerupKeys[i]] == 1 ) {
+                if( powerupKeys[i] == "big" || powerupKeys[i] == "small" ) {
+                    changePlayerSize(1);
+                }
+                else if( powerupKeys[i] == "invincible" ) {
+                    // It's OK to not check for if the being invincible after being hit timeout is still
+                    // going, since that timeout is less than powerup tick frames and will have expired by
+                    // the time the invincibility powerup expires 
+                    document.querySelector(".player").classList.remove("player-invincible");
+                }
+                // Spawn another powerup
+                spawnPowerups(1, document.querySelector(".world"));
+            }
+            if( powerups[powerupKeys[i]] > 0 ) {
+                powerups[powerupKeys[i]] --;
+            }
+        }
+
+        updateBar();
+
+        tickTimeoutSet = Date.now();
+        setTimeout(tick, tickRate);
     }
-
-    existEnemies();
-    console.log("Health: " + playerHealth);
-    console.log("Deliver to: " + (currentBuilding + 1));
-    console.log("Player Score: " + playerScore);
-
-    setTimeout(tick, tickRate);
 }
 
 /**
  * Play the dog moving
  */
 function play() {
-    draw();
+    if( !stopped && !powerups.fly ) {
+        draw();
+    }
     playTimeout = setTimeout(play, dogMoveRate);
 }
 
@@ -1179,11 +1302,40 @@ function play() {
  * Draw the dog's correct frame
  */
 function draw() {
-    var container = document.querySelector(".player");
     var player = document.querySelector(".player");
+
+    // We must always have an ice cream and always should
+    var iceCream = document.querySelector(".ice-cream");
+
     player.innerHTML = "";
 
-    window["drawDogFrame" + frame](playerCanvasX, playerCanvasY, container);
+    window["drawDogFrame" + frame](playerCanvasX, playerCanvasY, player);
+
+    player.appendChild(iceCream);
+    if( frame == 1 ) {
+        document.querySelector(".ice-cream").setAttribute("x", -3.5);
+        document.querySelector(".ice-cream").setAttribute("y", 4);
+    }
+    if( frame == 2 ) {
+        document.querySelector(".ice-cream").setAttribute("x", -1);
+        document.querySelector(".ice-cream").setAttribute("y", 0);
+    }
+    if( frame == 4 ) {
+        document.querySelector(".ice-cream").setAttribute("x", 1.5);
+        document.querySelector(".ice-cream").setAttribute("y", -2.7);
+    }
+    if( frame == 6 ) {
+        document.querySelector(".ice-cream").setAttribute("x", -2);
+        document.querySelector(".ice-cream").setAttribute("y", 1.5);
+    }
+    if( frame == 7 ) {
+        document.querySelector(".ice-cream").setAttribute("x", -4.2);
+        document.querySelector(".ice-cream").setAttribute("y", 5.2);
+    }
+    if( frame == 8 ) {
+        document.querySelector(".ice-cream").setAttribute("x", -3.5);
+        document.querySelector(".ice-cream").setAttribute("y", 4);
+    }
 
     if( frame == 8 ) {
         frame = 0;
@@ -1202,23 +1354,23 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO increase difficulty by adding more enemies and increasing speed / sight
-        // TODO add class for when aggro
-        // TODO add bar on screen
-        // TODO finish tennis ball drawing
         // TODO add house and high score.
-        // TODO add pause and game over and restart
-        // TODO prevent zoom in on phone and add zoom
+        // TODO add pause and game over and restart and menu screen
+        // TODO add touch controls
+        // TODO power-up indicators
+        // TODO big powerup give x2 points for ice cream
 
         // If this hits the player
-        if( !playerInvincible && collisionTest(enemy, playerObject) ) {
+        if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
             playerHealth --;
-            playerInvincible = true;
-            document.querySelector(".player").classList.add("player-invincible");
-            setTimeout( function() { playerInvincible = false; document.querySelector(".player").classList.remove("player-invincible"); }, playerInvincibilityTime );
+            if( playerHealth <= 0 ) {
+                reset(); // You lose!
+                return;
+            }
+            obtainInvincibility(playerInvincibilityTicks);
         }
 
-        if( !playerInvincible && collisionTest(playerObject, enemySightedObject) ) {
+        if( !powerups.invincible && collisionTest(playerObject, enemySightedObject) ) {
             enemy.shape.classList.add("enemy-aggro");
             chasePlayer(enemy);
         }
@@ -1260,8 +1412,8 @@ function moveEnemy(amount, enemy, noActualMove) {
         enemy.x2 += amount.x;
         enemy.y1 += amount.y;
         enemy.y2 += amount.y;
-        enemy.shape.setAttribute( "cx", parseInt(enemy.shape.getAttribute("cx")) + amount.x );
-        enemy.shape.setAttribute( "cy", parseInt(enemy.shape.getAttribute("cy")) + amount.y );
+        enemy.shape.setAttribute( "x", parseFloat(enemy.shape.getAttribute("x")) + amount.x );
+        enemy.shape.setAttribute( "y", parseFloat(enemy.shape.getAttribute("y")) + amount.y );
     }
 
     return colliding;
@@ -1318,6 +1470,21 @@ function randomWalk(enemy) {
     if( collided ) {
         direction = Math.floor(Math.random() * 16);
         enemy.direction = direction;
+    }
+}
+
+/**
+ * Increase the current difficulty
+ */
+function increaseDifficulty() {
+    if( currentDifficulty <= maxDifficulty ) {
+        enemyMovementAmount += 0.1; // So the max movement amount is 7.5
+        
+        if(currentDifficulty % 5 == 0) {
+            spawnEnemies(1, document.querySelector(".world"));
+        }
+
+        currentDifficulty ++;
     }
 }
 
@@ -1434,6 +1601,9 @@ function generateNextBuilding() {
     return nextBuilding;
 }
 
+/**
+ * Deliver a package to a house
+ */
 function deliver() {
     var door = objects[currentBuilding].door;
     var playerObject = { x1: playerX, y1: playerY, x2: playerX + playerWidth, y2: playerY + playerHeight };
@@ -1441,13 +1611,266 @@ function deliver() {
     if( collisionTest(playerObject, door) ) {
         playerScore ++;
         currentBuilding = generateNextBuilding();
+        // get a new ice cream
+        // we want to replace the current one to maintain position
+        var player = document.querySelector(".player");
+        var iceCream = document.querySelector(".ice-cream");
+        var newIceCream = drawIceCream(-1, 0, null); // Use a null container so it is not added
+        player.replaceChild(newIceCream, iceCream);
     }
+}
+
+/**
+ * Toggle the state of the game being paused
+ */
+function togglePause() {
+    if( stopped ) {
+        setTimeout(tick, tickTimeoutRemaining);
+        stopped = false;
+    }
+    else {
+        // Get exactly the frame we are on when we pause, so we can resume at that frame
+        tickTimeoutRemaining = tickRate - (Date.now() - tickTimeoutSet);
+        stopped = true;
+    }
+}
+
+/**
+ * Draw the bar on the bottom of the screen
+ */
+function drawBar() {
+    var bar = document.createElement("div");
+    bar.classList.add("bar");
+
+    bar.innerHTML += '<i class="fas fa-paw"></i>';
+
+    var heartsDiv = document.createElement("div");
+    heartsDiv.classList.add("bar-div");
+    heartsDiv.classList.add("bar-hearts");
+    bar.appendChild(heartsDiv);
+
+    var deliverToDiv = document.createElement("div");
+    deliverToDiv.classList.add("bar-div");
+    deliverToDiv.classList.add("bar-deliver");
+    bar.appendChild(deliverToDiv);
+
+    var scoreDiv = document.createElement("div");
+    scoreDiv.classList.add("bar-div");
+    scoreDiv.classList.add("bar-score");
+    bar.appendChild(scoreDiv);
+
+    bar.innerHTML += '<i class="fas fa-ice-cream"></i>';
+
+    document.body.appendChild(bar);
+
+    updateBar();
+}
+
+// Update the information on the bar
+function updateBar() {
+    var heartText = "";
+    for(var i=0; i<playerHealth; i++) {
+        heartText += '<i class="fas fa-heart"></i>&nbsp;';
+    }
+    for(var i=Math.max(0,playerHealth); i<playerMaxHealth; i++) {
+        heartText += '<i class="far fa-heart"></i>&nbsp;';
+    }
+    document.querySelector(".bar-hearts").innerHTML = heartText;
+    document.querySelector(".bar-score").innerText = playerScore;
+    document.querySelector(".bar-deliver").innerText = (currentBuilding + 1);
+}
+
+// Draw menu
+function drawMenu() {
+
+}
+
+// Change the size of the player
+function changePlayerSize(multiplier) {
+    var newPlayerWidth = playerStartingWidth * multiplier;
+    var newPlayerHeight = playerStartingHeight * multiplier;
+
+    widthDifference = playerWidth - newPlayerWidth;
+    heightDifference = playerHeight - newPlayerHeight;
+
+    playerX = playerX + widthDifference/2;
+    playerY = playerY + heightDifference/2;
+    playerWidth = newPlayerWidth;
+    playerHeight = newPlayerHeight;
+
+    var player = document.querySelector(".player");
+    var transformStyle = "scale(" + multiplier + ")";
+
+    // TODO - this won't work for when flipping after
+    if( player.classList.contains("player-flipped") ) {
+        player.style.transform = transformStyle + "scaleX(-1)";
+    }
+    else {
+        player.style.transform = transformStyle;
+    }
+}
+
+// obtain invincibility
+function obtainInvincibility(time) {
+    powerups.invincible = time;
+    document.querySelector(".player").classList.add("player-invincible");
+}
+
+// Draw a powerup (x and y are the center like enemies)
+function drawPowerup(x, y, radius, type, container) {
+    var powerupGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    powerupGroup.classList.add("powerup");
+
+    // Since the enemy is mainly a circle, we'll have the x and y coordinates of the group
+    // correspond to the center of the circle, not the top left like usual
+    //var powerup = drawCircle(0, 0, radius, powerupGroup);
+    var powerup = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    powerup.classList.add("powerup");
+    powerup.classList.add("powerup-" + type);
+
+    var points = [];
+    for(var radians=0; radians<2*Math.PI; radians+=2*Math.PI/6) {
+        var point = getPointOnCircumference( 0, 0, radius, radians );
+        points.push(point[0] + "," + point[1]);
+    }
+    powerup.setAttribute("points", points.join(" "));
+
+    powerupGroup.appendChild(powerup);
+
+    var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", 0);
+    text.setAttribute("y", 0);
+    powerupGroup.appendChild(text);
+
+    if( type == "big" ) {
+        text.innerHTML = "&#xf0d8;";
+    }
+    else if( type == "small" ) {
+        text.innerHTML = "&#xf0d7;";
+    }
+    else if( type == "speed" ) {
+        text.innerHTML = "&#xf70c;";
+    }
+    else if( type == "invincible" ) {
+        text.innerHTML = "&#xf70c;";
+    }
+    else if( type == "fly" ) {
+        text.innerHTML = "&#xf072;";
+    }
+    
+    container.appendChild(powerupGroup);
+    powerupGroup.setAttribute("x", x);
+    powerupGroup.setAttribute("y", y);
+
+    return powerupGroup;
+}
+
+function spawnPowerups(powerupCount, container) {
+    var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
+
+    for( var i=0; i<powerupCount; i++ ) {
+
+        var powerup;
+        while( true ) {
+            var x = Math.floor(Math.random() * (canvasWidth-600)/10) * 10 + 300;
+            var y = Math.floor(Math.random() * (canvasHeight-600)/10) * 10 + 300;
+
+            powerup = { x1: x - powerupRadius, y1: y - powerupRadius, x2: x + powerupRadius, y2: y+powerupRadius };
+            var overlaps = false;
+            for(var i=0; i<objects.length; i++) {
+                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-60, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap+20 };
+                if( collisionTest(powerup, curOverlapObject) ) {
+                    overlaps = true;
+                }
+            }
+            // Add the extra spacing to the powerup here, since all the powerups are the same size
+            var overlapPowerup = { x1: powerup.x1 - 50, y1: powerup.y1 - 50, x2: powerup.x1 + 50, y2: powerup.y2 + 50 };
+            for(var i=0; i<powerupsOnScreen.length; i++) {
+                if( collisionTest(overlapPowerup, powerupsOnScreen[i]) ) {
+                    overlaps = true;
+                }
+            }
+            if( collisionTest(playerObject, overlapPowerup) ) {
+                overlaps = true;
+            }
+            if( !overlaps ) {
+                powerup.type = Object.keys(powerups)[Math.floor(Math.random() * Object.keys(powerups).length)];
+                var powerupShape = drawPowerup(x, y, powerupRadius, powerup.type, container);
+                powerup.shape = powerupShape;
+                powerupsOnScreen.push(powerup);
+                break;
+            }
+        }
+    }
+}
+
+function existPowerups() {
+    for( var i=powerupsOnScreen.length-1; i>=0; i-- ) { // Go backwards since we can remove powerups
+        var powerup = powerupsOnScreen[i];
+        
+        var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
+
+        if( collisionTest(powerup, playerObject) ) {
+            if( powerup.type == "big" ) {
+                changePlayerSize(1.5);
+                powerups.small = 0;
+                powerups.big = powerupTicks;
+            }
+            else if( powerup.type == "small" ) {
+                changePlayerSize(0.5);
+                powerups.big = 0;
+                powerups.small = powerupTicks;
+            }
+            else if( powerup.type == "fly" ) {
+                powerups.fly = powerupTicks;
+            }
+            else if( powerup.type == "invincible" ) {
+                obtainInvincibility(powerupTicks);
+            }
+            else if( powerup.type == "speed" ) {
+                powerups.speed = powerupTicks;
+            }
+            // On collision, we no longer need to show the powerup.
+            powerup.shape.parentNode.removeChild(powerup.shape);
+            powerupsOnScreen.splice(i, 1);
+        }
+    }
+}
+
+// Reset/Start the game
+function reset() {
+    document.body.innerHTML = "";
+    playerHealth = playerMaxHealth;
+    playerScore = 0;
+    frame = 1;
+    playTimeout = null;
+    currentBuilding = generateNextBuilding();
+    currentDifficulty = 1;
+    objects = [];
+    enemyBuildings = [];
+    enemies = [];
+    powerupsOnScreen = [];
+    stopped = false;
+    playerWidth = playerStartingWidth;
+    playerHeight = playerStartingHeight;
+    playerX = canvasWidth/2 - playerWidth/2;
+    playerY = canvasHeight/2 - playerHeight/2;
+    powerups = {
+        "big": 0,
+        "small": 0,
+        "speed": 0,
+        "invincible": 0,
+        "fly": 0
+    };
+    drawWorld();
+    tick();
 }
 
 ////////// Main Program ////////////
 
 // Movement
-var tickRate = 33;
+var fps = 30
+var tickRate = 1000/fps; // every 33 ms ~ 30fps
 var keyDown = {};
 var keyMap = {
     37: "left",
@@ -1455,49 +1878,66 @@ var keyMap = {
     39: "right",
     40: "down"
 };
-
-var playerWidth = 82;
-var playerHeight = 72;
+var playerStartingWidth = 82;
+var playerStartingHeight = 72;
+var playerWidth;
+var playerHeight;
 var playerAllowedHouseOverlap = 60; // How much the player is allowed to overlap with the house
 var worldHorizontalOffset = 0;
 var worldVerticalOffset = 0;
 var canvasWidth = 3000;
 var canvasHeight = 3000;
 // Simply the midpoint minus half the player's width/height (note, these values are in the css too)
-var playerX = canvasWidth/2 - playerWidth/2;
-var playerY = canvasHeight/2 - playerHeight/2;
+var playerX;
+var playerY;
 var playerCanvasX = 2;
 var playerCanvasY = 11;
-var playerHealth = 5;
-var playerScore = 0;
-var playerInvincible = false;
-var playerInvincibilityTime = 1500;
+var playerMaxHealth = 5;
+var playerHealth;
+var playerScore;
+var playerInvincibilityTicks = 1500/fps; // 1.5 second of invinciblity when hit
 var playerHitboxReduction = 10;
 var dogMoveRate = 100;
 var movementAmount = 10;
-var frame = 1;
-var playTimeout = null;
+var frame;
+var playTimeout;
 var numBuildings = 25;
-var currentBuilding = generateNextBuilding(); // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
-var numEnemies = 10;
+var currentBuilding; // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
+var numEnemies = 5;
 var enemyRadius = 15;
 var enemySightedDistance = 300;
-var enemyMovementAmount = 6;
+var enemyMovementAmount = 5;
 var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
-var objects = []; // Objects that the player can hit.
-var enemyBuildings = []; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
-var enemies = []; // enemies of the player
-drawWorld();
+var currentDifficulty;
+var maxDifficulty = 25;
+var objects; // Objects that the player can hit.
+var enemyBuildings; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
+var enemies; // enemies of the player
+var powerupsOnScreen; // powerups on screen
+var powerupRadius = 20;
+var numPowerups = 3;
+var stopped;
+var tickTimeoutSet;
+var tickTimeoutRemaining;
+var powerups;
+var powerupTicks = 10000/fps; // ten seconds of powerup
+
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
 document.body.onkeyup = function(e) {
     keyDown[keyMap[e.which]] = false; // This is not for just press
 
-    // On space press
-    if( e.keyCode == 32 ) {
-        deliver();
+    if( !stopped ) {
+        // On space press
+        if( e.keyCode == 32 ) {
+            deliver();
+        }
+    }
+    // On p press
+    if( e.keyCode == 80 ) {
+        togglePause();
     }
 };
-tick();
+reset();
 
 //play();
 // Old dog

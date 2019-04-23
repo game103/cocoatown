@@ -1,9 +1,12 @@
-body {
+html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
     margin: 0;
     background-color: rgb(0, 94, 5);
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .world {
@@ -33,7 +36,19 @@ body {
     transform: scaleX(-1);
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy {
+.ice-cream {
+    overflow: visible;
+}
+
+.cone {
+    fill: rgb(223, 191, 87) !important;
+}
+
+.scoop {
+    fill: white;
+}
+
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
@@ -65,6 +80,7 @@ body {
 
 .enemy {
     fill: yellow;
+    overflow: visible;
 }
 
 .enemy-aggro {
@@ -78,5 +94,60 @@ body {
 
 .door-text {
     font-size: 16px;
-    font-family: "Crimson Text";
+    font-family: "Crimson Text", serif;
+}
+
+.bar {
+    background-color: rgb(160, 255, 250);
+    color: black;
+    position: fixed;
+    width: calc(100% - 6px);
+    display: flex;
+    bottom: 0;
+    font-size: 15px;
+    border-top: 2px solid black;
+    padding: 3px;
+    margin: 0;
+}
+
+.bar .fa-paw, .bar .fa-ice-cream {
+    font-size: 24px;
+    padding: 3px;
+}
+
+@media screen and (max-width: 330px) {
+    .bar .fa-paw, .bar .fa-ice-cream {
+        display: none;
+    }
+}
+
+.bar-hearts {
+    color: red;
+}
+
+.bar-div {
+    flex: 1 1 0;
+    padding: 3px;
+    height: 24px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-family: "Acme", sans-serif;
+}
+
+.bar-score::before {
+    content: "Score:\00a0";
+}
+
+.bar-deliver::before {
+    content: "Deliver to:\00a0";
+}
+
+.powerup {
+    overflow: visible;
+}
+
+.powerup text {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
 }
