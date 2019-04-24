@@ -1375,6 +1375,9 @@ function existEnemies() {
         // TODO add pause and game over and restart and menu screen
         // TODO add touch controls
         // TODO power-up indicators
+        // TODO no space to delvier
+        // TODO easier way to see numbers
+        // TODO quicker game? more enemies to start
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
