@@ -1096,6 +1096,12 @@ function drawWorld() {
     drawDog(playerCanvasX, playerCanvasY, container);
     drawIceCream(-1, 0, container);
 
+    // seperate container for the pointer
+    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    container.classList.add("pointer-container");
+    document.body.appendChild(container);
+    drawPointer(0, 0, container);
+
     drawBar();
 }
 
@@ -1215,7 +1221,7 @@ function moveVertical(amount) {
     if( !colliding ) {
         worldVerticalOffset -= amount;
         // Make sure this matches the css
-        world.style.top = "calc(100vh / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
+        world.style.top = "calc( 100vh / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
         playerY -= amount;
     }
 }
@@ -1300,6 +1306,11 @@ function tick() {
 
         updateBar();
 
+        anglePointer();
+
+        // Deliver if we can 
+        deliver();
+
         tickTimeoutSet = Date.now();
         setTimeout(tick, tickRate);
     }
@@ -1374,11 +1385,10 @@ function existEnemies() {
         // TODO add house and high score.
         // TODO add pause and game over and restart and menu screen
         // TODO add touch controls
-        // TODO power-up indicators
         // TODO no space to delvier
         // TODO easier way to see numbers
-        // TODO quicker game? more enemies to start
-        // TODO pointer
+        // TODO center dog given bar.
+        // TODO - check responsive
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1641,6 +1651,71 @@ function deliver() {
     }
 }
 
+function drawPointer(x, y, container) {
+    var pointerWidth = 10;
+    var pointerHeight = 30;
+    var pointer = drawPath( [ [x+pointerHeight, y], [x, y+pointerWidth/2], [x+pointerHeight/5, y], [x, y-pointerWidth/2] ] , container, true );
+    pointer.classList.add("pointer");
+    pointer.style.transformOrigin = x + "px " + y + "px ";
+    return pointer;
+}
+
+function anglePointer() {
+    var pointer = document.querySelector(".pointer");
+
+    var door = objects[currentBuilding].door;
+    
+    var playerCenterX =  (playerX + playerWidth/2);
+    var playerCenterY = (playerY + playerHeight/2);
+    var doorX = (door.x1 + door.x2)/2;
+    var doorY = (door.y1 + door.y2)/2;
+
+    // If we're really close, turn off the pointer
+    if( Math.sqrt( (playerCenterX-doorX)**2 ) + Math.sqrt( (playerCenterY-doorY)**2 ) < 20 ) {
+        pointer.parentNode.style.visibility = "hidden";
+    }
+    else {
+        pointer.parentNode.style.visibility = "visible";
+    }
+
+    // tan (angle) = opposite/adjacent - solve for angle
+    var rotationAngle;
+    
+    // tangent is only good for right triangles, so we have to rotate accordingly
+    if( doorX > playerCenterX && doorY > playerCenterY ) {
+        rotationAngle = Math.atan( (doorY - playerCenterY) / (doorX - playerCenterX) );
+    }
+    else if( doorX < playerCenterX && doorY > playerCenterY ) {
+        rotationAngle = Math.PI/2 - Math.atan( (doorY - playerCenterY) / (playerCenterX - doorX) );
+        rotationAngle += Math.PI/2;
+    }
+    else if( doorX < playerCenterX && doorY < playerCenterY ) {
+        rotationAngle = Math.atan( (playerCenterY - doorY) / (playerCenterX - doorX) );
+        rotationAngle += Math.PI;
+    }
+    else if( doorX > playerCenterX && doorY < playerCenterY ) {
+        rotationAngle = Math.PI/2 - Math.atan( (playerCenterY - doorY) / (doorX - playerCenterX) );
+        rotationAngle -= Math.PI/2;
+    }
+    else if( doorX == playerCenterX && doorY > playerCenterY ) {
+        // straight down
+        rotationAngle = Math.PI/2;
+    }
+    else if( doorX == playerCenterX && doorY < playerCenterY ) {
+        // straight up
+        rotationAngle = -Math.PI/2;
+    }
+    else if( doorX < playerCenterX && doorY == playerCenterY ) {
+        // straight left
+        rotationAngle = Math.PI;
+    }
+    else if( doorX > playerCenterX && doorY == playerCenterY ) {
+        // straight right
+    }
+    
+    pointer.style.transform="rotate("+rotationAngle+"rad)";
+}
+
 /**
  * Toggle the state of the game being paused
  */
@@ -1663,24 +1738,49 @@ function drawBar() {
     var bar = document.createElement("div");
     bar.classList.add("bar");
 
-    bar.innerHTML += '<i class="fas fa-paw"></i>';
+    // First row
+    var barRow = document.createElement("div");
+    barRow.classList.add("bar-row");
+
+    barRow.innerHTML += '<i class="fas fa-paw"></i>';
 
     var heartsDiv = document.createElement("div");
     heartsDiv.classList.add("bar-div");
     heartsDiv.classList.add("bar-hearts");
-    bar.appendChild(heartsDiv);
+    barRow.appendChild(heartsDiv);
 
     var deliverToDiv = document.createElement("div");
     deliverToDiv.classList.add("bar-div");
     deliverToDiv.classList.add("bar-deliver");
-    bar.appendChild(deliverToDiv);
+    barRow.appendChild(deliverToDiv);
 
     var scoreDiv = document.createElement("div");
     scoreDiv.classList.add("bar-div");
     scoreDiv.classList.add("bar-score");
-    bar.appendChild(scoreDiv);
+    barRow.appendChild(scoreDiv);
 
-    bar.innerHTML += '<i class="fas fa-ice-cream"></i>';
+    barRow.innerHTML += '<i class="fas fa-paw"></i>';
+
+    bar.appendChild(barRow);
+
+    // Second row - powerups
+    barRow = document.createElement("div");
+    barRow.classList.add("bar-row");
+
+    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
+
+    var powerupKeys = Object.keys(powerups);
+    for(var i=0; i<powerupKeys.length; i++) {
+        var powerupDiv = document.createElement("div");
+        powerupDiv.classList.add("bar-div");
+        powerupDiv.classList.add("bar-powerup");
+        powerupDiv.classList.add("bar-powerup-" + powerupKeys[i]);
+        barRow.appendChild(powerupDiv);
+    }
+
+    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
+
+    bar.appendChild(barRow);
 
     document.body.appendChild(bar);
 
@@ -1699,6 +1799,16 @@ function updateBar() {
     document.querySelector(".bar-hearts").innerHTML = heartText;
     document.querySelector(".bar-score").innerText = playerScore;
     document.querySelector(".bar-deliver").innerText = (currentBuilding + 1);
+
+    var powerupKeys = Object.keys(powerups);
+    for(var i=0; i<powerupKeys.length; i++) {
+        var powerupDiv = document.querySelector(".bar-powerup-" + powerupKeys[i]);
+
+        // Make sure this matches the background color in the css
+        var barBackgroundColor = "rgb(142, 200, 248)";
+        var powerupPecentage = powerups[powerupKeys[i]] / powerupTicks * 100;
+        powerupDiv.style.backgroundImage = "linear-gradient(90deg, transparent "+powerupPecentage+"%, "+barBackgroundColor+" "+powerupPecentage+"%)";
+    }
 }
 
 // Draw menu
@@ -1788,6 +1898,7 @@ function drawPowerup(x, y, radius, type, container) {
     var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     powerupGroup.appendChild(text);
 
+    // Make sure these match the css
     if( type == "big" ) {
         text.innerHTML = "&#xf0d8;";
         text.setAttribute("x", -6);
@@ -1966,7 +2077,7 @@ var frame;
 var playTimeout;
 var numBuildings = 25;
 var currentBuilding; // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
-var numEnemies = 5;
+var numEnemies = 7;
 var enemyRadius = 15;
 var enemySightedDistance = 300;
 var enemyMovementAmount = 5;
@@ -1991,12 +2102,6 @@ document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
 document.body.onkeyup = function(e) {
     keyDown[keyMap[e.which]] = false; // This is not for just press
 
-    if( !stopped ) {
-        // On space press
-        if( e.keyCode == 32 ) {
-            deliver();
-        }
-    }
     // On p press
     if( e.keyCode == 80 ) {
         togglePause();

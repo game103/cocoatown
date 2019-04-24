@@ -98,16 +98,20 @@ html, body {
 }
 
 .bar {
-    background-color: rgb(160, 255, 250);
+    background-color: rgb(142, 200, 248);
     color: black;
     position: fixed;
     width: calc(100% - 6px);
-    display: flex;
     bottom: 0;
     font-size: 15px;
     border-top: 2px solid black;
     padding: 3px;
     margin: 0;
+}
+
+.bar-row {
+    display: flex;
+    padding: 3px;
 }
 
 .bar .fa-paw, .bar .fa-ice-cream {
@@ -143,6 +147,52 @@ html, body {
     content: "Deliver to:\00a0";
 }
 
+.bar-powerup::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+/* make sure these match the JS */
+.bar-powerup-big::before {
+    content: "\f0d8";
+}
+
+.bar-powerup-small::before {
+    content: "\f0d7";
+}
+
+.bar-powerup-speed::before {
+    content: "\f70c";
+}
+
+.bar-powerup-invincible::before {
+    content: "\f005";
+}
+
+.bar-powerup-fly::before {
+    content: "\f072";
+}
+
+.bar-powerup-big {
+    background-color: red;
+}
+
+.bar-powerup-small {
+    background-color: steelblue;
+}
+
+.bar-powerup-speed {
+    background-color: purple;
+}
+
+.bar-powerup-invincible {
+    background-color: yellow;
+}
+
+.bar-powerup-fly {
+    background-color: white;
+}
+
 .powerup {
     overflow: visible;
 }
@@ -171,4 +221,12 @@ html, body {
 
 .powerup.powerup-speed {
     fill: purple;
+}
+
+.pointer-container {
+    position: fixed;
+    overflow: visible;
+    bottom: 120px; right: 40px;
+    width: 1px;
+    height: 1px;
 }
