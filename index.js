@@ -359,6 +359,8 @@ function drawDog(x, y, container) {
  */
 function drawDogFrame1(x, y, container) {
 
+    var rotationYModifier = -3;
+
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x+6;
@@ -370,6 +372,8 @@ function drawDogFrame1(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y + rotationYModifier;
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -383,6 +387,8 @@ function drawDogFrame1(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     var body = drawDogBody(container);
     body.style.transform = "rotate(-6deg)";
@@ -400,6 +406,8 @@ function drawDogFrame1(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -414,6 +422,8 @@ function drawDogFrame1(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 }
 
 /**
@@ -550,6 +560,9 @@ function drawDogFrame3(x, y, container) {
  */
 function drawDogFrame4(x, y, container) {
 
+    var rotationYModifier = -2.5;
+    y = y + rotationYModifier;
+
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x+10;
@@ -564,6 +577,7 @@ function drawDogFrame4(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y - rotationYModifier;
     
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -581,6 +595,8 @@ function drawDogFrame4(x, y, container) {
     var body = drawDogBody(container);
     body.style.transform = "rotate(5deg)";
     
+    y = y + rotationYModifier;
+
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -595,6 +611,8 @@ function drawDogFrame4(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -620,6 +638,9 @@ function drawDogFrame4(x, y, container) {
  */
 function drawDogFrame5(x, y, container) {
 
+    var rotationYModifier = -2.5;
+    y = y + rotationYModifier;
+
     // This leg is somewhat fake
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -630,6 +651,8 @@ function drawDogFrame5(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -647,6 +670,8 @@ function drawDogFrame5(x, y, container) {
 
     var body = drawDogBody(container);
     body.style.transform = "rotate(5deg)";
+
+    y = y + rotationYModifier;
     
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -660,6 +685,8 @@ function drawDogFrame5(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -685,6 +712,8 @@ function drawDogFrame5(x, y, container) {
  */
 function drawDogFrame6(x, y, container) {
 
+    var rotationYModifier = -1.25;
+
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x+2.5;
@@ -697,6 +726,8 @@ function drawDogFrame6(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x+52;
@@ -706,6 +737,8 @@ function drawDogFrame6(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     var body = drawDogBody(container);
     body.style.transform = "rotate(-2.5deg)";
@@ -723,6 +756,8 @@ function drawDogFrame6(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -735,6 +770,8 @@ function drawDogFrame6(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 }
 
 /**
@@ -744,6 +781,8 @@ function drawDogFrame6(x, y, container) {
  * @param {HTMLElement} container - the svg container on which to draw
  */
 function drawDogFrame7(x, y, container) {
+
+    var rotationYModifier = -4.25;
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -756,6 +795,8 @@ function drawDogFrame7(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y + rotationYModifier;
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -770,6 +811,8 @@ function drawDogFrame7(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     var body = drawDogBody(container);
     body.style.transform = "rotate(-8.5deg)";
@@ -788,6 +831,8 @@ function drawDogFrame7(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -802,6 +847,8 @@ function drawDogFrame7(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 }
 
 /**
@@ -811,6 +858,8 @@ function drawDogFrame7(x, y, container) {
  * @param {HTMLElement} container - the svg container on which to draw
  */
 function drawDogFrame8(x, y, container) {
+
+    var rotationYModifier = -3;
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -826,6 +875,8 @@ function drawDogFrame8(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     var legOffset = x + 47;
@@ -837,6 +888,8 @@ function drawDogFrame8(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 
     var body = drawDogBody(container);
     body.style.transform = "rotate(-6deg)";
@@ -855,6 +908,8 @@ function drawDogFrame8(x, y, container) {
     container.appendChild( leg );
     leg.classList.add("dog");
 
+    y = y + rotationYModifier;
+
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -869,6 +924,87 @@ function drawDogFrame8(x, y, container) {
     leg.setAttribute("d", d);
     container.appendChild( leg );
     leg.classList.add("dog");
+
+    y = y - rotationYModifier;
+}
+
+/**
+ * Draw the flying frame of the dog - mix between frame 5 (front legs) and frame 6 (back legs)
+ * @param {number} x - the x coordinate of the left side of the dog
+ * @param {number} y - the y coordinate of the top of the dog
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawDogFlying(x, y, container) {
+
+    var rotationYModifier = -2.5;
+    y = y + rotationYModifier;
+
+    // This leg is somewhat fake
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+5;
+    d.push("M " + (19+legOffset) + " " + (y+28));
+    d.push("C " + (19+legOffset) + " " + (y+28) + "," + (-5+legOffset) + " " + (y+31) + "," + (-2+legOffset) + " " + (y+38));
+    d.push("C " + (-2+legOffset) + " " + (y+38) + "," + (legOffset) + " " + (y+40) + "," + (19+legOffset) + " " + (y+31));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    y = y - rotationYModifier;
+
+    rotationYModifier = -1.25;
+    y = y + rotationYModifier;
+
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+52;
+    d.push("M " + (20+legOffset) + " " + (y+27));
+    d.push("C " + (legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+25) + "," + (39.5+legOffset) + " " + (y+37));
+    d.push("C " + (46+legOffset) + " " + (y+37) + "," + (44+legOffset) + " " + (y+41) + "," + (44+legOffset) + " " + (y+42));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    y = y - rotationYModifier;
+
+    var body = drawDogBody(container);
+    //body.style.transform = "rotate(5deg)";
+
+    rotationYModifier = -2.5;
+    y = y + rotationYModifier;
+    
+    // Front
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x+2;
+    d.push("M " + (19+legOffset) + " " + (y+22));
+    d.push("C " + (14+legOffset) + " " + (y+28) + "," + (21+legOffset) + " " + (y+37) + "," + (legOffset) + " " + (y+38));
+    d.push("C " + (-1+legOffset) + " " + (y+34.5) + "," + (-5+legOffset) + " " + (y+32.5) + "," + (-5+legOffset) + " " + (y+39));
+    d.push("C " + (-4.5+legOffset) + " " + (y+39) + "," + (-6+legOffset) + " " + (y+42) + "," + (legOffset) + " " + (y+43.5));
+    d.push("C " + (31+legOffset) + " " + (y+40) + "," + (26+legOffset) + " " + (y+33) + "," + (29+legOffset) + " " + (y+26));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    y = y - rotationYModifier;
+
+    rotationYModifier = -1.25;
+    y = y + rotationYModifier;
+
+    // Back
+    var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var legOffset = x + 52;
+    d.push("M " + (17+legOffset) + " " + (y+29));
+    d.push("C " + (17+legOffset) + " " + (y+32) + "," + (12+legOffset) + " " + (y+38) + "," + (28+legOffset) + " " + (y+40));
+    d.push("C " + (39+legOffset) + " " + (y+42) + "," + (38+legOffset) + " " + (y+49) + "," + (42+legOffset) + " " + (y+47));
+    d.push("C " + (49+legOffset) + " " + (y+44) + "," + (48+legOffset) + " " + (y+40) + "," + (41+legOffset) + " " + (y+41));
+    d.push("C " + (23+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+25) + "," + (27+legOffset) + " " + (y+27));
+    leg.setAttribute("d", d);
+    container.appendChild( leg );
+    leg.classList.add("dog");
+
+    y = y - rotationYModifier;
 }
 
 /**
@@ -966,7 +1102,8 @@ function drawIceCream(x, y, container) {
     var numScoops = Math.floor(Math.random() * maxScoops) + 1;
 
     for( var i=0; i<numScoops; i++ ) {
-        var scoop = drawCircle( scoopRadius+1, -scoopRadius*i, scoopRadius, iceCreamGroup );
+        var scoopY = -scoopRadius*1.75*i;
+        var scoop = drawCircle( scoopRadius+1, scoopY, scoopRadius, iceCreamGroup );
         scoop.style.fill = getRandomColor();
         scoop.classList.add("scoop");
     }
@@ -1103,6 +1240,7 @@ function drawWorld() {
     drawPointer(0, 0, container);
 
     drawBar();
+    drawMenu();
 }
 
 /**
@@ -1320,7 +1458,7 @@ function tick() {
  * Play the dog moving
  */
 function play() {
-    if( !stopped && !isFlying ) {
+    if( !stopped ) {
         draw();
     }
     playTimeout = setTimeout(play, dogMoveRate);
@@ -1337,32 +1475,44 @@ function draw() {
 
     player.innerHTML = "";
 
-    window["drawDogFrame" + frame](playerCanvasX, playerCanvasY, player);
+    if( !isFlying ) {
+        window["drawDogFrame" + frame](playerCanvasX, playerCanvasY, player);
+    }
+    else {
+        drawDogFlying(playerCanvasX, playerCanvasY, player);
+    }
 
     player.appendChild(iceCream);
-    if( frame == 1 ) {
-        document.querySelector(".ice-cream").setAttribute("x", -3.5);
-        document.querySelector(".ice-cream").setAttribute("y", 4);
+
+    if( !isFlying ) {
+        if( frame == 1 ) {
+            document.querySelector(".ice-cream").setAttribute("x", -3.5);
+            document.querySelector(".ice-cream").setAttribute("y", 4);
+        }
+        if( frame == 2 ) {
+            document.querySelector(".ice-cream").setAttribute("x", -1);
+            document.querySelector(".ice-cream").setAttribute("y", 0);
+        }
+        if( frame == 4 ) {
+            document.querySelector(".ice-cream").setAttribute("x", 1.5);
+            document.querySelector(".ice-cream").setAttribute("y", -2.7);
+        }
+        if( frame == 6 ) {
+            document.querySelector(".ice-cream").setAttribute("x", -2);
+            document.querySelector(".ice-cream").setAttribute("y", 1.5);
+        }
+        if( frame == 7 ) {
+            document.querySelector(".ice-cream").setAttribute("x", -4.2);
+            document.querySelector(".ice-cream").setAttribute("y", 5.2);
+        }
+        if( frame == 8 ) {
+            document.querySelector(".ice-cream").setAttribute("x", -3.5);
+            document.querySelector(".ice-cream").setAttribute("y", 4);
+        }
     }
-    if( frame == 2 ) {
-        document.querySelector(".ice-cream").setAttribute("x", -1);
-        document.querySelector(".ice-cream").setAttribute("y", 0);
-    }
-    if( frame == 4 ) {
-        document.querySelector(".ice-cream").setAttribute("x", 1.5);
-        document.querySelector(".ice-cream").setAttribute("y", -2.7);
-    }
-    if( frame == 6 ) {
+    else {
         document.querySelector(".ice-cream").setAttribute("x", -2);
         document.querySelector(".ice-cream").setAttribute("y", 1.5);
-    }
-    if( frame == 7 ) {
-        document.querySelector(".ice-cream").setAttribute("x", -4.2);
-        document.querySelector(".ice-cream").setAttribute("y", 5.2);
-    }
-    if( frame == 8 ) {
-        document.querySelector(".ice-cream").setAttribute("x", -3.5);
-        document.querySelector(".ice-cream").setAttribute("y", 4);
     }
 
     if( frame == 8 ) {
@@ -1382,13 +1532,12 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO add house and high score.
-        // TODO add pause and game over and restart and menu screen
-        // TODO add touch controls
-        // TODO no space to delvier
-        // TODO easier way to see numbers
-        // TODO center dog given bar.
-        // TODO - check responsive
+        // TODO add house
+        // TODO add pause (add button and menu) and game over and restart and menu screen
+        // TODO - prevent zoom out ultimately?
+        // TODO test the game - make sure the difficulty is good.
+        // TODO - reset isn't working properly - still
+        // TODO - global high scores
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1641,6 +1790,9 @@ function deliver() {
     if( collisionTest(playerObject, door) ) {
         var scoreIncrement = powerups.big ? 2 : 1;
         playerScore += scoreIncrement;
+        if( playerScore > localStorage.cocoaTownHighScore ) {
+            localStorage.cocoaTownHighScore = playerScore;
+        }
         currentBuilding = generateNextBuilding();
         // get a new ice cream
         // we want to replace the current one to maintain position
@@ -1653,8 +1805,11 @@ function deliver() {
 
 function drawPointer(x, y, container) {
     var pointerWidth = 10;
-    var pointerHeight = 30;
-    var pointer = drawPath( [ [x+pointerHeight, y], [x, y+pointerWidth/2], [x+pointerHeight/5, y], [x, y-pointerWidth/2] ] , container, true );
+    var pointerLength = 20;
+    var compass = drawCircle(x, y, pointerLength + 5, container);
+    compass.classList.add("compass");
+
+    var pointer = drawPath( [ [x+pointerLength, y], [x, y+pointerWidth/2], [x+pointerLength/5, y], [x, y-pointerWidth/2] ] , container, true );
     pointer.classList.add("pointer");
     pointer.style.transformOrigin = x + "px " + y + "px ";
     return pointer;
@@ -1670,12 +1825,13 @@ function anglePointer() {
     var doorX = (door.x1 + door.x2)/2;
     var doorY = (door.y1 + door.y2)/2;
 
-    // If we're really close, turn off the pointer
-    if( Math.sqrt( (playerCenterX-doorX)**2 ) + Math.sqrt( (playerCenterY-doorY)**2 ) < 20 ) {
-        pointer.parentNode.style.visibility = "hidden";
-    }
-    else {
-        pointer.parentNode.style.visibility = "visible";
+    // If we're really close, indicate it
+    var distance = Math.sqrt( (playerCenterX-doorX)**2 ) + Math.sqrt( (playerCenterY-doorY)**2 );
+    var scaleTransform = "";
+    if( distance < 300 ) {
+        scaleTransform = "scaleX("+(distance/300)+")" + "scaleY("+(distance/300)+")";
+        console.log(scaleTransform);
+        console.log("JA");
     }
 
     // tan (angle) = opposite/adjacent - solve for angle
@@ -1713,7 +1869,7 @@ function anglePointer() {
         // straight right
     }
     
-    pointer.style.transform="rotate("+rotationAngle+"rad)";
+    pointer.style.transform = scaleTransform  + "rotate("+rotationAngle+"rad)";
 }
 
 /**
@@ -1723,11 +1879,14 @@ function togglePause() {
     if( stopped ) {
         setTimeout(tick, tickTimeoutRemaining);
         stopped = false;
+        document.querySelector(".menu").style.visibility = "hidden";
     }
     else {
         // Get exactly the frame we are on when we pause, so we can resume at that frame
         tickTimeoutRemaining = tickRate - (Date.now() - tickTimeoutSet);
         stopped = true;
+        document.querySelector(".menu-subtitle").innerText = "Paused";
+        document.querySelector(".menu").style.visibility = "visible";
     }
 }
 
@@ -1758,6 +1917,11 @@ function drawBar() {
     scoreDiv.classList.add("bar-div");
     scoreDiv.classList.add("bar-score");
     barRow.appendChild(scoreDiv);
+
+    var hiScoreDiv = document.createElement("div");
+    hiScoreDiv.classList.add("bar-div");
+    hiScoreDiv.classList.add("bar-hi-score");
+    barRow.appendChild(hiScoreDiv);
 
     barRow.innerHTML += '<i class="fas fa-paw"></i>';
 
@@ -1798,6 +1962,7 @@ function updateBar() {
     }
     document.querySelector(".bar-hearts").innerHTML = heartText;
     document.querySelector(".bar-score").innerText = playerScore;
+    document.querySelector(".bar-hi-score").innerText = localStorage.cocoaTownHighScore;
     document.querySelector(".bar-deliver").innerText = (currentBuilding + 1);
 
     var powerupKeys = Object.keys(powerups);
@@ -1813,7 +1978,49 @@ function updateBar() {
 
 // Draw menu
 function drawMenu() {
+    var menu = document.createElement("div");
+    menu.classList.add("menu");
 
+    var menuTitle = document.createElement("div");
+    menuTitle.classList.add("menu-title");
+    menuTitle.innerText = "Cocoa Town";
+    menu.appendChild(menuTitle);
+
+    var menuSubtitle = document.createElement("div");
+    menuSubtitle.classList.add("menu-subtitle");
+    menuSubtitle.innerText = "Menu";
+    menu.appendChild(menuSubtitle);
+
+    var menuButtons = document.createElement("div");
+    menuButtons.classList.add("menu-buttons");
+    
+    var menuPlayButton = document.createElement("div");
+    menuPlayButton.innerHTML = "<i class='fas fa-play'></i>";
+    menuPlayButton.classList.add("menu-button");
+    menuPlayButton.classList.add("menu-button-play");
+    menuButtons.appendChild(menuPlayButton);
+
+    var menuHomeButton = document.createElement("div");
+    menuHomeButton.innerHTML = "<i class='fas fa-home'></i>";
+    menuHomeButton.classList.add("menu-button");
+    menuHomeButton.classList.add("menu-button-home");
+    menuButtons.appendChild(menuHomeButton);
+
+    var menuHighScoreButton = document.createElement("div");
+    menuHighScoreButton.innerHTML = "<i class='fas fa-trophy'></i>";
+    menuHighScoreButton.classList.add("menu-button");
+    menuHighScoreButton.classList.add("menu-button-hi-scores");
+    menuButtons.appendChild(menuHighScoreButton);
+
+    var menuCreditsButton = document.createElement("div");
+    menuCreditsButton.innerHTML = "<i class='far fa-copyright'></i>";
+    menuCreditsButton.classList.add("menu-button");
+    menuCreditsButton.classList.add("menu-button-credits");
+    menuButtons.appendChild(menuCreditsButton);
+
+    menu.appendChild(menuButtons);
+
+    document.body.appendChild(menu);
 }
 
 function powerupIsSafe(sizeMultiplier, overrideFlying ) {
@@ -2009,9 +2216,49 @@ function existPowerups() {
     spawnPowerups(addPowerupCount, document.querySelector(".world"));
 }
 
+// Control touch movement
+function touchMove(e) {
+    var width = document.body.clientWidth;
+    var height = document.body.clientHeight;
+    var touch = e.touches[0];
+    // left
+    if( touch.clientX < width/3 ) {
+        keyDown.right = false;
+        keyDown.left = true;
+    }
+    // right
+    else if(touch.clientX > width/3 * 2 ) {
+        keyDown.left = false;
+        keyDown.right = true;
+    }
+    else {
+        keyDown.left = false;
+        keyDown.right = false;
+    }
+    // down
+    if( touch.clientY > height - 150 ) {
+        keyDown.up = false;
+        keyDown.down = true;
+    }
+    // up
+    else if( touch.clientY < height - 300 ) {
+        keyDown.down = false;
+        keyDown.up = true;
+    }
+    else {
+        keyDown.down = false;
+        keyDown.up = false;
+    }
+}
+
 // Reset/Start the game
 function reset() {
     document.body.innerHTML = "";
+    document.body.onkeydown = null;
+    document.body.onkeyup = null;
+    document.body.ontouchstart = null;
+    document.body.ontouchmove = null;
+    document.body.ontouchend = null;
     playerHealth = playerMaxHealth;
     playerScore = 0;
     frame = 1;
@@ -2022,13 +2269,16 @@ function reset() {
     enemyBuildings = [];
     enemies = [];
     powerupsOnScreen = [];
-    stopped = false;
+    stopped = true;
     playerWidth = playerStartingWidth;
     playerHeight = playerStartingHeight;
     playerX = canvasWidth/2 - playerWidth/2;
-    playerY = canvasHeight/2 - playerHeight/2;
+    playerY = canvasHeight/2 - playerHeight/2 - 40; // 80/2 for the bar, same as in CSS
     changeWhenSafe = {};
     isFlying = false;
+    tickTimeoutSet = null;
+    tickTimeoutRemaining = null;
+    keyDown = {};
     powerups = {
         "big": 0,
         "small": 0,
@@ -2038,6 +2288,24 @@ function reset() {
     };
     drawWorld();
     tick();
+
+    document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
+    document.body.onkeyup = function(e) {
+        keyDown[keyMap[e.which]] = false; // This is not for just press
+
+        // On p press
+        if( e.keyCode == 80 ) {
+            togglePause();
+        }
+    };
+    document.body.ontouchstart = function(e) {touchMove(e);};
+    document.body.ontouchmove = function(e) {touchMove(e);};
+    document.body.ontouchend = function(e) {
+        keyDown.right = false;
+        keyDown.left = false;
+        keyDown.up = false;
+        keyDown.down = false;
+    }
 }
 
 ////////// Main Program ////////////
@@ -2050,7 +2318,11 @@ var keyMap = {
     37: "left",
     38: "up",
     39: "right",
-    40: "down"
+    40: "down",
+    65: "left",
+    87: "up",
+    68: "right",
+    83: "down"
 };
 var playerStartingWidth = 82;
 var playerStartingHeight = 72;
@@ -2098,16 +2370,13 @@ var powerupTicks = 10000/fps; // ten seconds of powerup
 var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups
 var isFlying;
 
-document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
-document.body.onkeyup = function(e) {
-    keyDown[keyMap[e.which]] = false; // This is not for just press
+// make sure cocoaTownHighScore is not null
+if( !localStorage.cocoaTownHighScore ) {
+    localStorage.cocoaTownHighScore = 0;
+}
 
-    // On p press
-    if( e.keyCode == 80 ) {
-        togglePause();
-    }
-};
 reset();
+document.oncontextmenu = new Function("return false;"); // disable right click
 
 //play();
 // Old dog

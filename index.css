@@ -23,7 +23,7 @@ html, body {
     width: 82px;
     height: 72px;
     position: absolute;
-    top: calc(100vh / 2 - 41px);
+    top: calc( (100vh - 80px) / 2 - 41px); /* -80px for the bottom bar */
     left: calc(100vw / 2 - 36px);
     overflow: visible;
 }
@@ -48,13 +48,13 @@ html, body {
     fill: white;
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup {
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
 }
 
-.door {
+.door, .compass {
     fill: white;
 }
 
@@ -93,7 +93,7 @@ html, body {
 }
 
 .door-text {
-    font-size: 16px;
+    font-size: 20px;
     font-family: "Crimson Text", serif;
 }
 
@@ -119,7 +119,7 @@ html, body {
     padding: 3px;
 }
 
-@media screen and (max-width: 330px) {
+@media screen and (max-width: 400px) {
     .bar .fa-paw, .bar .fa-ice-cream {
         display: none;
     }
@@ -141,6 +141,10 @@ html, body {
 
 .bar-score::before {
     content: "Score:\00a0";
+}
+
+.bar-hi-score::before {
+    content: "Hi:\00a0";
 }
 
 .bar-deliver::before {
@@ -229,4 +233,40 @@ html, body {
     bottom: 120px; right: 40px;
     width: 1px;
     height: 1px;
+}
+
+.menu {
+    border: 2px solid black;
+    background-color: rgb(142, 200, 248);
+    position: fixed;
+    width: 400px;
+    font-family: Acme;
+    top: calc( (100vh - 80px) / 2 ); /* -80px for the bottom bar */
+    left: calc(100vw / 2 - 200px);
+    transform: translateY(-50%);
+    text-align: center;
+    padding: 20px;
+}
+
+.menu-title {
+    font-size: 25px;
+}
+
+.menu-subtitle {
+    font-size: 16px;
+}
+
+.menu-buttons {
+    margin-top: 20px;
+}
+
+.menu-button {
+    display: inline-block;
+    margin: 5px;
+    font-size: 25px;
+    padding: 10px;
+    background-color: rgb(85, 161, 223);
+    border-radius: 15px;
+    width: 50px;
+    border: 2px solid black;
 }
