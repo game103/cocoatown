@@ -1378,6 +1378,7 @@ function existEnemies() {
         // TODO no space to delvier
         // TODO easier way to see numbers
         // TODO quicker game? more enemies to start
+        // TODO pointer
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
