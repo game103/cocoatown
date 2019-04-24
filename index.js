@@ -567,7 +567,7 @@ function drawDogFrame4(x, y, container) {
     
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+59;
+    var legOffset = x+57.5;//x+59;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (7+legOffset) + " " + (y+34) + "," + (10+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+43));
     d.push("C " + (19+legOffset) + " " + (y+44) + "," + (26+legOffset) + " " + (y+55) + "," + (21+legOffset) + " " + (y+55.5));
@@ -599,7 +599,7 @@ function drawDogFrame4(x, y, container) {
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x + 52;
+    var legOffset = x+50.5;//x + 52;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
     d.push("C " + (17+legOffset) + " " + (y+44) + "," + (20+legOffset) + " " + (y+46) + "," + (17+legOffset) + " " + (y+49));
@@ -633,7 +633,7 @@ function drawDogFrame5(x, y, container) {
 
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+59;
+    var legOffset = x+57.5;//x+59;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (7+legOffset) + " " + (y+34) + "," + (10+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+43));
     d.push("C " + (19+legOffset) + " " + (y+44) + "," + (21+legOffset) + " " + (y+55) + "," + (23+legOffset) + " " + (y+55));
@@ -664,7 +664,7 @@ function drawDogFrame5(x, y, container) {
     // Back
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x + 52;
+    var legOffset = x+50.5;//x + 52;
     d.push("M " + (17+legOffset) + " " + (y+27));
     d.push("C " + (17+legOffset) + " " + (y+32) + "," + (8+legOffset) + " " + (y+38) + "," + (17+legOffset) + " " + (y+44));
     d.push("C " + (17+legOffset) + " " + (y+44) + "," + (18+legOffset) + " " + (y+46) + "," + (18+legOffset) + " " + (y+47));
@@ -1173,7 +1173,7 @@ function moveHorizontal(amount) {
         colliding = true;
     }
     else {
-        if( !powerups.fly ) {
+        if( !isFlying ) {
             for(var i=0; i<objects.length;i++) {
                 if( collisionTest(objects[i], playerObject) ) {
                     colliding = true;
@@ -1203,7 +1203,7 @@ function moveVertical(amount) {
         colliding = true;
     }
     else {
-        if( !powerups.fly ) {
+        if( !isFlying ) {
             for(var i=0; i<objects.length;i++) {
                 if( collisionTest(objects[i], playerObject) ) {
                     colliding = true;
@@ -1263,9 +1263,9 @@ function tick() {
         var powerupKeys = Object.keys(powerups);
         for( var i=0; i<powerupKeys.length; i++ ) {
             // We need this to be 1 here, so we don't keep doing it (once at 0), but it'll hit this on the last loop
-            if( powerups[powerupKeys[i]] == 1 ) {
+            if( powerups[powerupKeys[i]] <= 1 && powerups[powerupKeys[i]] > 0 ) {
                 if( powerupKeys[i] == "big" || powerupKeys[i] == "small" ) {
-                    changePlayerSize(1);
+                    changeWhenSafe.size = { "multiplier": 1, "function": function() {changePlayerSize(1);} };
                 }
                 else if( powerupKeys[i] == "invincible" ) {
                     // It's OK to not check for if the being invincible after being hit timeout is still
@@ -1273,11 +1273,28 @@ function tick() {
                     // the time the invincibility powerup expires 
                     document.querySelector(".player").classList.remove("player-invincible");
                 }
-                // Spawn another powerup
-                spawnPowerups(1, document.querySelector(".world"));
+                else if( powerupKeys[i] == "fly" ) { 
+                    changeWhenSafe.fly = { "multiplier": powerups.big ? 1.5 : powerups.small ? 0.5 : 1, "function": function() {isFlying = false;} };
+                }
             }
             if( powerups[powerupKeys[i]] > 0 ) {
                 powerups[powerupKeys[i]] --;
+            }
+            else {
+                powerups[powerupKeys[i]] = 0;
+            }
+        }
+
+        if(changeWhenSafe.size) {
+            if( powerupIsSafe(changeWhenSafe.size.multiplier) ) {
+                changeWhenSafe.size["function"]();
+                changeWhenSafe.size = null;
+            }
+        }
+        if(changeWhenSafe.fly) {
+            if( powerupIsSafe(changeWhenSafe.fly.multiplier, true) ) {
+                changeWhenSafe.fly["function"]();
+                changeWhenSafe.fly = null;
             }
         }
 
@@ -1292,7 +1309,7 @@ function tick() {
  * Play the dog moving
  */
 function play() {
-    if( !stopped && !powerups.fly ) {
+    if( !stopped && !isFlying ) {
         draw();
     }
     playTimeout = setTimeout(play, dogMoveRate);
@@ -1358,7 +1375,6 @@ function existEnemies() {
         // TODO add pause and game over and restart and menu screen
         // TODO add touch controls
         // TODO power-up indicators
-        // TODO big powerup give x2 points for ice cream
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1609,7 +1625,8 @@ function deliver() {
     var playerObject = { x1: playerX, y1: playerY, x2: playerX + playerWidth, y2: playerY + playerHeight };
 
     if( collisionTest(playerObject, door) ) {
-        playerScore ++;
+        var scoreIncrement = powerups.big ? 2 : 1;
+        playerScore += scoreIncrement;
         currentBuilding = generateNextBuilding();
         // get a new ice cream
         // we want to replace the current one to maintain position
@@ -1685,6 +1702,34 @@ function drawMenu() {
 
 }
 
+function powerupIsSafe(sizeMultiplier, overrideFlying ) {
+    var newPlayerWidth = playerStartingWidth * sizeMultiplier;
+    var newPlayerHeight = playerStartingHeight * sizeMultiplier;
+    widthDifference = playerWidth - newPlayerWidth;
+    heightDifference = playerHeight - newPlayerHeight;
+    var newPlayerX = playerX + widthDifference/2;
+    var newPlayerY = playerY + heightDifference/2;
+
+    var playerObject = { x1: newPlayerX, y1: newPlayerY, x2: newPlayerX + newPlayerWidth, y2: newPlayerY + newPlayerHeight };
+
+    var colliding = false;
+    if( newPlayerX + newPlayerWidth > canvasWidth || newPlayerX < 0 ) {
+        colliding = true;
+    }
+    else {
+        if( !isFlying || overrideFlying ) {
+            for(var i=0; i<objects.length;i++) {
+                if( collisionTest(objects[i], playerObject) ) {
+                    colliding = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return !colliding;
+}
+
 // Change the size of the player
 function changePlayerSize(multiplier) {
     var newPlayerWidth = playerStartingWidth * multiplier;
@@ -1701,7 +1746,6 @@ function changePlayerSize(multiplier) {
     var player = document.querySelector(".player");
     var transformStyle = "scale(" + multiplier + ")";
 
-    // TODO - this won't work for when flipping after
     if( player.classList.contains("player-flipped") ) {
         player.style.transform = transformStyle + "scaleX(-1)";
     }
@@ -1738,24 +1782,32 @@ function drawPowerup(x, y, radius, type, container) {
     powerupGroup.appendChild(powerup);
 
     var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", 0);
-    text.setAttribute("y", 0);
     powerupGroup.appendChild(text);
 
     if( type == "big" ) {
         text.innerHTML = "&#xf0d8;";
+        text.setAttribute("x", -6);
+        text.setAttribute("y", 6);
     }
     else if( type == "small" ) {
         text.innerHTML = "&#xf0d7;";
+        text.setAttribute("x", -6);
+        text.setAttribute("y", 8);
     }
     else if( type == "speed" ) {
         text.innerHTML = "&#xf70c;";
+        text.setAttribute("x", -8);
+        text.setAttribute("y", 7);
     }
     else if( type == "invincible" ) {
-        text.innerHTML = "&#xf70c;";
+        text.innerHTML = "&#xf005;";
+        text.setAttribute("x", -11.25);
+        text.setAttribute("y", 7);
     }
     else if( type == "fly" ) {
         text.innerHTML = "&#xf072;";
+        text.setAttribute("x", -10);
+        text.setAttribute("y", 7);
     }
     
     container.appendChild(powerupGroup);
@@ -1805,6 +1857,7 @@ function spawnPowerups(powerupCount, container) {
 }
 
 function existPowerups() {
+    var addPowerupCount = 0;
     for( var i=powerupsOnScreen.length-1; i>=0; i-- ) { // Go backwards since we can remove powerups
         var powerup = powerupsOnScreen[i];
         
@@ -1812,17 +1865,18 @@ function existPowerups() {
 
         if( collisionTest(powerup, playerObject) ) {
             if( powerup.type == "big" ) {
-                changePlayerSize(1.5);
+                changeWhenSafe.size = { "multiplier": 1.5, "function": function() {changePlayerSize(1.5);} };
                 powerups.small = 0;
                 powerups.big = powerupTicks;
             }
             else if( powerup.type == "small" ) {
-                changePlayerSize(0.5);
+                changeWhenSafe.size = { "multiplier": 0.5, "function": function() {changePlayerSize(0.5);} };
                 powerups.big = 0;
                 powerups.small = powerupTicks;
             }
             else if( powerup.type == "fly" ) {
                 powerups.fly = powerupTicks;
+                isFlying = true;
             }
             else if( powerup.type == "invincible" ) {
                 obtainInvincibility(powerupTicks);
@@ -1833,8 +1887,11 @@ function existPowerups() {
             // On collision, we no longer need to show the powerup.
             powerup.shape.parentNode.removeChild(powerup.shape);
             powerupsOnScreen.splice(i, 1);
+            addPowerupCount ++;
         }
     }
+    // Spawn another powerup
+    spawnPowerups(addPowerupCount, document.querySelector(".world"));
 }
 
 // Reset/Start the game
@@ -1855,6 +1912,8 @@ function reset() {
     playerHeight = playerStartingHeight;
     playerX = canvasWidth/2 - playerWidth/2;
     playerY = canvasHeight/2 - playerHeight/2;
+    changeWhenSafe = {};
+    isFlying = false;
     powerups = {
         "big": 0,
         "small": 0,
@@ -1921,6 +1980,8 @@ var tickTimeoutSet;
 var tickTimeoutRemaining;
 var powerups;
 var powerupTicks = 10000/fps; // ten seconds of powerup
+var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups
+var isFlying;
 
 document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
 document.body.onkeyup = function(e) {
@@ -1952,3 +2013,4 @@ d.push("C " + (x+85) + " " + (y+20) + "," + (x+90) + " " + (y+35) + "," + (x+75)
 d.push("C " + (x+75) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
 d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x) + " " + (y+10));
 */
+// Do we need to move the legs up for when the are rotated, we adjusted frames 4&5 back legs for roatation on x - axis by 1.5..

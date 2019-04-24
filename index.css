@@ -150,4 +150,25 @@ html, body {
 .powerup text {
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
+    font-size: 20px;
+}
+
+.powerup.powerup-big {
+    fill: red;
+}
+
+.powerup.powerup-small {
+    fill: steelblue;
+}
+
+.powerup.powerup-invincible {
+    fill: yellow;
+}
+
+.powerup.powerup-fly {
+    fill: white;
+}
+
+.powerup.powerup-speed {
+    fill: purple;
 }
