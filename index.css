@@ -52,7 +52,7 @@ html, body {
     fill: white;
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat {
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
@@ -60,6 +60,15 @@ html, body {
 
 .door, .compass {
     fill: white;
+}
+
+.door-inside {
+    fill: tan;
+}
+
+.door-group {
+    overflow: visible;
+    transition: transform 1s ease;
 }
 
 .window {
@@ -118,6 +127,8 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     border-radius: 25px;
+    opacity: 0;
+    transition: opacity 0.5s;
 }
 
 .bar-column {

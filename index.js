@@ -119,9 +119,9 @@ function drawBuilding( width, height, x, y, container, houseNumber ) {
 
     drawBricks( width, height, x, y, container, brickWidth, brickHeight );
     drawWindows( windowsAreaWidth-xWindowOffset, windowsAreaHeight-yWindowOffset, x+xWindowOffset+(width-windowsAreaWidth)/2, y+yWindowOffset+(height-windowsAreaHeight)/2, container, windowWidth, windowHeight, windowSpacingHorizontal, windowSpacingVertical, doorX, doorY, doorWidth, doorHeight);
-    drawDoor( doorWidth, doorHeight, doorX, doorY, container, doorHandleRadius, houseNumber );
+    var door = drawDoor( doorWidth, doorHeight, doorX, doorY, container, doorHandleRadius, houseNumber );
 
-    return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut, door: { x1: doorX, y1: doorY, x2: doorX+doorWidth, y2: doorY+doorHeight } };
+    return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut, door: { x1: doorX, y1: doorY, x2: doorX+doorWidth, y2: doorY+doorHeight, shape: door } };
 }
 
 /**
@@ -227,20 +227,52 @@ function generateHouseNumber() {
  * @param {HTMLElement} container - the svg container on which to draw
  * @param {number} doorHandleRadius - the radius of the door handle
  * @param {number} houseNumber - the number of the house to put on the door
+ * @returns an svg containing the door element
  */
 function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber ) {
-    var rectangle = drawRectangle( width, height, x, y, container );
+    var doorGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    doorGroup.classList.add("door-group");
+    doorGroup.style.transform = "translate(" + x + "px," + y + "px)";
+
+    var doorInside = drawRectangle( width, height, x, y, container );
+    doorInside.classList.add("door-inside"); 
+
+    x = 0;
+    y = 0;
+    var rectangle = drawRectangle( width, height, x, y, doorGroup );
     rectangle.classList.add("door"); 
     rectangle.style.fill = getRandomColor();
-    drawCircle( x+width/9, y+height/2, doorHandleRadius, container );
+    drawCircle( x+width-width/9, y+height/2, doorHandleRadius, doorGroup );
     var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.classList.add("door-text");
     text.setAttribute("x", x+width/2);
     text.setAttribute("y", y+height/2 - 8);
     text.innerHTML = houseNumber;
-    container.appendChild(text);
+
+    container.appendChild(doorGroup);
+    doorGroup.appendChild(text);
+
     var textWidth = text.getBBox().width;
     text.setAttribute("x", x+width/2 - textWidth/2);
+
+    return doorGroup;
+}
+
+/**
+ * Open a door
+ * @param {HTMLElement} doorGroup - the group element containing a door
+ */
+function openDoor(doorGroup) {
+    // at scaleX = 0, the skew would be 90deg, at 1, 0 deg
+    doorGroup.style.transform += "scaleX(0.8)skew(0, 18deg)"; 
+}
+
+/**
+ * Close a door
+ * @param {HTMLElement} doorGroup - the group element containing a door
+ */
+function closeDoor(doorGroup) {
+    doorGroup.style.transform = doorGroup.style.transform.replace(/scaleX.*/,"");
 }
 
 // Draw a recntangle below the house
@@ -1267,7 +1299,8 @@ function drawWorld() {
 
     spawnEnemies(numEnemies, container);
     spawnPowerups(numPowerups, container);
-    drawMat(objects[currentBuilding].door, container);
+    //drawMat(objects[currentBuilding].door, container);
+    openDoor(objects[currentBuilding].door.shape);
 
     // We have a seperate container for the player
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1572,13 +1605,15 @@ function existEnemies() {
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
-        // TODO slight open door upon deliver
+        // TODO scenery
+        // TODO dont move on tap of pause button
         // TODO sound and music
         // TODO - global high scores
         // TODO - no overlap menu on phone and responsive in general?
         // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
         // TODO see if we can increase max difficulty so it doesn't cap so early on - testing needed
         // TODO remember that bug  where you grew big on tick? maybe we should add the let people escape code just in case
+        // TODO local resources
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1845,7 +1880,10 @@ function deliver() {
         var newIceCream = drawIceCream(-1, 0, null); // Use a null container so it is not added
         player.replaceChild(newIceCream, iceCream);
 
-        drawMat(objects[currentBuilding].door, document.querySelector(".world"));
+        //drawMat(objects[currentBuilding].door, document.querySelector(".world"));
+        openDoor(objects[currentBuilding].door.shape);
+
+        closeDoor(door.shape);
 
         increaseDifficulty();
     }
@@ -1938,6 +1976,7 @@ function togglePause() {
         setTimeout(tick, tickTimeoutRemaining);
         stopped = false;
         document.querySelector(".menu").style.opacity = 0;
+        document.querySelector(".bar").style.opacity = 1;
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-pause'></i>";
     }
     else {
@@ -1945,6 +1984,7 @@ function togglePause() {
         tickTimeoutRemaining = tickRate - (Date.now() - tickTimeoutSet);
         stopped = true;
         document.querySelector(".menu-subtitle").innerText = "Paused";
+        document.querySelector(".bar").style.opacity = 0;
         document.querySelector(".menu").style.opacity = 1;
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-play'></i>";
     }
@@ -2579,6 +2619,31 @@ function reset() {
     }
 }
 
+// High scores
+
+function loadHighScores(range, page, callback) {
+    var url = loadHighScoresEndpoint + "?" + "game=" + highScoresGame + "&range=" + range + "&page=" + page;
+    makeRequest("GET", url, callback);
+}
+
+// Get the most up to date username for our user (they may have change it elsewhere)
+function getUsername(id, callback) {
+    var url = loadHighScoresEndpoint + "?" + "id=" + id;
+    makeRequest("GET", url, callback);
+}
+
+// Make a request to the high scores server
+function makeRequest(type, url, callback) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if( this.readyState == 4 && this.status == 200 ) {
+            if( callback ) { callback(); }
+        }
+    }    
+    xhttp.open(type, url, true);
+    xhttp.send();
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -2641,6 +2706,10 @@ var powerups;
 var powerupTicks = 10000/fps; // ten seconds of powerup
 var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups
 var isFlying;
+
+var highScoresDomain = "https://game103.net/ws/scores/";
+var highScoresGame = "ct";
+var loadHighScoresEndpoint = highScoresDomain + "load_scores.php";
 
 // make sure cocoaTownHighScore is not null
 if( !localStorage.cocoaTownHighScore ) {
