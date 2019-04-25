@@ -35,6 +35,7 @@ function drawLine( x1, y1, x2, y2, container ) {
     container.appendChild( line );
     return line;
 }
+
 /**
  * Draw a circle
  * @param {number} x - the x coordinate of the center of the circle
@@ -123,8 +124,10 @@ function drawBuilding( width, height, x, y, container, houseNumber ) {
     return { roofHeight: roofHeight, roofWidth: width + roofOut*2, roofOut: roofOut, door: { x1: doorX, y1: doorY, x2: doorX+doorWidth, y2: doorY+doorHeight } };
 }
 
-// Get a random color
-// Taken from here: https://stackoverflow.com/questions/1484506/random-color-generator
+/**
+ * Get a random color
+ * Soure: https://stackoverflow.com/questions/1484506/random-color-generator
+ */
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
@@ -137,17 +140,21 @@ function getRandomColor() {
     }
     return color;
 }
-// Make sure a color has a lightness over 0.8, (background [006633] = 0.4166666666666667)
-// Idea from here: https://stackoverflow.com/questions/13586999/color-difference-similarity-between-two-values-with-js
+
+/**
+ * Make sure a color has a lightness over 0.85, (background [006633] = 0.4166666666666667)
+ * Idea from here: https://stackoverflow.com/questions/13586999/color-difference-similarity-between-two-values-with-js
+ * @param {string} hex1 - hexadecimal of the color
+ */
 function isLightColor(hex1) {
     var rgb1 = hexToRgb(hex1);
     var hsv1 = rgbToHsv(rgb1.r, rgb1.g, rgb1.b);
     if( hsv1[2] < 0.85 && hsv1[1] < 50 && hsv1[0] < 50 ) return true; // We only want light colors
     return false;
 }
-// rgb to hsv 
-// taken from here: http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+
 /**
+* Taken from here: http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
 * Converts an RGB color value to HSV. Conversion formula
 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
 * Assumes r, g, and b are contained in the set [0, 255] and
@@ -179,8 +186,12 @@ function rgbToHsv(r, g, b){
 
     return [h, s, v];
 }
-// hex to rgb
-// Taken from here: https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb/5624139
+
+/**
+ * Hex to rgb
+ * Taken from here: https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb/5624139
+ * @param {string} hex - hexidecimal of the color
+ */
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -1099,6 +1110,13 @@ function drawDogLeg(x, y, legOffset, container) {
     leg.classList.add("dog");
 }
 
+/**
+ * Draw the ice cream the dog will deliver
+ * @param {number} x - the x coordinate of the left side of the ice cream
+ * @param {number} y - the y coordinate of the BOTTOM of the ice cream
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the ice cream
+ */
 function drawIceCream(x, y, container) {
     // Note how y is the BOTTOM here, since that is more useful with the cone
     // and varying heights due to different scoops
@@ -1133,7 +1151,12 @@ function drawIceCream(x, y, container) {
 }
 
 /**
- * Draw an enemy
+ * Draw an enemy (tennis ball)
+ * @param {number} x - the x coordinate of the CENTER of the enemy
+ * @param {number} y - the y coordinate of the CENTER of the enemy
+ * @param {number} radius - the radius of the enemy
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the enemy
  */
 function drawEnemy(x, y, radius, container) {
     var enemyGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1169,6 +1192,14 @@ function drawEnemy(x, y, radius, container) {
     return enemyGroup;
 }
 
+/**
+ * Get the point on the circumference of a circle given a center point, radius, and radians
+ * @param {number} cx - the x coordinate of the center of the circle
+ * @param {number} cy - the y coordinate of the center of the circl 
+ * @param {number} radius - the radius of the circle
+ * @param {number} radians - the rotation of the angle in radians
+ * @returns a coordinate pair for the point on the circumference
+ */
 function getPointOnCircumference(cx, cy, radius, radians) {
     return [ cx + radius * Math.cos(radians), cy + radius * Math.sin(radians) ];
 }
@@ -1250,7 +1281,7 @@ function drawWorld() {
 }
 
 /**
- * 
+ * Spawn enemies
  * @param {number} enemyCount - the number of enemies to add
  * @param {HTMLElement} container - the svg canvas to add the enemies to
  */
@@ -1365,7 +1396,7 @@ function moveVertical(amount) {
     if( !colliding ) {
         worldVerticalOffset -= amount;
         // Make sure this matches the css
-        world.style.top = "calc( (100% - 69px) / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
+        world.style.top = "calc( 100% / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
         playerY -= amount;
     }
 }
@@ -1529,9 +1560,10 @@ function draw() {
     frame++;
 }
 
-// Control the existence of the enemies
-// This function should be called from within a tick function as this
-// controls a single tick of the enemies existence.
+/**
+ * Control the existence of enemies
+ * (performs a single "tick" of existence)
+ */
 function existEnemies() {
 
     for( var i=0; i<enemies.length; i++ ) {
@@ -1540,18 +1572,20 @@ function existEnemies() {
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
-        // TODO add pause (add button and menu) and game over and restart and menu screen
-        // TODO test the game - make sure the difficulty is good.
+        // TODO slight open door upon deliver
+        // TODO sound and music
         // TODO - global high scores
-        // TODO - have a default "zoom" (scaleX on non-bar body) so you see the same amount of stuff no matter the screen size > put it in an iFrame
-        // TODO - easier indicator for house to deliver 
-        // TODO - responsive
+        // TODO - no overlap menu on phone and responsive in general?
+        // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
+        // TODO see if we can increase max difficulty so it doesn't cap so early on - testing needed
+        // TODO remember that bug  where you grew big on tick? maybe we should add the let people escape code just in case
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
             playerHealth --;
             if( playerHealth <= 0 ) {
                 reset(); // You lose!
+                document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + playerScore + ".";
                 return;
             }
             obtainInvincibility(playerInvincibilityTicks);
@@ -1570,7 +1604,7 @@ function existEnemies() {
 }
 
 /**
- * Move enemy
+ * Move an enemy
  * @param {number} amount - the number of pixels to move horizontally and vertically {x: <int>, y: <int>}
  */
 function moveEnemy(amount, enemy, noActualMove) {
@@ -1677,7 +1711,7 @@ function increaseDifficulty() {
 
 /**
  * Have an enemy chase the player
- * @param {object} enemy 
+ * @param {object} enemy - an enemy object that can be used to test for collision (see collisionTest function for the object type)
  */
 function chasePlayer(enemy) {
     var xMove = 0;
@@ -1779,6 +1813,7 @@ function chasePlayer(enemy) {
 
 /**
  * Generate the next building to deliver to
+ * @returns the next building to deliver to (note this is one less than the actual number on the door of the building)
  */
 function generateNextBuilding() {
     var nextBuilding = Math.floor(Math.random() * numBuildings);
@@ -1798,6 +1833,7 @@ function deliver() {
     if( collisionTest(playerObject, door) ) {
         var scoreIncrement = powerups.big ? 2 : 1;
         playerScore += scoreIncrement;
+        localStorage.cocoaTownCoins = parseInt(localStorage.cocoaTownCoins) + scoreIncrement;
         if( playerScore > localStorage.cocoaTownHighScore ) {
             localStorage.cocoaTownHighScore = playerScore;
         }
@@ -1815,6 +1851,12 @@ function deliver() {
     }
 }
 
+/**
+ * Draw the pointer of the compass
+ * @param {number} x - the x coordinate of the CENTER of the compass (not the needle/pointer of the compass)
+ * @param {number} y - the y coordinate of the CENTER of the compass (not the needle/pointer of the compass)
+ * @param {number} radius - the radius of the enemy
+ */
 function drawPointer(x, y, container) {
     var pointerWidth = 10;
     var pointerLength = 20;
@@ -1827,6 +1869,9 @@ function drawPointer(x, y, container) {
     return pointer;
 }
 
+/**
+ * Correctly angle the pointer to point to the house we are delivering to 
+ */
 function anglePointer() {
     var pointer = document.querySelector(".pointer");
 
@@ -1886,17 +1931,22 @@ function anglePointer() {
  * Toggle the state of the game being paused
  */
 function togglePause() {
+    if( !document.querySelector(".pause-button") ) {
+        drawPause();
+    }
     if( stopped ) {
         setTimeout(tick, tickTimeoutRemaining);
         stopped = false;
-        document.querySelector(".menu").style.visibility = "hidden";
+        document.querySelector(".menu").style.opacity = 0;
+        document.querySelector(".pause-button").innerHTML = "<i class='fas fa-pause'></i>";
     }
     else {
         // Get exactly the frame we are on when we pause, so we can resume at that frame
         tickTimeoutRemaining = tickRate - (Date.now() - tickTimeoutSet);
         stopped = true;
         document.querySelector(".menu-subtitle").innerText = "Paused";
-        document.querySelector(".menu").style.visibility = "visible";
+        document.querySelector(".menu").style.opacity = 1;
+        document.querySelector(".pause-button").innerHTML = "<i class='fas fa-play'></i>";
     }
 }
 
@@ -1935,6 +1985,11 @@ function drawBar() {
     hiScoreDiv.classList.add("bar-div");
     hiScoreDiv.classList.add("bar-hi-score");
     barRow.appendChild(hiScoreDiv);
+
+    var moneyDiv = document.createElement("div");
+    moneyDiv.classList.add("bar-div");
+    moneyDiv.classList.add("bar-money");
+    barRow.appendChild(moneyDiv);
 
     //barRow.innerHTML += '<i class="fas fa-paw"></i>';
 
@@ -1977,7 +2032,9 @@ function drawBar() {
     updateBar();
 }
 
-// Update the information on the bar
+/**
+ * Update the information on the bar
+ */
 function updateBar() {
     var heartText = "";
     for(var i=0; i<playerHealth; i++) {
@@ -1989,6 +2046,7 @@ function updateBar() {
     document.querySelector(".bar-hearts").innerHTML = heartText;
     document.querySelector(".bar-score").innerText = playerScore;
     document.querySelector(".bar-hi-score").innerText = localStorage.cocoaTownHighScore;
+    document.querySelector(".bar-money").innerText = localStorage.cocoaTownCoins;
     document.querySelector(".bar-deliver").innerText = (currentBuilding + 1);
 
     var powerupKeys = Object.keys(powerups);
@@ -2002,20 +2060,34 @@ function updateBar() {
     }
 }
 
-// Draw menu
+/**
+ * Draw the menu
+ */
 function drawMenu() {
     var menu = document.createElement("div");
     menu.classList.add("menu");
 
+    // Back button
+    var menuBackButton = document.createElement("div");
+    menuBackButton.innerHTML = "<i class='fas fa-hand-point-left'></i>";
+    menuBackButton.classList.add("menu-button");
+    menuBackButton.classList.add("menu-button-back");
+    menu.appendChild(menuBackButton);
+
+    // Main menu frame
+    var menuFrame = document.createElement("menu-frame");
+    menuFrame.classList.add("menu-frame");
+    menuFrame.classList.add("menu-frame-main");
+
     var menuTitle = document.createElement("div");
     menuTitle.classList.add("menu-title");
     menuTitle.innerText = "Cocoa Town";
-    menu.appendChild(menuTitle);
+    menuFrame.appendChild(menuTitle);
 
     var menuSubtitle = document.createElement("div");
     menuSubtitle.classList.add("menu-subtitle");
     menuSubtitle.innerText = "";
-    menu.appendChild(menuSubtitle);
+    menuFrame.appendChild(menuSubtitle);
 
     var menuButtons = document.createElement("div");
     menuButtons.classList.add("menu-buttons");
@@ -2038,17 +2110,158 @@ function drawMenu() {
     menuHighScoreButton.classList.add("menu-button-hi-scores");
     menuButtons.appendChild(menuHighScoreButton);
 
+    var menuInstructionsButton = document.createElement("div");
+    menuInstructionsButton.innerHTML = "<i class='fas fa-info-circle'></i>";
+    menuInstructionsButton.classList.add("menu-button");
+    menuInstructionsButton.classList.add("menu-button-credits");
+    menuButtons.appendChild(menuInstructionsButton);
+
     var menuCreditsButton = document.createElement("div");
     menuCreditsButton.innerHTML = "<i class='far fa-copyright'></i>";
     menuCreditsButton.classList.add("menu-button");
     menuCreditsButton.classList.add("menu-button-credits");
     menuButtons.appendChild(menuCreditsButton);
 
-    menu.appendChild(menuButtons);
+    menuFrame.appendChild(menuButtons);
+
+    menu.appendChild(menuFrame);
+
+    // Credits menu frame
+    menuFrame = document.createElement("menu-frame");
+    menuFrame.classList.add("menu-frame");
+    menuFrame.classList.add("menu-frame-credits");
+
+    var menuTitle = document.createElement("div");
+    menuTitle.classList.add("menu-title");
+    menuTitle.innerText = "Credits";
+    menuFrame.appendChild(menuTitle);
+
+    var credits = document.createElement("div");
+    credits.classList.add("menu-credits");
+    credits.innerHTML = "Concept, Art, Programming: James Grams<br>\
+    Music: Kasey Grams<br>\
+    Icons: <a target='blank' rel='noopener' href='https://fontawesome.com/'>Font Awesome</a><br>\
+    Fonts: <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Crimson+Text'>Crimson Text by Sebastian Kosch</a>, <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Acme'>Acme by Huerta Tipográfica</a><br>\
+    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='https://game103.net/images/logo2016.png'/><br>© 2019 Game 103</a>";
+    menuFrame.appendChild(credits);
+    
+    menu.appendChild(menuFrame);
+
+    // Instructions menu frame
+    menuFrame = document.createElement("menu-frame");
+    menuFrame.classList.add("menu-frame");
+    menuFrame.classList.add("menu-frame-instructions");
+
+    var menuTitle = document.createElement("div");
+    menuTitle.classList.add("menu-title");
+    menuTitle.innerText = "Instructions";
+    menuFrame.appendChild(menuTitle);
+
+    var instructions = document.createElement("div");
+    instructions.classList.add("menu-instructions");
+    instructions.innerHTML = "Help Cocoa deliver Ice Cream to houses across town while avoiding the angry tennis balls.\
+    <div class='menu-instructions-sub-title'>Move</div>\
+    <div class='menu-instructions-column'><div class='menu-instructions-key'><i class='fas fa-caret-up'></i></div><div class='menu-instructions-key'><i class='fas fa-caret-left'></i></div><div class='menu-instructions-key'><i class='fas fa-caret-down'></i></div><div class='menu-instructions-key'><i class='fas fa-caret-right'></i></div></div>\
+    <div class='menu-instructions-column'><div class='menu-instructions-key'>W</div><div class='menu-instructions-key'>A</div><div class='menu-instructions-key'>S</div><div class='menu-instructions-key'>D</div></div>\
+    <div class='menu-instructions-column menu-instructions-column-hand'><i class='fas fa-hand-point-up'></i></div>\
+    <div class='menu-instructions-sub-title'>Follow your compass and note the house numbers to find your destination.</div>\
+    <div class='menu-instructions-sub-title'>Powerups</div>";
+
+    var powerupKeys = Object.keys(powerups);
+    for( var i=0; i<powerupKeys.length; i++) {
+        var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        container.classList.add("menu-instructions-powerup-container");
+        drawPowerup(powerupRadius, powerupRadius, powerupRadius, powerupKeys[i], container);
+
+        instructions.appendChild(container);
+
+        if( powerupKeys[i] == "big" ) {
+            container.onmouseenter = function() {
+                document.querySelector(".menu-instructions-powerup-description").innerText = "Become giant and earn double the points for deliveries.";
+            };
+        }
+        else if( powerupKeys[i] == "small" ) {
+            container.onmouseenter = function() {
+                document.querySelector(".menu-instructions-powerup-description").innerText = "Shrink down to more easily avoid enemies.";
+            };
+        }
+        else if( powerupKeys[i] == "invincible" ) {
+            container.onmouseenter = function() {
+                document.querySelector(".menu-instructions-powerup-description").innerText = "Gain invincibility from enemies.";
+            };
+        }
+        else if( powerupKeys[i] == "fly" ) {
+            container.onmouseenter = function() {
+                document.querySelector(".menu-instructions-powerup-description").innerText = "Obtain the ability to fly through buildings.";
+            };
+        }
+        else if( powerupKeys[i] == "speed" ) {
+            container.onmouseenter = function() {
+                document.querySelector(".menu-instructions-powerup-description").innerText = "Increase your movement speed to zip around town.";
+            };
+        }
+    }
+
+    var powerupDescription = document.createElement("div");
+    powerupDescription.classList.add("menu-instructions-powerup-description");
+    powerupDescription.innerText = "Hover over a powerup to see what it does!";
+
+    instructions.appendChild(powerupDescription);
+
+    menuFrame.appendChild(instructions);
+    
+    menu.appendChild(menuFrame);
 
     document.body.appendChild(menu);
+
+    // Add the event listeners
+    menuPlayButton.onclick = function() {
+        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+            togglePause();
+        }
+    }
+    menuCreditsButton.onclick = function() {
+        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+            document.querySelector(".menu-frame-main").style.display = "none";
+            document.querySelector(".menu-frame-credits").style.display = "block";
+            document.querySelector(".menu-button-back").style.display = "block";
+        }
+    }
+    menuInstructionsButton.onclick = function() {
+        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+            document.querySelector(".menu-frame-main").style.display = "none";
+            document.querySelector(".menu-frame-instructions").style.display = "block";
+            document.querySelector(".menu-button-back").style.display = "block";
+        }
+    }
+    menuBackButton.onclick = function() {
+        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+            document.querySelector(".menu-frame-credits").style.display = "none";
+            document.querySelector(".menu-frame-instructions").style.display = "none";
+            document.querySelector(".menu-button-back").style.display = "none";
+            document.querySelector(".menu-frame-main").style.display = "block";
+        }
+    }
 }
 
+/**
+ * Draw the pause button
+ */
+function drawPause() {
+    var pause = document.createElement("div");
+    pause.classList.add("menu-button");
+    pause.classList.add("pause-button");
+    pause.innerHTML = "<i class='fas fa-play'></i>"; // We start out paused
+    document.body.appendChild(pause);
+    pause.onclick = togglePause;
+}
+
+/**
+ * Check if it is safe to use/stop using a powerup
+ * @param {number} sizeMultiplier - the new multiplier of the player size
+ * @param {boolean} overrideFlying - whether or not override the default option that ignores building collisions if flying
+ * @returns true if it is safe to use/stop using the powerup
+ */
 function powerupIsSafe(sizeMultiplier, overrideFlying ) {
     var newPlayerWidth = playerStartingWidth * sizeMultiplier;
     var newPlayerHeight = playerStartingHeight * sizeMultiplier;
@@ -2077,7 +2290,10 @@ function powerupIsSafe(sizeMultiplier, overrideFlying ) {
     return !colliding;
 }
 
-// Change the size of the player
+/**
+ * Change the size of the player
+ * @param {number} multiplier - the multipler from the original player size (the one which you start the game as)
+ */
 function changePlayerSize(multiplier) {
     var newPlayerWidth = playerStartingWidth * multiplier;
     var newPlayerHeight = playerStartingHeight * multiplier;
@@ -2101,13 +2317,23 @@ function changePlayerSize(multiplier) {
     }
 }
 
-// obtain invincibility
+/**
+ * Become invincible
+ * @param {number} time - the amount of time for the invincibility to last
+ */
 function obtainInvincibility(time) {
     powerups.invincible = time;
     document.querySelector(".player").classList.add("player-invincible");
 }
 
-// Draw a powerup (x and y are the center like enemies)
+/**
+ * Draw a powerup
+ * @param {number} x - the x coordinate of the CENTER of the powerup
+ * @param {number} y - the y coordinate of the CENTER of the powerup
+ * @param {number} radius - the radius of the powerup
+ * @param {string} type - the type of powerup
+ * @param {HTMLElement} container - the container on which to draw
+ */
 function drawPowerup(x, y, radius, type, container) {
     var powerupGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     powerupGroup.classList.add("powerup");
@@ -2165,6 +2391,11 @@ function drawPowerup(x, y, radius, type, container) {
     return powerupGroup;
 }
 
+/**
+ * Spawn Powerups
+ * @param {number} powerupCount - the number of powerups to draw
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
 function spawnPowerups(powerupCount, container) {
     var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
 
@@ -2204,6 +2435,10 @@ function spawnPowerups(powerupCount, container) {
     }
 }
 
+/**
+ * Control the existence of powerups
+ * (controls one "tick" of existence)
+ */
 function existPowerups() {
     var addPowerupCount = 0;
     for( var i=powerupsOnScreen.length-1; i>=0; i-- ) { // Go backwards since we can remove powerups
@@ -2242,7 +2477,10 @@ function existPowerups() {
     spawnPowerups(addPowerupCount, document.querySelector(".world"));
 }
 
-// Control touch movement
+/**
+ * handle touch down or touch move events
+ * @param {TouchEvent} e - the touch event
+ */
 function touchMove(e) {
     var width = document.body.clientWidth;
     var height = document.body.clientHeight;
@@ -2277,7 +2515,9 @@ function touchMove(e) {
     }
 }
 
-// Reset/Start the game
+/**
+ * Reset/start the game
+ */
 function reset() {
     while( document.body.firstChild ) {
         document.body.removeChild(document.body.firstChild);
@@ -2405,6 +2645,10 @@ var isFlying;
 // make sure cocoaTownHighScore is not null
 if( !localStorage.cocoaTownHighScore ) {
     localStorage.cocoaTownHighScore = 0;
+}
+// make sure cocoaTownCoins is not null
+if( !localStorage.cocoaTownCoins ) {
+    localStorage.cocoaTownCoins = 0;
 }
 
 reset();

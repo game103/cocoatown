@@ -1,3 +1,7 @@
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -14,7 +18,7 @@ html, body {
     height: 3000px;
     position: absolute;
     /* Make sure these values are updated in the JS too */
-    top: calc( (100% - 69px) / 2 - 1500px); /* -69px for the bottom bar */
+    top: calc( 100% / 2 - 1500px);
     left: calc(100% / 2 - 1500px);
     background-color: rgb(0, 133, 29);
 }
@@ -23,7 +27,7 @@ html, body {
     width: 82px;
     height: 72px;
     position: absolute;
-    top: calc( (100% - 69px) / 2 - 41px); /* -69px for the bottom bar */
+    top: calc( 100% / 2 - 41px);
     left: calc(100% / 2 - 36px);
     overflow: visible;
 }
@@ -102,17 +106,18 @@ html, body {
 }
 
 .bar {
-    background-color: rgba(142, 200, 248, 0.9);
+    background-color: rgba(142, 200, 248, 0.8);
     color: black;
     position: absolute;
     width: calc(100% - 6px);
-    bottom: 0;
+    bottom: 10px;
     font-size: 15px;
-    padding: 3px;
+    padding: 10px;
     margin: 0;
-    max-width: 600px;
+    max-width: 500px;
     left: 50%;
     transform: translateX(-50%);
+    border-radius: 25px;
 }
 
 .bar-column {
@@ -148,11 +153,15 @@ html, body {
 }
 
 .bar-hi-score::before {
-    content: "Hi:\00a0";
+    content: "High Score:\00a0";
 }
 
 .bar-deliver::before {
     content: "Deliver to:\00a0";
+}
+
+.bar-money::before {
+    content: "Money:\00a0$";
 }
 
 .bar .fa-ice-cream {
@@ -170,6 +179,7 @@ html, body {
     max-width: 80px;
     margin-left: 5px;
     margin-right: 5px;
+    border-radius: 35px;
 }
 
 .bar-row:nth-child(2) .fa-paw, .bar-row:nth-child(2) .fa-ice-cream {
@@ -259,25 +269,43 @@ html, body {
     width: 1px;
     height: 1px;
     position: relative;
-    top: -20px;
-    left: 20px;
+    top: -21px;
+    left: 30px;
 }
 
 .menu {
-    background-color: rgba(142, 200, 248, 0.9);
+    background-color: rgba(142, 200, 248, 0.8);
     position: absolute;
-    width: 290px;
+    width: 350px;
     font-family: Acme;
-    top: calc( (100% - 69px) / 2 ); /* -69px for the bottom bar */
-    left: calc(100% / 2 - 166px);
-    transform: translateY(-50%);
+    top: calc( 100% / 2 );
+    left: calc(100% / 2);
+    transform: translateY(-50%)translateX(-50%);
     text-align: center;
     padding: 20px;
+    border-radius: 25px;
+    opacity: 1;
+    transition: opacity 0.5s;
+    position: relative;
+}
+
+.menu-frame {
+    display: none;
+}
+
+.menu-frame-main {
+    display: block;
 }
 
 .menu-title {
     font-size: 35px;
-    text-shadow: 1px 1px 1px 1px steelblue;
+    /*outline-color:  steelblue;*/
+    text-shadow: -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px 1px 0 black,
+    1px 1px 0 black;
+    color: rgb(85, 161, 223);
+    letter-spacing: 1.75px;
 }
 
 .menu-subtitle {
@@ -297,6 +325,7 @@ html, body {
     width: 50px;
     font-size: 25px;
     box-shadow: 0 4px rgb(42, 108, 161);
+    cursor: pointer;
 }
 
 .menu-button:active {
@@ -311,4 +340,98 @@ html, body {
     margin-right: auto;
     width: 90px;
     font-size: 35px;
+    margin-bottom: 15px;
+}
+
+.menu-credits, .menu-instructions {
+    margin-top: 20px;
+}
+
+.menu-credits a {
+    color: black;
+    text-decoration: none;
+}
+
+.menu-credits img {
+    height: 20px;
+    margin-top: 10px;
+}
+
+.menu-credits-game103 {
+    font-size: 12px;
+}
+
+.menu-button-back {
+    display: none;
+    position: absolute; 
+    top: 10px;
+    left: 10px;
+}
+
+.menu-button-back:active {
+    position: absolute;
+    top: 15px;
+}
+
+.menu-instructions-sub-title {
+    margin-top: 10px;
+}
+
+.menu-instructions-column {
+    display: inline-block;
+    margin: 5px;
+    width: 100px;
+}
+
+@keyframes hand-move {
+    0% { top: 0; left: 0; }
+    25% { top: -22px; left: 0 }
+    50% { left: 22px; top: -22px }
+    75% { top: 0; left: 22px }
+    100% { top: 0; left: 0; }
+}
+
+.menu-instructions-column-hand i {
+    font-size: 25px;
+    position: relative;
+    animation-name: hand-move;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+.menu-instructions-key {
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    border: 2px solid black;
+    border-radius: 6px;
+    line-height: 22px;
+    display: inline-block;
+    margin: 2px;
+}
+
+.menu-instructions-key:first-child {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.menu-instructions-powerup-container {
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.pause-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-align: center;
+    opacity: 0.6;
+}
+
+.pause-button:active {
+    position: absolute;
+    top: 15px;
 }
