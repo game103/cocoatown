@@ -1445,16 +1445,19 @@ function tick() {
 
         var curMoveAmount = movementAmount * (powerups["speed"] ? 2 : 1);
 
+        if( (keyDown['up'] || keyDown['down']) && ( keyDown['left'] || keyDown['right'] ) ) {
+            curMoveAmount = curMoveAmount/Math.abs(curMoveAmount) * Math.sqrt( curMoveAmount**2/2 );
+        }
         if( keyDown['up'] ) {
             moveVertical(curMoveAmount);
         }
-        if( keyDown['down'] ) {
+        else if( keyDown['down'] ) {
             moveVertical(-curMoveAmount);
         }
         if( keyDown['left'] ) {
             moveHorizontal(curMoveAmount);
         }
-        if( keyDown['right'] ) {
+        else if( keyDown['right'] ) {
             moveHorizontal(-curMoveAmount);
         }
         
@@ -1605,13 +1608,14 @@ function existEnemies() {
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
+        // TODO Make phone better
+        // TODO - no cursor pointer when menu not visible
         // TODO scenery
         // TODO dont move on tap of pause button
         // TODO sound and music
         // TODO - global high scores
         // TODO - no overlap menu on phone and responsive in general?
         // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
-        // TODO see if we can increase max difficulty so it doesn't cap so early on - testing needed
         // TODO remember that bug  where you grew big on tick? maybe we should add the let people escape code just in case
         // TODO local resources
 
@@ -1619,8 +1623,9 @@ function existEnemies() {
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
             playerHealth --;
             if( playerHealth <= 0 ) {
+                var oldScore = playerScore;
                 reset(); // You lose!
-                document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + playerScore + ".";
+                document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + oldScore + ".";
                 return;
             }
             obtainInvincibility(playerInvincibilityTicks);
@@ -1720,6 +1725,12 @@ function randomWalk(enemy) {
         xMove = enemyMovementAmount;
         yMove = -enemyMovementAmount;
     }
+
+    if( xMove && yMove ) {
+        var diagonal = Math.sqrt( enemyMovementAmount**2/2 );
+        xMove = xMove/Math.abs(xMove) * diagonal;
+        yMove = yMove/Math.abs(yMove) * diagonal;
+    }
     
     // Move the enemy
     var collided = moveEnemy({x: xMove, y: yMove}, enemy);
@@ -1734,9 +1745,9 @@ function randomWalk(enemy) {
  */
 function increaseDifficulty() {
     if( currentDifficulty <= maxDifficulty ) {
-        enemyMovementAmount += 0.1; // So the max movement amount is 8.5
+        enemyMovementAmount += 0.05; // So the max movement amount is 8.5
         
-        if(currentDifficulty % 5 == 0) {
+        if(currentDifficulty % 10 == 0) {
             spawnEnemies(1, document.querySelector(".world"));
         }
 
@@ -1775,6 +1786,12 @@ function chasePlayer(enemy) {
         else if( enemy.y1 - enemyMovementAmount > playerY + playerHeight/2 ) {
             yMove = -enemyMovementAmount;
         }
+    }
+
+    if(xMove && yMove) {
+        var diagonal = Math.sqrt( enemyMovementAmount**2/2 );
+        xMove = xMove/Math.abs(xMove) * diagonal;
+        yMove = yMove/Math.abs(yMove) * diagonal;
     }
 
     // Move seperately, so if one enemy collides, we still have the other
@@ -1830,6 +1847,13 @@ function chasePlayer(enemy) {
         if( ! yCollided ) {
             enemy.chaseDirectionX = null;
         }
+    }
+
+    if( xCollided && !yCollided && yMove ) {
+        moveEnemy({x: 0, y: yMove/Math.abs(yMove) * (enemyMovementAmount - diagonal)}, enemy);
+    }
+    else if ( yCollided && !xCollided && xMove ) {
+        moveEnemy({x: xMove/Math.abs(xMove) * (enemyMovementAmount - diagonal), y:0}, enemy);
     }
 
     // Consider the following
@@ -2522,8 +2546,8 @@ function existPowerups() {
  * @param {TouchEvent} e - the touch event
  */
 function touchMove(e) {
-    var width = document.body.clientWidth;
-    var height = document.body.clientHeight;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
     var touch = e.touches[0];
     // left
     if( touch.clientX < width/3 ) {
@@ -2619,6 +2643,22 @@ function reset() {
     }
 }
 
+/**
+ * Scale to the user's screen (16x9 is best for things not to be distorted though)
+ * https://stackoverflow.com/questions/3437786/get-the-size-of-the-screen-current-web-page-and-browser-window
+ */
+function scaleToScreen() {
+    var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+    // Make sure these divisors match the css
+    document.body.style.transform = "scaleX("+(x/1200)+")";
+    document.body.style.transform += "scaleY("+(y/675)+")";
+}
+
 // High scores
 
 function loadHighScores(range, page, callback) {
@@ -2687,11 +2727,11 @@ var numBuildings = 25;
 var currentBuilding; // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
 var numEnemies = 7;
 var enemyRadius = 15;
-var enemySightedDistance = 400;
+var enemySightedDistance = 350;
 var enemyMovementAmount = 6;
 var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
-var maxDifficulty = 25;
+var maxDifficulty = 50;
 var objects; // Objects that the player can hit.
 var enemyBuildings; // Enemies have a simpler set of objects - all squares, but still capable of hitting the player at any point (max roofOut < playerWidth)
 var enemies; // enemies of the player
@@ -2720,20 +2760,9 @@ if( !localStorage.cocoaTownCoins ) {
     localStorage.cocoaTownCoins = 0;
 }
 
+scaleToScreen();
+
 reset();
 document.oncontextmenu = new Function("return false;"); // disable right click
 
-//play();
-// Old dog
-/**
- * d.push("M " + x + " " + (y+10));
-d.push("C " + (x-5) + " " + (y+10) + "," + (x-10) + " " + (y) + "," + x + " " + y);
-d.push("C " + (x) + " " + (y) + "," + (x+5) + " " + (y) + "," + (x+10) + " " + (y-10));
-d.push("C " + (x+10) + " " + (y-10) + "," + (x+10) + " " + (y-14) + "," + (x+20) + " " + (y-14));
-d.push("C " + (x+20) + " " + (y-14) + "," + (x+34) + " " + (y-14) + "," + (x+32) + " " + (y+7));
-d.push("C " + (x+37) + " " + (y+20) + "," + (x+50) + " " + (y+10) + "," + (x+75) + " " + (y+15));
-d.push("C " + (x+85) + " " + (y+20) + "," + (x+90) + " " + (y+35) + "," + (x+75) + " " + (y+35));
-d.push("C " + (x+75) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
-d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x) + " " + (y+10));
-*/
-// Do we need to move the legs up for when the are rotated, we adjusted frames 4&5 back legs for roatation on x - axis by 1.5..
+document.body.onresize = scaleToScreen;
