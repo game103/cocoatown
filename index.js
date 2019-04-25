@@ -1492,7 +1492,7 @@ function tick() {
                     document.querySelector(".player").classList.remove("player-invincible");
                 }
                 else if( powerupKeys[i] == "fly" ) { 
-                    changeWhenSafe.fly = { "multiplier": powerups.big ? 1.5 : powerups.small ? 0.5 : 1, "function": function() {isFlying = false;} };
+                    changeWhenSafe.fly = { "multiplier": null, "function": function() {isFlying = false;} };
                 }
             }
             if( powerups[powerupKeys[i]] > 0 ) {
@@ -1616,7 +1616,6 @@ function existEnemies() {
         // TODO - global high scores
         // TODO - no overlap menu on phone and responsive in general?
         // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
-        // TODO remember that bug  where you grew big on tick? maybe we should add the let people escape code just in case
         // TODO local resources
 
         // If this hits the player
@@ -1744,14 +1743,14 @@ function randomWalk(enemy) {
  * Increase the current difficulty
  */
 function increaseDifficulty() {
-    if( currentDifficulty <= maxDifficulty ) {
+    if( currentDifficulty < maxDifficulty ) {
+        currentDifficulty ++;
+
         enemyMovementAmount += 0.05; // So the max movement amount is 8.5
         
         if(currentDifficulty % 10 == 0) {
             spawnEnemies(1, document.querySelector(".world"));
         }
-
-        currentDifficulty ++;
     }
 }
 
@@ -2206,7 +2205,7 @@ function drawMenu() {
     Music: Kasey Grams<br>\
     Icons: <a target='blank' rel='noopener' href='https://fontawesome.com/'>Font Awesome</a><br>\
     Fonts: <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Crimson+Text'>Crimson Text by Sebastian Kosch</a>, <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Acme'>Acme by Huerta Tipográfica</a><br>\
-    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='https://game103.net/images/logo2016.png'/><br>© 2019 Game 103</a>";
+    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='https://game103.net/images/logo2016.png'/><br>© 2019 Game 103 (game103.net)</a>";
     menuFrame.appendChild(credits);
     
     menu.appendChild(menuFrame);
@@ -2327,6 +2326,10 @@ function drawPause() {
  * @returns true if it is safe to use/stop using the powerup
  */
 function powerupIsSafe(sizeMultiplier, overrideFlying ) {
+    // For flying we don't want to use the value we were when we got try flying powerup
+    if( !sizeMultiplier ) {
+        sizeMultiplier = powerups.big ? 1.5 : powerups.small ? 0.5 : 1
+    }
     var newPlayerWidth = playerStartingWidth * sizeMultiplier;
     var newPlayerHeight = playerStartingHeight * sizeMultiplier;
     widthDifference = playerWidth - newPlayerWidth;
