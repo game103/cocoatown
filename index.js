@@ -232,6 +232,17 @@ function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber
     text.setAttribute("x", x+width/2 - textWidth/2);
 }
 
+// Draw a recntangle below the house
+function drawMat(door, container) {
+   var matHeight = 10;
+   var mat = document.querySelector(".mat");
+   if( mat ) {
+       mat.parentElement.removeChild(mat);
+   }
+   mat = drawRectangle( door.x2 - door.x1, matHeight, door.x1, door.y2, container );
+   mat.classList.add("mat");
+}
+
 /**
  * Test for a collision between two boxes
  * @param {object} obj1 - an object with x1, y1, x2, and y2 values 
@@ -1225,6 +1236,7 @@ function drawWorld() {
 
     spawnEnemies(numEnemies, container);
     spawnPowerups(numPowerups, container);
+    drawMat(objects[currentBuilding].door, container);
 
     // We have a seperate container for the player
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1232,12 +1244,6 @@ function drawWorld() {
     document.body.appendChild(container);
     drawDog(playerCanvasX, playerCanvasY, container);
     drawIceCream(-1, 0, container);
-
-    // seperate container for the pointer
-    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    container.classList.add("pointer-container");
-    document.body.appendChild(container);
-    drawPointer(0, 0, container);
 
     drawBar();
     drawMenu();
@@ -1329,7 +1335,7 @@ function moveHorizontal(amount) {
     if( !colliding ) {
         worldHorizontalOffset -= amount;
         // Make sure this matches the css
-        world.style.left = "calc(100vw / 2 - " + (canvasWidth/2+worldHorizontalOffset) + "px)";
+        world.style.left = "calc(100% / 2 - " + (canvasWidth/2+worldHorizontalOffset) + "px)";
         playerX -= amount;
     }
 }
@@ -1359,7 +1365,7 @@ function moveVertical(amount) {
     if( !colliding ) {
         worldVerticalOffset -= amount;
         // Make sure this matches the css
-        world.style.top = "calc( 100vh / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
+        world.style.top = "calc( (100% - 69px) / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
         playerY -= amount;
     }
 }
@@ -1371,6 +1377,7 @@ function tick() {
     if( !stopped ) {
         var curPlayerX = playerX;
         var curPlayerY = playerY;
+
 
         var curMoveAmount = movementAmount * (powerups["speed"] ? 2 : 1);
 
@@ -1450,7 +1457,7 @@ function tick() {
         deliver();
 
         tickTimeoutSet = Date.now();
-        setTimeout(tick, tickRate);
+        tickTimeout = setTimeout(tick, tickRate);
     }
 }
 
@@ -1534,10 +1541,11 @@ function existEnemies() {
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
         // TODO add pause (add button and menu) and game over and restart and menu screen
-        // TODO - prevent zoom out ultimately?
         // TODO test the game - make sure the difficulty is good.
-        // TODO - reset isn't working properly - still
         // TODO - global high scores
+        // TODO - have a default "zoom" (scaleX on non-bar body) so you see the same amount of stuff no matter the screen size > put it in an iFrame
+        // TODO - easier indicator for house to deliver 
+        // TODO - responsive
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1657,7 +1665,7 @@ function randomWalk(enemy) {
  */
 function increaseDifficulty() {
     if( currentDifficulty <= maxDifficulty ) {
-        enemyMovementAmount += 0.1; // So the max movement amount is 7.5
+        enemyMovementAmount += 0.1; // So the max movement amount is 8.5
         
         if(currentDifficulty % 5 == 0) {
             spawnEnemies(1, document.querySelector(".world"));
@@ -1800,6 +1808,10 @@ function deliver() {
         var iceCream = document.querySelector(".ice-cream");
         var newIceCream = drawIceCream(-1, 0, null); // Use a null container so it is not added
         player.replaceChild(newIceCream, iceCream);
+
+        drawMat(objects[currentBuilding].door, document.querySelector(".world"));
+
+        increaseDifficulty();
     }
 }
 
@@ -1830,8 +1842,6 @@ function anglePointer() {
     var scaleTransform = "";
     if( distance < 300 ) {
         scaleTransform = "scaleX("+(distance/300)+")" + "scaleY("+(distance/300)+")";
-        console.log(scaleTransform);
-        console.log("JA");
     }
 
     // tan (angle) = opposite/adjacent - solve for angle
@@ -1897,11 +1907,14 @@ function drawBar() {
     var bar = document.createElement("div");
     bar.classList.add("bar");
 
+    var barColumn = document.createElement("div");
+    barColumn.classList.add("bar-column");
+
     // First row
     var barRow = document.createElement("div");
     barRow.classList.add("bar-row");
 
-    barRow.innerHTML += '<i class="fas fa-paw"></i>';
+    /*barRow.innerHTML += '<i class="fas fa-paw"></i>';*/
 
     var heartsDiv = document.createElement("div");
     heartsDiv.classList.add("bar-div");
@@ -1923,15 +1936,15 @@ function drawBar() {
     hiScoreDiv.classList.add("bar-hi-score");
     barRow.appendChild(hiScoreDiv);
 
-    barRow.innerHTML += '<i class="fas fa-paw"></i>';
+    //barRow.innerHTML += '<i class="fas fa-paw"></i>';
 
-    bar.appendChild(barRow);
+    barColumn.appendChild(barRow);
 
     // Second row - powerups
     barRow = document.createElement("div");
     barRow.classList.add("bar-row");
 
-    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
+    /*barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';*/
 
     var powerupKeys = Object.keys(powerups);
     for(var i=0; i<powerupKeys.length; i++) {
@@ -1942,9 +1955,22 @@ function drawBar() {
         barRow.appendChild(powerupDiv);
     }
 
-    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
+//    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
 
-    bar.appendChild(barRow);
+    barColumn.appendChild(barRow);
+
+    bar.appendChild(barColumn);
+
+    barColumn = document.createElement("div");
+    barColumn.classList.add("bar-column");
+
+    // seperate container for the pointer
+    var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    container.classList.add("pointer-container");
+    barColumn.appendChild(container);
+    drawPointer(0, 0, container);
+
+    bar.appendChild(barColumn);
 
     document.body.appendChild(bar);
 
@@ -1970,7 +1996,7 @@ function updateBar() {
         var powerupDiv = document.querySelector(".bar-powerup-" + powerupKeys[i]);
 
         // Make sure this matches the background color in the css
-        var barBackgroundColor = "rgb(142, 200, 248)";
+        var barBackgroundColor = "rgba(142, 200, 248, 0.9)";
         var powerupPecentage = powerups[powerupKeys[i]] / powerupTicks * 100;
         powerupDiv.style.backgroundImage = "linear-gradient(90deg, transparent "+powerupPecentage+"%, "+barBackgroundColor+" "+powerupPecentage+"%)";
     }
@@ -1988,7 +2014,7 @@ function drawMenu() {
 
     var menuSubtitle = document.createElement("div");
     menuSubtitle.classList.add("menu-subtitle");
-    menuSubtitle.innerText = "Menu";
+    menuSubtitle.innerText = "";
     menu.appendChild(menuSubtitle);
 
     var menuButtons = document.createElement("div");
@@ -2253,7 +2279,9 @@ function touchMove(e) {
 
 // Reset/Start the game
 function reset() {
-    document.body.innerHTML = "";
+    while( document.body.firstChild ) {
+        document.body.removeChild(document.body.firstChild);
+    }
     document.body.onkeydown = null;
     document.body.onkeyup = null;
     document.body.ontouchstart = null;
@@ -2262,7 +2290,7 @@ function reset() {
     playerHealth = playerMaxHealth;
     playerScore = 0;
     frame = 1;
-    playTimeout = null;
+    if( playTimeout ) { clearTimeout(playTimeout); playTimeout = null; }
     currentBuilding = generateNextBuilding();
     currentDifficulty = 1;
     objects = [];
@@ -2273,11 +2301,14 @@ function reset() {
     playerWidth = playerStartingWidth;
     playerHeight = playerStartingHeight;
     playerX = canvasWidth/2 - playerWidth/2;
-    playerY = canvasHeight/2 - playerHeight/2 - 40; // 80/2 for the bar, same as in CSS
+    playerY = canvasHeight/2 - playerHeight/2;
+    worldHorizontalOffset = 0;
+    worldVerticalOffset = 0;
     changeWhenSafe = {};
     isFlying = false;
     tickTimeoutSet = null;
     tickTimeoutRemaining = null;
+    if( tickTimeout ) { clearTimeout(tickTimeout); tickTimeout = null; }
     keyDown = {};
     powerups = {
         "big": 0,
@@ -2329,8 +2360,8 @@ var playerStartingHeight = 72;
 var playerWidth;
 var playerHeight;
 var playerAllowedHouseOverlap = 60; // How much the player is allowed to overlap with the house
-var worldHorizontalOffset = 0;
-var worldVerticalOffset = 0;
+var worldHorizontalOffset;
+var worldVerticalOffset;
 var canvasWidth = 3000;
 var canvasHeight = 3000;
 // Simply the midpoint minus half the player's width/height (note, these values are in the css too)
@@ -2351,8 +2382,8 @@ var numBuildings = 25;
 var currentBuilding; // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
 var numEnemies = 7;
 var enemyRadius = 15;
-var enemySightedDistance = 300;
-var enemyMovementAmount = 5;
+var enemySightedDistance = 400;
+var enemyMovementAmount = 6;
 var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
 var maxDifficulty = 25;
@@ -2365,6 +2396,7 @@ var numPowerups = 3;
 var stopped;
 var tickTimeoutSet;
 var tickTimeoutRemaining;
+var tickTimeout;
 var powerups;
 var powerupTicks = 10000/fps; // ten seconds of powerup
 var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups

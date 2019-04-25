@@ -14,8 +14,8 @@ html, body {
     height: 3000px;
     position: absolute;
     /* Make sure these values are updated in the JS too */
-    top: calc(100vh / 2 - 1500px);
-    left: calc(100vw / 2 - 1500px);
+    top: calc( (100% - 69px) / 2 - 1500px); /* -69px for the bottom bar */
+    left: calc(100% / 2 - 1500px);
     background-color: rgb(0, 133, 29);
 }
 
@@ -23,8 +23,8 @@ html, body {
     width: 82px;
     height: 72px;
     position: absolute;
-    top: calc( (100vh - 80px) / 2 - 41px); /* -80px for the bottom bar */
-    left: calc(100vw / 2 - 36px);
+    top: calc( (100% - 69px) / 2 - 41px); /* -69px for the bottom bar */
+    left: calc(100% / 2 - 36px);
     overflow: visible;
 }
 
@@ -48,7 +48,7 @@ html, body {
     fill: white;
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass {
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat {
     fill: transparent;
     stroke-width: 2;
     stroke: black;
@@ -97,32 +97,36 @@ html, body {
     font-family: "Crimson Text", serif;
 }
 
+.mat {
+    fill: gold;
+}
+
 .bar {
-    background-color: rgb(142, 200, 248);
+    background-color: rgba(142, 200, 248, 0.9);
     color: black;
-    position: fixed;
+    position: absolute;
     width: calc(100% - 6px);
     bottom: 0;
     font-size: 15px;
-    border-top: 2px solid black;
     padding: 3px;
     margin: 0;
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.bar-column {
+    display: inline-block;
 }
 
 .bar-row {
     display: flex;
     padding: 3px;
+    justify-content: center;
 }
 
-.bar .fa-paw, .bar .fa-ice-cream {
-    font-size: 24px;
-    padding: 3px;
-}
-
-@media screen and (max-width: 400px) {
-    .bar .fa-paw, .bar .fa-ice-cream {
-        display: none;
-    }
+.bar-column:nth-child(1) {
+    width: calc(100% - 60px);
 }
 
 .bar-hearts {
@@ -149,6 +153,27 @@ html, body {
 
 .bar-deliver::before {
     content: "Deliver to:\00a0";
+}
+
+.bar .fa-ice-cream {
+    flex: 1 1 0;
+    text-align: right;
+}
+
+.bar .fa-ice-cream:first-child {
+    text-align: left;
+}
+
+.bar-powerup {
+    height: 13px;
+    font-size: 12px;
+    max-width: 80px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.bar-row:nth-child(2) .fa-paw, .bar-row:nth-child(2) .fa-ice-cream {
+    font-size: 13px;
 }
 
 .bar-powerup::before {
@@ -228,28 +253,31 @@ html, body {
 }
 
 .pointer-container {
-    position: fixed;
+    /*position: absolute;*/
     overflow: visible;
-    bottom: 120px; right: 40px;
+    /*bottom: 120px; right: 40px;*/
     width: 1px;
     height: 1px;
+    position: relative;
+    top: -20px;
+    left: 20px;
 }
 
 .menu {
-    border: 2px solid black;
-    background-color: rgb(142, 200, 248);
-    position: fixed;
-    width: 400px;
+    background-color: rgba(142, 200, 248, 0.9);
+    position: absolute;
+    width: 290px;
     font-family: Acme;
-    top: calc( (100vh - 80px) / 2 ); /* -80px for the bottom bar */
-    left: calc(100vw / 2 - 200px);
+    top: calc( (100% - 69px) / 2 ); /* -69px for the bottom bar */
+    left: calc(100% / 2 - 166px);
     transform: translateY(-50%);
     text-align: center;
     padding: 20px;
 }
 
 .menu-title {
-    font-size: 25px;
+    font-size: 35px;
+    text-shadow: 1px 1px 1px 1px steelblue;
 }
 
 .menu-subtitle {
@@ -263,10 +291,24 @@ html, body {
 .menu-button {
     display: inline-block;
     margin: 5px;
-    font-size: 25px;
     padding: 10px;
     background-color: rgb(85, 161, 223);
     border-radius: 15px;
     width: 50px;
-    border: 2px solid black;
+    font-size: 25px;
+    box-shadow: 0 4px rgb(42, 108, 161);
+}
+
+.menu-button:active {
+    position: relative;
+    top: 5px;
+    box-shadow: 0 0;
+}
+
+.menu-button-play {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90px;
+    font-size: 35px;
 }
