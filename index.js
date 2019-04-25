@@ -1617,6 +1617,7 @@ function existEnemies() {
         // TODO - no overlap menu on phone and responsive in general?
         // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
         // TODO local resources
+        // TODO space to unpause/pause and play
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
