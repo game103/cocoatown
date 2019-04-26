@@ -308,6 +308,10 @@ body {
     position: relative;
 }
 
+.menu-hidden {
+    opacity: 0;
+}
+
 .menu-frame {
     display: none;
 }
@@ -347,7 +351,11 @@ body {
     cursor: pointer;
 }
 
-.menu-button:active {
+.menu-hidden .menu-button {
+    cursor: default;
+}
+
+.menu-button:active, .menu-high-scores-time-button-selected {
     position: relative;
     top: 5px;
     box-shadow: 0 0;
@@ -362,7 +370,7 @@ body {
     margin-bottom: 15px;
 }
 
-.menu-credits, .menu-instructions {
+.menu-credits, .menu-instructions, .menu-high-scores-times {
     margin-top: 20px;
 }
 
@@ -442,6 +450,94 @@ body {
     cursor: pointer;
 }
 
+.menu-high-scores-time-button {
+    width: 40px;
+    padding: 10px;
+    font-size: 15px;
+    border-radius: 10px;
+}
+
+.menu-high-scores-table {
+    border: 2px solid black;
+    width: calc(100% - 54px);
+    height: 175px;
+    overflow-y: scroll;
+    padding: 15px;
+    margin: 10px;
+    margin-top: 20px;
+    border-radius: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.menu-high-scores-table-row {
+    display: flex;
+}
+
+.menu-high-scores-table-column {
+    display: inline-block;
+    text-align: left;
+}
+
+.menu-high-scores-table-column:nth-child(1) {
+    margin-right: 10px;
+}
+
+.menu-high-scores-table-column:nth-child(2) {
+    flex-grow: 1;
+}
+
+.menu-high-scores-info-username::before {
+    content: "Your Username:\00a0";
+}
+
+.menu-high-scores-info-local-high-score::before {
+    content: "Your High Score on This Device:\00a0";
+}
+
+.menu-high-scores-info-account-change {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.menu-high-scores-info label {
+    display: block;
+    margin-top: 5px;
+}
+
+.menu-high-scores-info label span {
+    display: inline-block;
+    width: 80px;
+}
+
+.menu-high-scores-info input {
+    width: 170px;
+    border-radius: 10px;
+    border: 0;
+    font-size: 18px;
+    padding: 5px;
+    font-family: Acme, "sans-serif";
+}
+
+.menu-high-scores-info-update-account, .menu-high-scores-info-login-account {
+    margin-top: 10px;
+    width: 50px;
+}
+
+.menu-high-scores-info-update-account {
+    margin-right: 15px;
+}
+
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+
+.fa-spinner {
+    animation-name: spin;
+    animation-duration: 1.5s;
+}
+
 .pause-button {
     position: absolute;
     top: 10px;
@@ -453,4 +549,12 @@ body {
 .pause-button:active {
     position: absolute;
     top: 15px;
+}
+
+.message-success {
+    color: rgb(22, 80, 22);
+}
+
+.message-failure {
+    color: rgb(180, 0, 0);
 }

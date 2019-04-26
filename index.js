@@ -1609,15 +1609,15 @@ function existEnemies() {
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
         // TODO Make phone better
-        // TODO - no cursor pointer when menu not visible
         // TODO scenery
-        // TODO dont move on tap of pause button
         // TODO sound and music
-        // TODO - global high scores
-        // TODO - no overlap menu on phone and responsive in general?
-        // TODO - prevent zoom? > just make sure the phone and the desktop have the same viewport somehow
         // TODO local resources
-        // TODO space to unpause/pause and play
+        // TODO vertical and horizontal sight distance for enemies.
+        // TODO prevent zoom..
+        // TODO constants for menu/login/get user error messages - just go through drawMenu function and search for the other high score callback functions
+        // TODO - rn we are using clicking off and back on to reset after logging in, but this isn't good if they already clicked off before the login completed
+        // - gotta refresh in the bg.
+        // TODO submit high score if offline? I think on the other devices we just take the highest score once we're able to submit... OK....
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1626,6 +1626,10 @@ function existEnemies() {
                 var oldScore = playerScore;
                 reset(); // You lose!
                 document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + oldScore + ".";
+                // Submit the score with a sanity check for having a game 103 ID
+                if( localStorage.game103Id ) {
+                    addScore( localStorage.game103Id, oldScore, function(response) { console.log( "Successfully submitted score of " + oldScore + " for " + game103Username + " (" + localStorage.game103Id + ")" ); }, function() { console.log("failed to submit score") } );
+                }
                 return;
             }
             obtainInvincibility(playerInvincibilityTicks);
@@ -1999,7 +2003,7 @@ function togglePause() {
     if( stopped ) {
         setTimeout(tick, tickTimeoutRemaining);
         stopped = false;
-        document.querySelector(".menu").style.opacity = 0;
+        document.querySelector(".menu").classList.add("menu-hidden");
         document.querySelector(".bar").style.opacity = 1;
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-pause'></i>";
     }
@@ -2009,7 +2013,7 @@ function togglePause() {
         stopped = true;
         document.querySelector(".menu-subtitle").innerText = "Paused";
         document.querySelector(".bar").style.opacity = 0;
-        document.querySelector(".menu").style.opacity = 1;
+        document.querySelector(".menu").classList.remove("menu-hidden");
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-play'></i>";
     }
 }
@@ -2276,7 +2280,239 @@ function drawMenu() {
     
     menu.appendChild(menuFrame);
 
+    // High scores menu frame
+    menuFrame = document.createElement("menu-frame");
+    menuFrame.classList.add("menu-frame");
+    menuFrame.classList.add("menu-frame-high-scores");
+
+    var menuTitle = document.createElement("div");
+    menuTitle.classList.add("menu-title");
+    menuTitle.innerText = "High Scores";
+    menuFrame.appendChild(menuTitle);
+
+    var menuHighScoresTimes = document.createElement("div");
+    menuHighScoresTimes.classList.add("menu-high-scores-times");
+
+    var ranges = ["day", "week", "month", "year", "all"];
+    for( var i=0; i<ranges.length; i++ ) {
+        var menuHighScoresTimeButton = document.createElement("div");
+        menuHighScoresTimeButton.classList.add("menu-high-scores-time-button");
+        menuHighScoresTimeButton.classList.add("menu-button");
+        menuHighScoresTimeButton.innerText = ranges[i].charAt(0).toUpperCase() + ranges[i].slice(1);
+
+        menuHighScoresTimeButton.onclick = function() {
+
+            if( !this.classList.contains("menu-high-scores-time-button-selected") ) {
+
+                var curSelected = document.querySelector(".menu-high-scores-time-button-selected");
+                if( curSelected ) {
+                    curSelected.classList.remove("menu-high-scores-time-button-selected");
+                }
+                this.classList.add("menu-high-scores-time-button-selected");
+
+                var highScoresTable = document.querySelector(".menu-high-scores-table");
+                highScoresTable.innerHTML = "<i class='fas fa-spinner'></i>";
+
+                // On scroll bottom, load new results
+                highScoresTable.onscroll = function() {
+                    requestCount = requestCount ++;
+                    var myRequestCount = requestCount;
+
+                    if( this.scrollHeight - this.scrollTop == this.clientHeight ) {
+                        currentHighScoresPage ++;
+                        loadHighScores( this.innerText.toLowerCase(), currentHighScoresPage, function(response) {
+                            // If we are still on this request (haven't moved to another tab)
+                            if( requestCount == myRequestCount ) {
+                                try {
+                                    var jsonResponse = JSON.parse(response);
+                                    if( jsonResponse.results && jsonResponse.results.length ) {
+                                        console.log("Got more results");
+                                        addResults(jsonResponse.results);
+                                    }
+                                    // There are no more results
+                                    else {
+                                        console.log("No more results");
+                                        highScoresTable.onscroll = function() {return false;};
+                                    }
+                                }
+                                catch(err) {
+                                    console.log("More results parse error");
+                                    console.log(err);
+                                    highScoresTable.onscroll = function() {return false;};
+                                }
+                            }
+                        }, function() { 
+                            console.log("An error occured loading more scores");
+                            console.log(err);
+                            highScoresTable.onscroll = function() {return false;};
+                        } );
+                    }
+                };
+
+                requestCount = requestCount ++;
+                var myRequestCount = requestCount;
+
+                currentHighScoresPage = 1;
+
+                loadHighScores( this.innerText.toLowerCase(), currentHighScoresPage, function(response) {
+                    // If we are still on this request (haven't moved to another tab)
+                    if( requestCount == myRequestCount ) {
+                        try {
+                            var jsonResponse = JSON.parse(response);
+                            if( jsonResponse.results && jsonResponse.results.length ) {
+                                console.log("Got results");
+                                highScoresTable.innerHTML = "";
+                                addResults(jsonResponse.results);
+                            }
+                            else {
+                                menuHighScoresTable.innerText = "There are no high scores for this time period.";
+                            }
+                        }
+                        catch(err) {
+                            menuHighScoresTable.innerText = "Sorry, an error occurred parsing scores.";
+                            console.log("An error occured parsing scores");
+                            console.log(err);
+                        }
+                    }
+                }, function() { 
+                    menuHighScoresTable.innerText = "Sorry, an error occurred loading scores."; 
+                    console.log("An error occured loading scores");
+                    console.log(err);
+                } );
+            }
+        };
+
+        menuHighScoresTimes.appendChild(menuHighScoresTimeButton);
+    }
+
+    menuFrame.appendChild(menuHighScoresTimes);
+
+    var menuHighScoresTable = document.createElement("div");
+    menuHighScoresTable.classList.add("menu-high-scores-table");
+    menuFrame.appendChild(menuHighScoresTable);
+
+    var menuHighScoresInfoSection = document.createElement("div");
+    menuHighScoresInfoSection.classList.add("menu-high-scores-info");
+
+    var menuHighScoresInfoLocalHigh = document.createElement("div");
+    menuHighScoresInfoLocalHigh.classList.add("menu-high-scores-info-local-high-score");
+    menuHighScoresInfoLocalHigh.innerText = localStorage.cocoaTownHighScore ? localStorage.cocoaTownHighScore : 0;
+    menuHighScoresInfoSection.appendChild(menuHighScoresInfoLocalHigh);
+
+    var menuHighScoresInfoUsername = document.createElement("div");
+    menuHighScoresInfoUsername.classList.add("menu-high-scores-info-username");
+    if( game103Username ) {
+        menuHighScoresInfoUsername.innerText = game103Username;
+    }
+    menuHighScoresInfoSection.appendChild(menuHighScoresInfoUsername);
+
+    var menuHighScoreAccountChangeInfo = document.createElement("div");
+    menuHighScoreAccountChangeInfo.classList.add("menu-high-scores-info-account-change");
+    menuHighScoresInfoSection.appendChild(menuHighScoreAccountChangeInfo);
+
+    var menuHighScoreUsernameLabel = document.createElement("label");
+    menuHighScoreUsernameLabel.classList.add("menu-high-scores-info-username-label");
+    menuHighScoreUsernameLabel.innerHTML = "<span class='menu-high-scores-info-username-label-text'>Username:</span>";
+    var menuHighScoresUsernameInput = document.createElement("input");
+    menuHighScoresUsernameInput.setAttribute("type", "text");
+    menuHighScoresUsernameInput.setAttribute("minlength", "5");
+    menuHighScoresUsernameInput.setAttribute("maxlength", "15");
+    menuHighScoresUsernameInput.classList.add("menu-high-scores-info-username-input");
+    menuHighScoreUsernameLabel.appendChild(menuHighScoresUsernameInput);
+
+    menuHighScoresInfoSection.appendChild(menuHighScoreUsernameLabel);
+
+    var menuHighScorePasswordLabel = document.createElement("label");
+    menuHighScorePasswordLabel.classList.add("menu-high-scores-info-password-label");
+    menuHighScorePasswordLabel.innerHTML = "<span class='menu-high-scores-info-username-label-text'>Password:</span>";
+    var menuHighScoresPasswordInput = document.createElement("input");
+    menuHighScoresPasswordInput.setAttribute("type", "password");
+    menuHighScoresPasswordInput.setAttribute("minlength", "5");
+    menuHighScoresPasswordInput.setAttribute("maxlength", "15");
+    menuHighScoresPasswordInput.classList.add("menu-high-scores-info-password-input");
+    menuHighScorePasswordLabel.appendChild(menuHighScoresPasswordInput);
+
+    menuHighScoresInfoSection.appendChild(menuHighScorePasswordLabel);
+
+    var menuHighScoreUpdateAccountButton = document.createElement("div");
+    menuHighScoreUpdateAccountButton.classList.add("menu-button");
+    menuHighScoreUpdateAccountButton.classList.add("menu-high-scores-time-button");
+    menuHighScoreUpdateAccountButton.classList.add("menu-high-scores-info-update-account");
+    menuHighScoreUpdateAccountButton.innerText = "Update";
+
+    // Update the user's account
+    menuHighScoreUpdateAccountButton.onclick = function() {
+        if( localStorage.game103Id ) {
+            setUpdateLoginLoading();
+            updateUser( localStorage.game103Id, 
+                document.querySelector(".menu-high-scores-info-username-input").value,
+                document.querySelector(".menu-high-scores-info-password-input").value,
+                function(response) {
+                    try {
+                        var jsonResponse = JSON.parse(response);
+                        // Can't imagine a json response without a status
+                        if( jsonResponse.status == "success" ) {
+                            // Refresh the frame (this will refetch the username and table)
+                            document.querySelector(".menu-button-back").click();
+                            document.querySelector(".menu-button-hi-scores").click();
+                        }
+                        setHighScoresMenuError( jsonResponse.status == "success" ? "Success! Account updated." : jsonResponse.message, jsonResponse.status );
+                    }
+                    catch(err) {
+                        setHighScoresMenuError( "failure", "A connection error has occurred." );
+                    }
+                }, function() {
+                    setHighScoresMenuError( "failure", "An error has occurred." );
+                }
+            );
+        }
+        else {
+            setHighScoresMenuError( "failure", "An error has occurred." );
+        }
+    };
+
+    menuHighScoresInfoSection.appendChild(menuHighScoreUpdateAccountButton);
+
+    var menuHighScoreLoginButton = document.createElement("div");
+    menuHighScoreLoginButton.classList.add("menu-button");
+    menuHighScoreLoginButton.classList.add("menu-high-scores-time-button");
+    menuHighScoreLoginButton.classList.add("menu-high-scores-info-login-account");
+    menuHighScoreLoginButton.innerText = "Login";
+
+    // Login to the user's account
+    menuHighScoreLoginButton.onclick = function() {
+        setUpdateLoginLoading();
+        login( document.querySelector(".menu-high-scores-info-username-input").value,
+            document.querySelector(".menu-high-scores-info-password-input").value,
+            function(response) {
+                try {
+                    var jsonResponse = JSON.parse(response);
+                    // Can't imagine a json response without a status
+                    if( jsonResponse.status == "success" ) {
+                        // Refresh the frame (this will refetch the username and table)
+                        localStorage.game103Id = jsonResponse.id;
+                        document.querySelector(".menu-button-back").click();
+                        document.querySelector(".menu-button-hi-scores").click();
+                    }
+                    setHighScoresMenuError( jsonResponse.status == "success" ? "Success! Logged in." : jsonResponse.message, jsonResponse.status );
+                }
+                catch(err) {
+                    setHighScoresMenuError( "failure", "A connection error has occurred." );
+                }
+            }, function() {
+                setHighScoresMenuError( "failure", "An error has occurred." );
+            }
+        );
+    };
+
+    menuHighScoresInfoSection.appendChild(menuHighScoreLoginButton);
+
+    menuFrame.appendChild(menuHighScoresInfoSection);
+
+    menu.appendChild(menuFrame);
+
     document.body.appendChild(menu);
+    resetHighScoresMenuMessage();
 
     // Add the event listeners
     menuPlayButton.onclick = function() {
@@ -2298,13 +2534,106 @@ function drawMenu() {
             document.querySelector(".menu-button-back").style.display = "block";
         }
     }
+    menuHighScoreButton.onclick = function() {
+        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+            document.querySelector(".menu-frame-main").style.display = "none";
+            document.querySelector(".menu-frame-high-scores").style.display = "block";
+            document.querySelector(".menu-button-back").style.display = "block";
+            
+            // refresh the tab we were on, or click the first tab if none selected
+            var currentTabSelected = document.querySelector(".menu-high-scores-time-button-selected");
+            if( !currentTabSelected ) {
+                document.querySelector(".menu-high-scores-time-button").click();
+            }
+            else {
+                currentTabSelected.classList.remove("menu-high-scores-time-button-selected");
+                currentTabSelected.click();
+            }
+
+            // Reset the error message
+            resetHighScoresMenuMessage();
+
+            // Don't keep the password in the field
+            document.querySelector(".menu-high-scores-info-username-input").value = "";
+            document.querySelector(".menu-high-scores-info-password-input").value = "";
+
+            // update the current username whenever we go to the tab for good measure
+            // don't create new accounts on error here, only do that on start up to avoid excessive accounts.
+            getUsername( localStorage.game103Id, function(response) {
+                try {
+                    var jsonResponse = JSON.parse(response);
+                    game103Username = jsonResponse.username;
+                    document.querySelector(".menu-high-scores-info-username").innerText = game103Username;
+                }
+                catch(err) {
+                    console.log(err);
+                }
+            } );
+        }
+    }
     menuBackButton.onclick = function() {
         if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
             document.querySelector(".menu-frame-credits").style.display = "none";
             document.querySelector(".menu-frame-instructions").style.display = "none";
+            document.querySelector(".menu-frame-high-scores").style.display = "none";
             document.querySelector(".menu-button-back").style.display = "none";
             document.querySelector(".menu-frame-main").style.display = "block";
         }
+    }
+}
+
+/**
+ * Reset the high scores information menu message
+ */
+function resetHighScoresMenuMessage() {
+    document.querySelector(".menu-high-scores-info-account-change").innerText = "Enter credentials to update your current account or login to another one.";
+}
+
+/**
+ * Set an error message on the high scores view for update/login
+ */
+function setHighScoresMenuError(message, type) {
+    var messageClass = type == "success" ? "message-success" : "message-failure";
+    document.querySelector(".menu-high-scores-info-account-change").innerHTML = "<span class='"+messageClass+"'>"+message+"</span>";
+}
+
+/** Set loading for update or login */
+function setUpdateLoginLoading() {
+    document.querySelector(".menu-high-scores-info-account-change").innerHTML = "<i class='fas fa-spinner'></i>";
+}
+
+/**
+ * Add results to the high scores table
+ * @param {object} results - the results object from the high score server
+ */
+function addResults(results) {
+    var highScoresTable = document.querySelector(".menu-high-scores-table");
+    for( var i=0; i<results.length; i++ ) {
+
+        var row = document.createElement("div");
+        row.classList.add("menu-high-scores-table-row");
+
+        var count = highScoresTable.querySelectorAll(".menu-high-scores-table-row").length + 1;
+
+        var column = document.createElement("div");
+        column.classList.add("menu-high-scores-table-column");
+        column.innerText = count + ".";
+        row.appendChild(column);
+
+        column = document.createElement("div");
+        column.classList.add("menu-high-scores-table-column");
+        column.innerText = results[i].username;
+        if( results[i].username == game103Username ) {
+            column.innerText += " (You)";
+        }
+        row.appendChild(column);
+
+        column = document.createElement("div");
+        column.classList.add("menu-high-scores-table-column");
+        column.innerText = results[i].score;
+        row.appendChild(column);
+
+        highScoresTable.appendChild(row);
     }
 }
 
@@ -2317,7 +2646,10 @@ function drawPause() {
     pause.classList.add("pause-button");
     pause.innerHTML = "<i class='fas fa-play'></i>"; // We start out paused
     document.body.appendChild(pause);
+
+    pause.ontouchstart = function() { pauseButtonIsPressed = true; }
     pause.onclick = togglePause;
+    pause.ontouchend = function() { pauseButtonIsPressed = false; }
 }
 
 /**
@@ -2633,11 +2965,11 @@ function reset() {
         keyDown[keyMap[e.which]] = false; // This is not for just press
 
         // On p press
-        if( e.keyCode == 80 ) {
+        if( e.keyCode == 80 || e.keyCode == 32 ) {
             togglePause();
         }
     };
-    document.body.ontouchstart = function(e) {touchMove(e);};
+    document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed) { touchMove(e); } };
     document.body.ontouchmove = function(e) {touchMove(e);};
     document.body.ontouchend = function(e) {
         keyDown.right = false;
@@ -2665,27 +2997,123 @@ function scaleToScreen() {
 
 // High scores
 
-function loadHighScores(range, page, callback) {
-    var url = loadHighScoresEndpoint + "?" + "game=" + highScoresGame + "&range=" + range + "&page=" + page;
-    makeRequest("GET", url, callback);
+/**
+ * Load high scores
+ * @param {string} range - "day", "week", "month", "year", or "all"
+ * @param {number} page - the page of results (the first page is 1)
+ * @param {function} callback - callback function to run upon request completion
+ */
+function loadHighScores(range, page, callback, errorCallback) {
+    makeRequest("GET", loadHighScoresEndpoint, { game: highScoresGame, range: range, page: page }, callback, errorCallback);
 }
 
-// Get the most up to date username for our user (they may have change it elsewhere)
-function getUsername(id, callback) {
-    var url = loadHighScoresEndpoint + "?" + "id=" + id;
-    makeRequest("GET", url, callback);
+/**
+ * Get the most up to date username for our user (they may have change it elsewhere)
+ * @param {string} id - the id of the user
+ * @param {function} callback - callback function to run upon request completion
+ */
+function getUsername(id, callback, errorCallback) {
+    makeRequest("GET", getUserEndpoint, { id: id }, callback, errorCallback);
 }
 
-// Make a request to the high scores server
-function makeRequest(type, url, callback) {
+/**
+ * Login a user
+ * @param {string} username - the username of the user
+ * @param {string} password - the password of the user
+ * @param {function} callback - callback function to run upon request completion
+ */
+function login(username, password, callback, errorCallback) {
+    makeRequest("POST", loginEndpoint, { username: username, password: password }, callback, errorCallback);
+}
+
+/**
+ * Add a score to the high scores table
+ * @param {string} id - the id of the user
+ * @param {number} score - the score the user got
+ * @param {function} callback - callback function to run upon request completion
+ */
+function addScore(id, score, callback, errorCallback) {
+    makeRequest("POST", addScoreEndpoint, { game: highScoresGame, id: id, score: score }, callback, errorCallback );
+}
+
+/**
+ * Add a new user
+ * @param {function} callback - callback function to run upon request completion
+ */
+function addUser(callback, errorCallback) {
+    makeRequest("GET", addUserEndpoint, {}, callback, errorCallback);
+}
+
+/**
+ * Update a user
+ * @param {string} id - the id of the user to update
+ * @param {string} username - the new username
+ * @param {string} password - the new password
+ * @param {function} callback - callback function to run upon request completion
+ */
+function updateUser(id, username, password, callback, errorCallback) {
+    makeRequest("POST", updateUserEndpoint, { id: id, username: username, password: password }, callback, errorCallback );
+}
+
+/**
+ * Make a request
+ * @param {string} type - "GET" or "POST"
+ * @param {string} url - the url to make the request ro
+ * @param {object} parameters - an object with keys being parameter keys and values being parameter values to send with the request
+ * @param {function} callback - callback function to run upon request completion
+ */
+function makeRequest(type, url, parameters, callback, errorCallback) {
+    var parameterKeys = Object.keys(parameters);
+    var parameterArray = [];
+    for( var i=0; i<parameterKeys.length; i++ ) {
+        parameterArray.push( parameterKeys[i] + "=" + parameters[parameterKeys[i]] );
+    }
+
+    if( type == "GET" && parameterKeys.length ) {
+        url = url + "?" + parameterArray.join("&");
+    }
+
     var xhttp = new XMLHttpRequest();
+    xhttp.open(type, url, true);
+
+    if( type == "POST" && parameterKeys.length ) {
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    } 
+
     xhttp.onreadystatechange = function() {
-        if( this.readyState == 4 && this.status == 200 ) {
-            if( callback ) { callback(); }
+        if( this.readyState == 4 ) {
+            if( this.status == 200 ) {
+                if( callback ) { callback(this.responseText); }
+            }
+            else {
+                if( errorCallback ) { errorCallback(); }
+            }
         }
     }    
-    xhttp.open(type, url, true);
-    xhttp.send();
+    if( type == "POST" && parameterArray.length ) {
+        xhttp.send( parameterArray.join("&") );
+    }
+    else {
+        xhttp.send();
+    }
+}
+
+function loadNewUser() {
+    addUser( function(response) {
+        try {
+            var jsonResponse = JSON.parse(response);
+            if( jsonResponse.id ) {
+                console.log("Created an account");
+                console.log("ID: " + jsonResponse.id);
+                console.log("Username" + jsonResponse.username);
+                localStorage.game103Id = jsonResponse.id;
+                game103Username = jsonResponse.username;
+            }
+        }
+        catch(err) {
+            console.log(err);
+        }
+    } );
 }
 
 ////////// Main Program ////////////
@@ -2750,10 +3178,19 @@ var powerups;
 var powerupTicks = 10000/fps; // ten seconds of powerup
 var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups
 var isFlying;
+var pauseButtonIsPressed;
 
 var highScoresDomain = "https://game103.net/ws/scores/";
 var highScoresGame = "ct";
 var loadHighScoresEndpoint = highScoresDomain + "load_scores.php";
+var getUserEndpoint = highScoresDomain + "get_user.php";
+var addScoreEndpoint = highScoresDomain + "add_score.php";
+var addUserEndpoint = highScoresDomain + "add_user.php";
+var loginEndpoint = highScoresDomain + "login.php";
+var updateUserEndpoint = highScoresDomain + "update_user.php";
+var game103Username = "";
+var requestCount = 0;
+var currentHighScoresPage = 1;
 
 // make sure cocoaTownHighScore is not null
 if( !localStorage.cocoaTownHighScore ) {
@@ -2762,6 +3199,36 @@ if( !localStorage.cocoaTownHighScore ) {
 // make sure cocoaTownCoins is not null
 if( !localStorage.cocoaTownCoins ) {
     localStorage.cocoaTownCoins = 0;
+}
+// make sure we have a game103 id
+if( !localStorage.game103Id ) {
+    loadNewUser();
+}
+// If we already have an id
+else {
+    getUsername( localStorage.game103Id, function(response) {
+        try {
+            var jsonResponse = JSON.parse(response);
+            if( jsonResponse.id ) {
+                console.log("Got username");
+                console.log(jsonResponse.username);
+                game103Username = jsonResponse.username;
+                var currentUsernameListing = document.querySelector(".menu-high-scores-info-username");
+                if( currentUsernameListing ) {
+                    currentUsernameListing.innerText = game103Username;
+                }
+            }
+            else {
+                console.log("No user: creating a new one.");
+                loadNewUser();
+            }
+        }
+        catch(err) {
+            console.log("Error while loading user: creating a new one.");
+            loadNewUser();
+            console.log(err);
+        }
+    }, function() { console.log("HTTP error while loading user: creating a new one."); loadNewUser(); } /* Try to load a new user on error */ );
 }
 
 scaleToScreen();
