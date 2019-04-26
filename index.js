@@ -1337,14 +1337,14 @@ function spawnEnemies(enemyCount, container) {
                 }
             }
             // Add the extra spacing to the current enemy here, since all the enemies are the same size
-            var overlapEnemy = { x1: enemy.x1 - 50, y1: enemy.y1 - 50, x2: enemy.x1 + 50, y2: enemy.y2 + 50 };
+            var overlapEnemy = { x1: enemy.x1 - 50, y1: enemy.y1 - 50, x2: enemy.x2 + 50, y2: enemy.y2 + 50 };
             for(var i=0; i<enemies.length; i++) {
                 if( collisionTest(overlapEnemy, enemies[i]) ) {
                     overlaps = true;
                 }
             }
             // Really don't get close to the player
-            overlapEnemy = { x1: enemy.x1 - enemySightedDistance - 50, y1: enemy.y1 - enemySightedDistance - 50, x2: enemy.x1 + enemySightedDistance + 50, y2: enemy.y2 + enemySightedDistance + 50 };
+            overlapEnemy = { x1: enemy.x1 - enemySightedDistanceX - 50, y1: enemy.y1 - enemySightedDistanceY - 50, x2: enemy.x2 + enemySightedDistanceX + 50, y2: enemy.y2 + enemySightedDistanceY + 50 };
             if( collisionTest(playerObject, overlapEnemy) ) {
                 overlaps = true;
             }
@@ -1605,31 +1605,53 @@ function existEnemies() {
     for( var i=0; i<enemies.length; i++ ) {
         var enemy = enemies[i];
         
-        var enemySightedObject = { x1: enemy.x1 - enemySightedDistance, x2: enemy.x2 + enemySightedDistance, y1: enemy.y1 - enemySightedDistance, y2: enemy.y2 + enemySightedDistance };
+        var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add house
         // TODO Make phone better
         // TODO scenery
         // TODO sound and music
-        // TODO local resources
-        // TODO vertical and horizontal sight distance for enemies.
-        // TODO prevent zoom..
-        // TODO constants for menu/login/get user error messages - just go through drawMenu function and search for the other high score callback functions
-        // TODO - rn we are using clicking off and back on to reset after logging in, but this isn't good if they already clicked off before the login completed
-        // - gotta refresh in the bg.
-        // TODO submit high score if offline? I think on the other devices we just take the highest score once we're able to submit... OK....
+        // TODO test with slow connection high scores and navigating while they are loading
+        // TODO see what fontawesome stuff can be deleted
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
             playerHealth --;
             if( playerHealth <= 0 ) {
                 var oldScore = playerScore;
+
+                unsubmittedHighscores[new Date().getTime()] = oldScore; // Add this score to the list of unsubmitted globalscores
+
                 reset(); // You lose!
                 document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + oldScore + ".";
+                
                 // Submit the score with a sanity check for having a game 103 ID
                 if( localStorage.game103Id ) {
-                    addScore( localStorage.game103Id, oldScore, function(response) { console.log( "Successfully submitted score of " + oldScore + " for " + game103Username + " (" + localStorage.game103Id + ")" ); }, function() { console.log("failed to submit score") } );
+                    var funcs = [];
+
+                    // for each of the unsubmitted high scores
+                    var unsubmittedHighscoresKeys = Object.keys(unsubmittedHighscores);
+                    for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
+                        // Create functions so that we have closures
+                        // https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example/19323214#19323214
+                        funcs.push ( function(index) { addScore( localStorage.game103Id, unsubmittedHighscores[unsubmittedHighscoresKeys[index]], 
+                            function(response) {
+                                console.log( "Successfully submitted score of " + unsubmittedHighscores[unsubmittedHighscoresKeys[index]] + " for " + game103Username + " (" + localStorage.game103Id + ")" ); 
+                                delete unsubmittedHighscores[unsubmittedHighscoresKeys[index]];
+                            }, 
+                            function() { 
+                                console.log("failed to submit score") 
+                            } 
+                        ) }.bind(this, i) );
+
+                    }
+
+                    // Now run the functions
+                    for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
+                        funcs[i]();
+                    }
                 }
+
                 return;
             }
             obtainInvincibility(playerInvincibilityTicks);
@@ -2008,6 +2030,7 @@ function togglePause() {
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-pause'></i>";
     }
     else {
+        returnToMainMenuScreen(); // Make sure we always unpause to the main screen
         // Get exactly the frame we are on when we pause, so we can resume at that frame
         tickTimeoutRemaining = tickRate - (Date.now() - tickTimeoutSet);
         stopped = true;
@@ -2210,7 +2233,7 @@ function drawMenu() {
     Music: Kasey Grams<br>\
     Icons: <a target='blank' rel='noopener' href='https://fontawesome.com/'>Font Awesome</a><br>\
     Fonts: <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Crimson+Text'>Crimson Text by Sebastian Kosch</a>, <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Acme'>Acme by Huerta Tipográfica</a><br>\
-    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='https://game103.net/images/logo2016.png'/><br>© 2019 Game 103 (game103.net)</a>";
+    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='/resources/logo.png'/><br>© 2019 Game 103 (game103.net)</a>";
     menuFrame.appendChild(credits);
     
     menu.appendChild(menuFrame);
@@ -2452,22 +2475,25 @@ function drawMenu() {
                         var jsonResponse = JSON.parse(response);
                         // Can't imagine a json response without a status
                         if( jsonResponse.status == "success" ) {
-                            // Refresh the frame (this will refetch the username and table)
-                            document.querySelector(".menu-button-back").click();
-                            document.querySelector(".menu-button-hi-scores").click();
+                            // We are on the high scores tab
+                            if( document.querySelector(".menu-frame-high-scores").style.display == "block" ) {
+                                // Refresh the frame (this will refetch the username and table)
+                                document.querySelector(".menu-button-back").click();
+                                document.querySelector(".menu-button-hi-scores").click();
+                            }
                         }
                         setHighScoresMenuError( jsonResponse.status == "success" ? "Success! Account updated." : jsonResponse.message, jsonResponse.status );
                     }
                     catch(err) {
-                        setHighScoresMenuError( "failure", "A connection error has occurred." );
+                        setHighScoresMenuError( null, "failure" );
                     }
                 }, function() {
-                    setHighScoresMenuError( "failure", "An error has occurred." );
+                    setHighScoresMenuError( null, "failure" );
                 }
             );
         }
         else {
-            setHighScoresMenuError( "failure", "An error has occurred." );
+            setHighScoresMenuError( null, "failure" );
         }
     };
 
@@ -2491,16 +2517,19 @@ function drawMenu() {
                     if( jsonResponse.status == "success" ) {
                         // Refresh the frame (this will refetch the username and table)
                         localStorage.game103Id = jsonResponse.id;
-                        document.querySelector(".menu-button-back").click();
-                        document.querySelector(".menu-button-hi-scores").click();
+                        if( document.querySelector(".menu-frame-high-scores").style.display == "block" ) {
+                            // Refresh the frame (this will refetch the username and table)
+                            document.querySelector(".menu-button-back").click();
+                            document.querySelector(".menu-button-hi-scores").click();
+                        }
                     }
                     setHighScoresMenuError( jsonResponse.status == "success" ? "Success! Logged in." : jsonResponse.message, jsonResponse.status );
                 }
                 catch(err) {
-                    setHighScoresMenuError( "failure", "A connection error has occurred." );
+                    setHighScoresMenuError( null, "failure" );
                 }
             }, function() {
-                setHighScoresMenuError( "failure", "An error has occurred." );
+                setHighScoresMenuError( null, "failure" );
             }
         );
     };
@@ -2573,13 +2602,20 @@ function drawMenu() {
     }
     menuBackButton.onclick = function() {
         if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
-            document.querySelector(".menu-frame-credits").style.display = "none";
-            document.querySelector(".menu-frame-instructions").style.display = "none";
-            document.querySelector(".menu-frame-high-scores").style.display = "none";
-            document.querySelector(".menu-button-back").style.display = "none";
-            document.querySelector(".menu-frame-main").style.display = "block";
+            returnToMainMenuScreen();
         }
     }
+}
+
+/**
+ * Return to main screen
+ */
+function returnToMainMenuScreen() {
+    document.querySelector(".menu-frame-credits").style.display = "none";
+    document.querySelector(".menu-frame-instructions").style.display = "none";
+    document.querySelector(".menu-frame-high-scores").style.display = "none";
+    document.querySelector(".menu-button-back").style.display = "none";
+    document.querySelector(".menu-frame-main").style.display = "block";
 }
 
 /**
@@ -2593,6 +2629,9 @@ function resetHighScoresMenuMessage() {
  * Set an error message on the high scores view for update/login
  */
 function setHighScoresMenuError(message, type) {
+    if( type == "failure" && !message ) {
+        message = "An error has occurred.";
+    }
     var messageClass = type == "success" ? "message-success" : "message-failure";
     document.querySelector(".menu-high-scores-info-account-change").innerHTML = "<span class='"+messageClass+"'>"+message+"</span>";
 }
@@ -2815,7 +2854,7 @@ function spawnPowerups(powerupCount, container) {
                 }
             }
             // Add the extra spacing to the powerup here, since all the powerups are the same size
-            var overlapPowerup = { x1: powerup.x1 - 50, y1: powerup.y1 - 50, x2: powerup.x1 + 50, y2: powerup.y2 + 50 };
+            var overlapPowerup = { x1: powerup.x1 - 50, y1: powerup.y1 - 50, x2: powerup.x2 + 50, y2: powerup.y2 + 50 };
             for(var i=0; i<powerupsOnScreen.length; i++) {
                 if( collisionTest(overlapPowerup, powerupsOnScreen[i]) ) {
                     overlaps = true;
@@ -3159,7 +3198,9 @@ var numBuildings = 25;
 var currentBuilding; // Note: this is the INDEX (the house number is one more since house numbers don't start at 0)
 var numEnemies = 7;
 var enemyRadius = 15;
-var enemySightedDistance = 350;
+// enemies have a 16/9 viewing window just like the player
+var enemySightedDistanceX = 450;
+var enemySightedDistanceY = 253;
 var enemyMovementAmount = 6;
 var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
@@ -3191,6 +3232,7 @@ var updateUserEndpoint = highScoresDomain + "update_user.php";
 var game103Username = "";
 var requestCount = 0;
 var currentHighScoresPage = 1;
+var unsubmittedHighscores = [];
 
 // make sure cocoaTownHighScore is not null
 if( !localStorage.cocoaTownHighScore ) {
