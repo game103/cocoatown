@@ -78,7 +78,7 @@ body {
 
 .building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside {
     fill: transparent;
-    stroke-width: 2;
+    stroke-width: 2px;
     stroke: black;
 }
 
@@ -126,7 +126,7 @@ body {
 
 .window-pane {
     stroke: black;
-    stroke-width: 2;
+    stroke-width: 2px;
 }
 
 .door-text {
@@ -477,7 +477,7 @@ body {
     border: 2px solid black;
     width: calc(100% - 54px);
     height: 175px;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 15px;
     margin: 10px;
     margin-top: 20px;

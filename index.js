@@ -72,7 +72,7 @@ function drawPath( coordinates, container, connectAtEnd ) {
     if( connectAtEnd ) {
         d.push("Z");
     }
-    path.setAttribute("d", d);
+    path.setAttribute("d", d.join(" ") );
     container.appendChild( path );
     return path;
 }
@@ -423,7 +423,7 @@ function drawDogFrame1(x, y, container) {
     d.push("C " + (32+legOffset) + " " + (y+54) + "," + (22+legOffset) + " " + (y+62) + "," + (34+legOffset) + " " + (y+60));
     d.push("C " + (34+legOffset) + " " + (y+60) + "," + (35+legOffset) + " " + (y+60) + "," + (38+legOffset) + " " + (y+55));
     d.push("C " + (36+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+45) + "," + (31+legOffset) + " " + (y+28));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -438,7 +438,7 @@ function drawDogFrame1(x, y, container) {
     d.push("C " + (20+legOffset) + " " + (y+50) + "," + (18+legOffset) + " " + (y+52) + "," + (22+legOffset) + " " + (y+54));
     d.push("C " + (22+legOffset) + " " + (y+56) + "," + (32+legOffset) + " " + (y+56) + "," + (26+legOffset) + " " + (y+50));
     d.push("C " + (27+legOffset) + " " + (y+48) + "," + (39+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -456,7 +456,7 @@ function drawDogFrame1(x, y, container) {
     d.push("C " + (32+legOffset) + " " + (y+54) + "," + (36+legOffset) + " " + (y+57) + "," + (40+legOffset) + " " + (y+55));
     d.push("C " + (41+legOffset) + " " + (y+53) + "," + (41+legOffset) + " " + (y+50.5) + "," + (36+legOffset) + " " + (y+50));
     d.push("C " + (36+legOffset) + " " + (y+50) + "," + (31+legOffset) + " " + (y+45) + "," + (29+legOffset) + " " + (y+28));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -473,7 +473,7 @@ function drawDogFrame1(x, y, container) {
     d.push("C " + (27+legOffset) + " " + (y+57) + "," + (33+legOffset) + " " + (y+57) + "," + (29+legOffset) + " " + (y+51));
     d.push("C " + (29+legOffset) + " " + (y+51) + "," + (34+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
     d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -495,7 +495,7 @@ function drawDogFrame2(x, y, container) {
     d.push("C " + (27+legOffset) + " " + (y+34) + "," + (22+legOffset) + " " + (y+44) + "," + (38+legOffset) + " " + (y+55));
     d.push("C " + (42+legOffset) + " " + (y+55) + "," + (42+legOffset) + " " + (y+50) + "," + (38+legOffset) + " " + (y+48));
     d.push("C " + (35+legOffset) + " " + (y+48) + "," + (28+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -506,7 +506,7 @@ function drawDogFrame2(x, y, container) {
     d.push("C " + (7+legOffset) + " " + (y+34) + "," + (9+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+50));
     d.push("C " + (legOffset) + " " + (y+50) + "," + (-8+legOffset) + " " + (y+56) + "," + (legOffset) + " " + (y+56));
     d.push("C " + (legOffset) + " " + (y+58) + "," + (legOffset+27) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -523,7 +523,7 @@ function drawDogFrame2(x, y, container) {
     d.push("C " + (27+legOffset) + " " + (y+56) + "," + (32+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+51));
     d.push("C " + (26+legOffset) + " " + (y+51) + "," + (29+legOffset) + " " + (y+40) + "," + (28+legOffset) + " " + (y+37));
     d.push("C " + (27+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+28));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -538,7 +538,7 @@ function drawDogFrame2(x, y, container) {
     d.push("C " + (7+legOffset) + " " + (y+51) + "," + (17+legOffset) + " " + (y+50) + "," + (27+legOffset) + " " + (y+46));
     d.push("C " + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+44) + "," + (25+legOffset) + " " + (y+43));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 }
@@ -558,7 +558,7 @@ function drawDogFrame3(x, y, container) {
     d.push("C " + (27+legOffset) + " " + (y+34) + "," + (20+legOffset) + " " + (y+52) + "," + (30+legOffset) + " " + (y+53));
     d.push("C " + (36+legOffset) + " " + (y+52) + "," + (33+legOffset) + " " + (y+48) + "," + (30+legOffset) + " " + (y+48));
     d.push("C " + (29+legOffset) + " " + (y+48) + "," + (26+legOffset) + " " + (y+32) + "," + (35+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -569,7 +569,7 @@ function drawDogFrame3(x, y, container) {
     d.push("C " + (7+legOffset) + " " + (y+34) + "," + (9+legOffset) + " " + (y+44) + "," + (8+legOffset) + " " + (y+55));
     d.push("C " + (2+legOffset) + " " + (y+56) + "," + (2+legOffset) + " " + (y+62) + "," + (12+legOffset) + " " + (y+60));
     d.push("C " + (13+legOffset) + " " + (y+58) + "," + (legOffset+19) + " " + (y+32) + "," + (22+legOffset) + " " + (y+24));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -586,7 +586,7 @@ function drawDogFrame3(x, y, container) {
     d.push("C " + (11+legOffset) + " " + (y+54) + "," + (14+legOffset) + " " + (y+54) + "," + (15+legOffset) + " " + (y+49));
     d.push("C " + (15+legOffset) + " " + (y+49) + "," + (19+legOffset) + " " + (y+48) + "," + (24+legOffset) + " " + (y+42));
     d.push("C " + (25+legOffset) + " " + (y+42) + "," + (23+legOffset) + " " + (y+32) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -601,7 +601,7 @@ function drawDogFrame3(x, y, container) {
     d.push("C " + (8+legOffset) + " " + (y+58) + "," + (18+legOffset) + " " + (y+56) + "," + (26.5+legOffset) + " " + (y+46));
     d.push("C " + (26.5+legOffset) + " " + (y+46) + "," + (28+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+43.5));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 }
@@ -627,7 +627,7 @@ function drawDogFrame4(x, y, container) {
     d.push("C " + (10+legOffset) + " " + (y+53) + "," + (13+legOffset) + " " + (y+54) + "," + (12.5+legOffset) + " " + (y+49));
     d.push("C " + (13+legOffset) + " " + (y+48) + "," + (20+legOffset) + " " + (y+46) + "," + (22+legOffset) + " " + (y+43));
     d.push("C " + (24+legOffset) + " " + (y+40) + "," + (23+legOffset) + " " + (y+32) + "," + (24+legOffset) + " " + (y+29));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -642,7 +642,7 @@ function drawDogFrame4(x, y, container) {
     d.push("C " + (14+legOffset) + " " + (y+55.5) + "," + (19+legOffset) + " " + (y+61) + "," + (23+legOffset) + " " + (y+60));
     d.push("C " + (27+legOffset) + " " + (y+60) + "," + (30+legOffset) + " " + (y+58) + "," + (26+legOffset) + " " + (y+43));
     d.push("C " + (21+legOffset) + " " + (y+37) + "," + (23+legOffset) + " " + (y+30) + "," + (20+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -662,7 +662,7 @@ function drawDogFrame4(x, y, container) {
     d.push("C " + (4+legOffset) + " " + (y+51) + "," + (8+legOffset) + " " + (y+54) + "," + (9+legOffset) + " " + (y+48));
     d.push("C " + (15+legOffset) + " " + (y+46) + "," + (19+legOffset) + " " + (y+48) + "," + (24.5+legOffset) + " " + (y+42));
     d.push("C " + (28+legOffset) + " " + (y+40) + "," + (23+legOffset) + " " + (y+32) + "," + (28+legOffset) + " " + (y+29));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -679,7 +679,7 @@ function drawDogFrame4(x, y, container) {
     d.push("C " + (5+legOffset) + " " + (y+55) + "," + (2+legOffset) + " " + (y+60) + "," + (8+legOffset) + " " + (y+60));
     d.push("C " + (9+legOffset) + " " + (y+62) + "," + (32+legOffset) + " " + (y+49) + "," + (25+legOffset) + " " + (y+44));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27.5+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 }
@@ -702,7 +702,7 @@ function drawDogFrame5(x, y, container) {
     d.push("M " + (19+legOffset) + " " + (y+28));
     d.push("C " + (19+legOffset) + " " + (y+28) + "," + (-5+legOffset) + " " + (y+31) + "," + (-2+legOffset) + " " + (y+38));
     d.push("C " + (-2+legOffset) + " " + (y+38) + "," + (legOffset) + " " + (y+40) + "," + (19+legOffset) + " " + (y+31));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -718,7 +718,7 @@ function drawDogFrame5(x, y, container) {
     d.push("C " + (31+legOffset) + " " + (y+54) + "," + (28.5+legOffset) + " " + (y+50) + "," + (26+legOffset) + " " + (y+50.5));
     d.push("C " + (25+legOffset) + " " + (y+50.5) + "," + (25+legOffset) + " " + (y+43) + "," + (23+legOffset) + " " + (y+41));
     d.push("C " + (23+legOffset) + " " + (y+41) + "," + (20+legOffset) + " " + (y+38) + "," + (20+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -736,7 +736,7 @@ function drawDogFrame5(x, y, container) {
     d.push("C " + (-1+legOffset) + " " + (y+34.5) + "," + (-5+legOffset) + " " + (y+32.5) + "," + (-5+legOffset) + " " + (y+39));
     d.push("C " + (-4.5+legOffset) + " " + (y+39) + "," + (-6+legOffset) + " " + (y+42) + "," + (legOffset) + " " + (y+43.5));
     d.push("C " + (31+legOffset) + " " + (y+40) + "," + (26+legOffset) + " " + (y+33) + "," + (29+legOffset) + " " + (y+26));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -753,7 +753,7 @@ function drawDogFrame5(x, y, container) {
     d.push("C " + (19.5+legOffset) + " " + (y+55) + "," + (11+legOffset) + " " + (y+56) + "," + (18+legOffset) + " " + (y+60));
     d.push("C " + (28+legOffset) + " " + (y+61) + "," + (24+legOffset) + " " + (y+46) + "," + (24+legOffset) + " " + (y+44));
     d.push("C " + (23+legOffset) + " " + (y+37) + "," + (29+legOffset) + " " + (y+40) + "," + (27.5+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 }
@@ -776,7 +776,7 @@ function drawDogFrame6(x, y, container) {
     d.push("C " + (-3+legOffset) + " " + (y+40) + "," + (-5+legOffset) + " " + (y+38) + "," + (legOffset-6) + " " + (y+42));
     d.push("C " + (-3+legOffset) + " " + (y+49) + "," + (2+legOffset) + " " + (y+46) + "," + (legOffset+9.5) + " " + (y+39));
     d.push("C " + (12+legOffset) + " " + (y+36) + "," + (42+legOffset) + " " + (y+30) + "," + (42+legOffset) + " " + (y+30));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -788,7 +788,7 @@ function drawDogFrame6(x, y, container) {
     d.push("M " + (20+legOffset) + " " + (y+27));
     d.push("C " + (legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+25) + "," + (39.5+legOffset) + " " + (y+37));
     d.push("C " + (46+legOffset) + " " + (y+37) + "," + (44+legOffset) + " " + (y+41) + "," + (44+legOffset) + " " + (y+42));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -806,7 +806,7 @@ function drawDogFrame6(x, y, container) {
     d.push("C " + (12+legOffset) + " " + (y+56) + "," + (12+legOffset) + " " + (y+60) + "," + (17+legOffset) + " " + (y+60));
     d.push("C " + (26+legOffset) + " " + (y+59) + "," + (27.5+legOffset) + " " + (y+46) + "," + (30+legOffset) + " " + (y+40));
     d.push("C " + (31+legOffset) + " " + (y+39) + "," + (27+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+27))
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -821,7 +821,7 @@ function drawDogFrame6(x, y, container) {
     d.push("C " + (39+legOffset) + " " + (y+42) + "," + (38+legOffset) + " " + (y+49) + "," + (42+legOffset) + " " + (y+47));
     d.push("C " + (49+legOffset) + " " + (y+44) + "," + (48+legOffset) + " " + (y+40) + "," + (41+legOffset) + " " + (y+41));
     d.push("C " + (23+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+25) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -846,7 +846,7 @@ function drawDogFrame7(x, y, container) {
     d.push("C " + (1+legOffset) + " " + (y+43.5) + "," + (-5+legOffset) + " " + (y+44) + "," + (legOffset) + " " + (y+49));
     d.push("C " + (legOffset) + " " + (y+49) + "," + (5.5+legOffset) + " " + (y+53) + "," + (legOffset+14) + " " + (y+41));
     d.push("C " + (15+legOffset) + " " + (y+39) + "," + (35+legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+30));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -862,7 +862,7 @@ function drawDogFrame7(x, y, container) {
     d.push("C " + (32+legOffset) + " " + (y+52) + "," + (35+legOffset) + " " + (y+47.5) + "," + (29.5+legOffset) + " " + (y+46.5));
     d.push("C " + (29+legOffset) + " " + (y+48) + "," + (34+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+34));
     d.push("C " + (27+legOffset) + " " + (y+32.9) + "," + (25+legOffset) + " " + (y+37) + "," + (27+legOffset) + " " + (y+24));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -881,7 +881,7 @@ function drawDogFrame7(x, y, container) {
     d.push("C " + (15+legOffset) + " " + (y+54) + "," + (11+legOffset) + " " + (y+60) + "," + (19+legOffset) + " " + (y+60));
     d.push("C " + (26+legOffset) + " " + (y+59) + "," + (31+legOffset) + " " + (y+46) + "," + (27+legOffset) + " " + (y+43));
     d.push("C " + (26+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+36) + "," + (26+legOffset) + " " + (y+29));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -898,7 +898,7 @@ function drawDogFrame7(x, y, container) {
     d.push("C " + (32+legOffset) + " " + (y+55) + "," + (35+legOffset) + " " + (y+50.5) + "," + (29.5+legOffset) + " " + (y+49.5));
     d.push("C " + (29+legOffset) + " " + (y+51) + "," + (34+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+37));
     d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+26));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -925,7 +925,7 @@ function drawDogFrame8(x, y, container) {
     d.push("C " + (15+legOffset) + " " + (y+54) + "," + (11+legOffset) + " " + (y+60) + "," + (19+legOffset) + " " + (y+60));
     d.push("C " + (26+legOffset) + " " + (y+59) + "," + (28+legOffset) + " " + (y+46) + "," + (27+legOffset) + " " + (y+43));
     d.push("C " + (26+legOffset) + " " + (y+42) + "," + (25+legOffset) + " " + (y+36) + "," + (26+legOffset) + " " + (y+29));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -939,7 +939,7 @@ function drawDogFrame8(x, y, container) {
     d.push("C " + (27+legOffset) + " " + (y+44) + "," + (22+legOffset) + " " + (y+46) + "," + (21+legOffset) + " " + (y+47));
     d.push("C " + (20+legOffset) + " " + (y+47.5) + "," + (23+legOffset) + " " + (y+53) + "," + (26+legOffset) + " " + (y+48));
     d.push("C " + (39+legOffset) + " " + (y+50) + "," + (30+legOffset) + " " + (y+42) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -958,7 +958,7 @@ function drawDogFrame8(x, y, container) {
     d.push("C " + (45+legOffset) + " " + (y+53) + "," + (47+legOffset) + " " + (y+44.5) + "," + (42+legOffset) + " " + (y+45.5));
     d.push("C " + (39+legOffset) + " " + (y+44) + "," + (39+legOffset) + " " + (y+38) + "," + (34.5+legOffset) + " " + (y+36.5));
     d.push("C " + (32+legOffset) + " " + (y+34) + "," + (32+legOffset) + " " + (y+31) + "," + (29+legOffset) + " " + (y+28));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -975,7 +975,7 @@ function drawDogFrame8(x, y, container) {
     d.push("C " + (20+legOffset) + " " + (y+54) + "," + (24+legOffset) + " " + (y+56) + "," + (23.5+legOffset) + " " + (y+51));
     d.push("C " + (26+legOffset) + " " + (y+50) + "," + (38+legOffset) + " " + (y+42) + "," + (27+legOffset) + " " + (y+37));
     d.push("C " + (27+legOffset) + " " + (y+35.9) + "," + (25+legOffset) + " " + (y+40) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -1000,7 +1000,7 @@ function drawDogFlying(x, y, container) {
     d.push("M " + (19+legOffset) + " " + (y+28));
     d.push("C " + (19+legOffset) + " " + (y+28) + "," + (-5+legOffset) + " " + (y+31) + "," + (-2+legOffset) + " " + (y+38));
     d.push("C " + (-2+legOffset) + " " + (y+38) + "," + (legOffset) + " " + (y+40) + "," + (19+legOffset) + " " + (y+31));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -1015,7 +1015,7 @@ function drawDogFlying(x, y, container) {
     d.push("M " + (20+legOffset) + " " + (y+27));
     d.push("C " + (legOffset) + " " + (y+30) + "," + (35+legOffset) + " " + (y+25) + "," + (39.5+legOffset) + " " + (y+37));
     d.push("C " + (46+legOffset) + " " + (y+37) + "," + (44+legOffset) + " " + (y+41) + "," + (44+legOffset) + " " + (y+42));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -1036,7 +1036,7 @@ function drawDogFlying(x, y, container) {
     d.push("C " + (-1+legOffset) + " " + (y+34.5) + "," + (-5+legOffset) + " " + (y+32.5) + "," + (-5+legOffset) + " " + (y+39));
     d.push("C " + (-4.5+legOffset) + " " + (y+39) + "," + (-6+legOffset) + " " + (y+42) + "," + (legOffset) + " " + (y+43.5));
     d.push("C " + (31+legOffset) + " " + (y+40) + "," + (26+legOffset) + " " + (y+33) + "," + (29+legOffset) + " " + (y+26));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -1054,7 +1054,7 @@ function drawDogFlying(x, y, container) {
     d.push("C " + (39+legOffset) + " " + (y+42) + "," + (38+legOffset) + " " + (y+49) + "," + (42+legOffset) + " " + (y+47));
     d.push("C " + (49+legOffset) + " " + (y+44) + "," + (48+legOffset) + " " + (y+40) + "," + (41+legOffset) + " " + (y+41));
     d.push("C " + (23+legOffset) + " " + (y+30) + "," + (29+legOffset) + " " + (y+25) + "," + (27+legOffset) + " " + (y+27));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 
@@ -1083,7 +1083,7 @@ function drawDogBody(container) {
     d.push("C " + (x+80) + " " + (y+20) + "," + (x+85) + " " + (y+35) + "," + (x+70) + " " + (y+35));
     d.push("C " + (x+70) + " " + (y+35) + "," + (x+55) + " " + (y+40) + "," + (x+30) + " " + (y+35));
     d.push("C " + (x+5) + " " + (y+35) + "," + (x+28) + " " + (y+15) + "," + (x+5) + " " + (y+10));
-    path.setAttribute("d", d);
+    path.setAttribute("d", d.join(" "));
     bodyGroup.appendChild( path );
     path.classList.add("dog");
 
@@ -1094,7 +1094,7 @@ function drawDogBody(container) {
     d = [];
     d.push("M " + (x+18) + " " + (y-5));
     d.push("C " + (x+22) + " " + (y+5) + "," + (x+22) + " " + (y+5) + "," + (x+26) + " " + (y-5));
-    ear.setAttribute("d", d);
+    ear.setAttribute("d", d.join(" "));
     bodyGroup.appendChild( ear );
     ear.classList.add("dog");
 
@@ -1103,7 +1103,7 @@ function drawDogBody(container) {
     d.push("M " + (x+70) + " " + (y+15));
     d.push("C " + (x+70) + " " + (y+15) + "," + (x+78) + " " + (y+21) + "," + (x+96) + " " + (y+15));
     d.push("C " + (x+96) + " " + (y+15) + "," + (x+86) + " " + (y+22) + "," + (x+77) + " " + (y+21));
-    tail.setAttribute("d", d);
+    tail.setAttribute("d", d.join(" "));
     bodyGroup.appendChild( tail );
     tail.classList.add("dog");
 
@@ -1137,7 +1137,7 @@ function drawDogLeg(x, y, legOffset, container) {
     d.push("C " + (15+legOffset) + " " + (y+54) + "," + (7+legOffset) + " " + (y+56) + "," + (15+legOffset) + " " + (y+60));
     d.push("C " + (15+legOffset) + " " + (y+60) + "," + (24+legOffset) + " " + (y+60) + "," + (23+legOffset) + " " + (y+55));
     d.push("C " + (23+legOffset) + " " + (y+45) + "," + (26+legOffset) + " " + (y+40) + "," + (25+legOffset) + " " + (y+25));
-    leg.setAttribute("d", d);
+    leg.setAttribute("d", d.join(" "));
     container.appendChild( leg );
     leg.classList.add("dog");
 }
@@ -1207,14 +1207,14 @@ function drawEnemy(x, y, radius, container) {
     var d = [];
     d.push("M " + (rightTopCoordinates[0]) + " " + (rightTopCoordinates[1]));
     d.push("C " + (rightTopCoordinates[0]-6) + " " + (rightTopCoordinates[1]+5) + "," + (rightBottomCoordinates[0]-6) + " " + (rightBottomCoordinates[1]-5) + "," + (rightBottomCoordinates[0]) + " " + (rightBottomCoordinates[1]));
-    path.setAttribute("d", d);
+    path.setAttribute("d", d.join(" "));
     enemyGroup.appendChild( path );
 
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
     d.push("M " + (leftTopCoordinates[0]) + " " + (leftTopCoordinates[1]));
     d.push("C " + (leftTopCoordinates[0]+6) + " " + (leftTopCoordinates[1]+5) + "," + (leftBottomCoordinates[0]+6) + " " + (leftBottomCoordinates[1]-5) + "," + (leftBottomCoordinates[0]) + " " + (leftBottomCoordinates[1]));
-    path.setAttribute("d", d);
+    path.setAttribute("d", d.join(" "));
     enemyGroup.appendChild( path );
 
     container.appendChild(enemyGroup);
@@ -1613,6 +1613,7 @@ function existEnemies() {
         // TODO sound and music
         // TODO see what fontawesome stuff can be deleted
         // TODO try to submit high scores in more places and save the array locally (maybe speed that up?)
+        // TODO I tried to type P on the high scores input and it unpaused...
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
