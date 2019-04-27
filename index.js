@@ -1611,8 +1611,8 @@ function existEnemies() {
         // TODO Make phone better
         // TODO scenery
         // TODO sound and music
-        // TODO test with slow connection high scores and navigating while they are loading
         // TODO see what fontawesome stuff can be deleted
+        // TODO try to submit high scores in more places and save the array locally (maybe speed that up?)
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1774,6 +1774,11 @@ function increaseDifficulty() {
         currentDifficulty ++;
 
         enemyMovementAmount += 0.05; // So the max movement amount is 8.5
+
+        // We have 49 increase to get to max
+        var xSightIncrease = maxSightedDistanceXIncrease/(maxDifficulty-1);
+        enemySightedDistanceX += xSightIncrease;
+        enemySightedDistanceY += (xSightIncrease * (9/16));
         
         if(currentDifficulty % 10 == 0) {
             spawnEnemies(1, document.querySelector(".world"));
@@ -2925,12 +2930,12 @@ function touchMove(e) {
     var height = window.innerHeight;
     var touch = e.touches[0];
     // left
-    if( touch.clientX < width/3 ) {
+    if( touch.clientX < width/6 ) {
         keyDown.right = false;
         keyDown.left = true;
     }
     // right
-    else if(touch.clientX > width/3 * 2 ) {
+    else if(touch.clientX > width/6 * 5 ) {
         keyDown.left = false;
         keyDown.right = true;
     }
@@ -2939,12 +2944,12 @@ function touchMove(e) {
         keyDown.right = false;
     }
     // down
-    if( touch.clientY > height - 150 ) {
+    if( touch.clientY > height - 100 ) {
         keyDown.up = false;
         keyDown.down = true;
     }
     // up
-    else if( touch.clientY < height - 300 ) {
+    else if( touch.clientY < height - 200 ) {
         keyDown.down = false;
         keyDown.up = true;
     }
@@ -2987,6 +2992,8 @@ function reset() {
     isFlying = false;
     tickTimeoutSet = null;
     tickTimeoutRemaining = null;
+    enemySightedDistanceX = 450;
+    enemySightedDistanceY = 253;
     if( tickTimeout ) { clearTimeout(tickTimeout); tickTimeout = null; }
     keyDown = {};
     powerups = {
@@ -3199,8 +3206,9 @@ var currentBuilding; // Note: this is the INDEX (the house number is one more si
 var numEnemies = 7;
 var enemyRadius = 15;
 // enemies have a 16/9 viewing window just like the player
-var enemySightedDistanceX = 450;
-var enemySightedDistanceY = 253;
+var enemySightedDistanceX;
+var enemySightedDistanceY;
+var maxSightedDistanceXIncrease = 130; // Scale is maintained at 16/9, Y is increased accordingly
 var enemyMovementAmount = 6;
 var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
