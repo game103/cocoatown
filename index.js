@@ -1183,6 +1183,93 @@ function drawIceCream(x, y, container) {
 }
 
 /**
+ * Draw a tree
+ * @param {number} x - the x coordinate of the left of the tree
+ * @param {number} y - the y coordinate of the BOTTOM of the tree
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function drawTree(x, y, container) {
+
+    // Tree width is 55 (trunk width) (it goes a little further out in both directions though)
+    // so middle of the tree is 27.5 
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (x) + " " + (y));
+    d.push("C " + (x+12) + " " + (y-10) + "," + (x+14) + " " + (y-22) + "," + (x+15) + " " + (y-100));
+    d.push("C " + (x+15) + " " + (y-100) + "," + (x+40) + " " + (y-100) + "," + (x+40) + " " + (y-100));
+    d.push("C " + (x+41) + " " + (y-22) + "," + (x+43) + " " + (y-10) + "," + (x+55) + " " + (y));
+    path.setAttribute("d", d.join(" "));
+    path.classList.add("tree-trunk");
+    container.appendChild( path );
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    var trunkHeightOffset = 20;
+    d.push("M " + (x+27.5) + " " + (y-80+trunkHeightOffset));
+    d.push("C " + (x) + " " + (y-60+trunkHeightOffset) + "," + (x-30) + " " + (y-110+trunkHeightOffset) + "," + (x-14) + " " + (y-130+trunkHeightOffset));
+    d.push("C " + (x-30) + " " + (y-140+trunkHeightOffset) + "," + (x-25) + " " + (y-200+trunkHeightOffset) + "," + (x) + " " + (y-200+trunkHeightOffset));
+    d.push("C " + (x+5) + " " + (y-230+trunkHeightOffset) + "," + (x+50) + " " + (y-230+trunkHeightOffset) + "," + (x+55) + " " + (y-200+trunkHeightOffset));
+    d.push("C " + (x+80) + " " + (y-200+trunkHeightOffset) + "," + (x+85) + " " + (y-140+trunkHeightOffset) + "," + (x+69) + " " + (y-130+trunkHeightOffset));
+    d.push("C " + (x+85) + " " + (y-110+trunkHeightOffset) + "," + (x+55) + " " + (y-60+trunkHeightOffset) + "," + (x+27.5) + " " + (y-80+trunkHeightOffset));
+    path.setAttribute("d", d.join(" "));
+    path.classList.add("tree");
+    container.appendChild( path );
+}
+
+/**
+ * Draw a rectange
+ * @param {number} width - the width of the house
+ * @param {number} height - the height of the house
+ * @param {number} x - the x coordinate of the house
+ * @param {number} y - the y coordinate of the house
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns information about the roof (out and height)
+ */
+function drawCocoaHouse(width, height, x, y, container) {
+
+    // draw the main house body
+    var rectangle = drawRectangle(width, height, x, y, container);
+    rectangle.classList.add("cocoa-house");
+
+    drawBricks( width, height, x, y, container, 100, 30 );
+
+    // draw the roof
+    var roofOut = width/10;
+    var roofHeight = height/1.5;
+    var roof = drawPath( [ [x-roofOut, y], [x+width/2, y-roofHeight], [x+width+roofOut, y] ], container, true );
+    roof.classList.add("cocoa-house");
+
+    var roofSliding = 15;
+    var roof = drawPath( [ [x-roofOut, y], [x+width/2, y-roofHeight], [x+width+roofOut, y], [x+width-roofSliding+roofOut, y], [x+width/2, y-roofHeight+roofSliding], [x-roofOut+roofSliding, y] ], container, true );
+    roof.classList.add("cocoa-house-roof");
+
+    var roofBar = drawPath( [ [x-roofOut+roofSliding+31, y-30], [x+width+roofOut-roofSliding-31, y-30] ], container, true );
+    roofBar.classList.add("brick");
+
+    // draw the entrance
+    var entrance = drawRectangle(50, 70, x+width/2 - 25, y+(height-70), container);
+    entrance = drawCircle(x+width/2, y+(height-70), 25, container);
+
+    // draw the label
+    var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.classList.add("cocoa-house-text");
+    text.setAttribute("x", x+width/2);
+    text.setAttribute("y", y+5);
+    text.innerHTML = "Cocoa";
+    container.appendChild(text);
+    var textWidth = text.getBBox().width;
+    text.setAttribute("x", x+width/2 - textWidth/2);
+
+    var textBorder = drawRectangle(textWidth+ 10, 30, text.getAttribute("x") - 5, text.getAttribute("y") - 22, container);
+    container.removeChild(text);
+    container.appendChild(text);
+    textBorder.classList.add("cocoa-house-text-border");
+
+    return { roofOut: roofOut, roofHeight: roofHeight };
+}
+
+/**
  * Draw an enemy (tennis ball)
  * @param {number} x - the x coordinate of the CENTER of the enemy
  * @param {number} y - the y coordinate of the CENTER of the enemy
@@ -1243,6 +1330,21 @@ function drawWorld() {
     var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     container.classList.add("world");
     document.body.appendChild(container);
+
+    // draw cocoa house
+    var cocoaHouseWidth = 140;
+    var cocoaHouseHeight = 120;
+    var cocoaHouseX = playerX - cocoaHouseWidth/2 + playerWidth/2;
+    var cocoaHouseY = playerY - 100;
+    var cocoaHouseRoofInfo = drawCocoaHouse( cocoaHouseWidth, cocoaHouseHeight, cocoaHouseX, cocoaHouseY, container );
+    var cocoaHouse = { special: "Cocoa", x1: cocoaHouseX, x2: cocoaHouseX + cocoaHouseWidth, y1: cocoaHouseY, y2: cocoaHouseY + cocoaHouseHeight - playerAllowedHouseOverlap };
+    objects.push( cocoaHouse );
+    enemyBuildings.push(JSON.parse(JSON.stringify(cocoaHouse)));
+    enemyBuildings[0].y2 += playerAllowedHouseOverlap;
+    enemyBuildings[0].x1 = enemyBuildings[0].x1 - cocoaHouseRoofInfo.roofOut;
+    enemyBuildings[0].x2 = enemyBuildings[0].x2 + cocoaHouseRoofInfo.roofOut;
+    enemyBuildings[0].y1 = enemyBuildings[0].y1 - cocoaHouseRoofInfo.roofHeight;
+
     // Temporarily add an object for the player
     var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
 
@@ -1258,8 +1360,8 @@ function drawWorld() {
             // This is for checking for overlap when generating the town, so no buldings are too close
             var overlapObject = { x1: object.x1-80, y1: object.y1-110, x2: object.x2+80, y2: object.y2+playerAllowedHouseOverlap+110 };
             var overlaps = false;
-            for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-80, y1: objects[i].y1-110, x2: objects[i].x2+80, y2: objects[i].y2+playerAllowedHouseOverlap+110 };
+            for(var j=0; j<objects.length; j++) {
+                var curOverlapObject = { x1: objects[j].x1-80, y1: objects[j].y1-110, x2: objects[j].x2+80, y2: objects[j].y2+playerAllowedHouseOverlap+110 };
                 if( collisionTest(overlapObject, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -1277,6 +1379,8 @@ function drawWorld() {
     }
 
     objects.sort( function(a,b) {
+        if( a.special ) return -1;
+        if( b.special ) return 1;
         if( a.y1 < b.y1 ) return -1;
         if( a.y1 > b.y1 ) return 1;
         if( a.x1 < b.x1 ) return -1;
@@ -1284,8 +1388,12 @@ function drawWorld() {
         return 0;
     } );
 
+    // draw cocoa house roof
+    var cocoaHouseRoof = { x1: cocoaHouseX - cocoaHouseRoofInfo.roofOut, y1: cocoaHouseY - cocoaHouseRoofInfo.roofHeight, x2: cocoaHouseX + cocoaHouseWidth + cocoaHouseRoofInfo.roofOut, y2: cocoaHouseY };
+    objects.push(cocoaHouseRoof);
+
     var houseNumber = 1;
-    for( var i=0; i<numBuildings; i++ ) {
+    for( var i=1; i<numBuildings+1; i++ ) {
         var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1+playerAllowedHouseOverlap, objects[i].x1, objects[i].y1, container, houseNumber );
         // Add the roof to the objects
         objects.push( { x1: objects[i].x1 - buildingResponse.roofOut, y1: objects[i].y1 - buildingResponse.roofHeight, x2: objects[i].x2 + buildingResponse.roofOut, y2: objects[i].y1 } );
@@ -1296,6 +1404,22 @@ function drawWorld() {
         objects[i].door = buildingResponse.door;
         houseNumber ++;
     }
+
+    var worldOverlay =document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    worldOverlay.classList.add("world-overlay");
+    for(var y=100; y<canvasHeight+200; y+=100 ) {
+        for( var x = 0; x <= 900; x+=60 ) {
+            drawTree( (x-900)-15+ Math.random() * 20, y+ Math.random() * 20, worldOverlay );
+            drawTree( x+canvasWidth - 40+ Math.random() * 20, y+ Math.random() * 20, worldOverlay );
+        }
+    }
+    for(var x=30-900; x<canvasWidth-30+900; x+=60 ) {
+        for( var y = 0; y <= 600; y+=100 ) {
+            drawTree( x + Math.random() * 20, (y-600)+60 + Math.random() * 20, container );
+            drawTree( x + Math.random() * 20, canvasHeight+140+y + Math.random() * 20, worldOverlay );
+        }
+    }
+
 
     spawnEnemies(numEnemies, container);
     spawnPowerups(numPowerups, container);
@@ -1308,6 +1432,8 @@ function drawWorld() {
     document.body.appendChild(container);
     drawDog(playerCanvasX, playerCanvasY, container);
     drawIceCream(-1, 0, container);
+
+    document.body.appendChild(worldOverlay);
 
     drawBar();
     drawMenu();
@@ -1383,7 +1509,7 @@ function moveHorizontal(amount) {
 
     var playerObject = { x1: playerX - amount, y1: playerY, x2: playerX + playerWidth - amount, y2: playerY + playerHeight };
     var colliding = false;
-    if( playerX + playerWidth - amount > canvasWidth || playerX - amount < 0 ) {
+    if( (playerX + playerWidth - amount > canvasWidth && amount < 0) || (playerX - amount < 0 && amount > 0) ) {
         colliding = true;
     }
     else {
@@ -1400,6 +1526,7 @@ function moveHorizontal(amount) {
         worldHorizontalOffset -= amount;
         // Make sure this matches the css
         world.style.left = "calc(100% / 2 - " + (canvasWidth/2+worldHorizontalOffset) + "px)";
+        document.querySelector(".world-overlay").style.left = world.style.left;
         playerX -= amount;
     }
 }
@@ -1413,7 +1540,7 @@ function moveVertical(amount) {
 
     var playerObject = { x1: playerX, y1: playerY - amount, x2: playerX + playerWidth, y2: playerY + playerHeight - amount };
     var colliding = false;
-    if( playerY + playerHeight - amount > canvasHeight || playerY - amount < 0 ) {
+    if( ( playerY + playerHeight - amount > canvasHeight && amount < 0 ) || ( playerY - amount < 0 && amount > 0) ) {
         colliding = true;
     }
     else {
@@ -1430,6 +1557,7 @@ function moveVertical(amount) {
         worldVerticalOffset -= amount;
         // Make sure this matches the css
         world.style.top = "calc( 100% / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
+        document.querySelector(".world-overlay").style.top = world.style.top;
         playerY -= amount;
     }
 }
@@ -1607,51 +1735,31 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO add house
-        // TODO Make phone better
-        // TODO scenery
-        // TODO sound and music
-        // TODO see what fontawesome stuff can be deleted
-        // TODO try to submit high scores in more places and save the array locally (maybe speed that up?)
-        // TODO I tried to type P on the high scores input and it unpaused...
+        // TODO add entry to cocoa house from game
+        // TODO add inside house
+        // TODO iframe testing on iOS > don't scroll parent
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
             playerHealth --;
+            
+            if( !mute ) {
+                // Play a random bark sound sound
+                var track = Math.floor( Math.random() * barkAudio.length );
+                barkAudio[track].play();
+            }
+
             if( playerHealth <= 0 ) {
                 var oldScore = playerScore;
 
                 unsubmittedHighscores[new Date().getTime()] = oldScore; // Add this score to the list of unsubmitted globalscores
+                localStorage.cocoaTownUnsubmittedHighscores = JSON.stringify(unsubmittedHighscores);
 
                 reset(); // You lose!
                 document.querySelector(".menu-subtitle").innerText = "Game over! You scored " + oldScore + ".";
                 
-                // Submit the score with a sanity check for having a game 103 ID
-                if( localStorage.game103Id ) {
-                    var funcs = [];
-
-                    // for each of the unsubmitted high scores
-                    var unsubmittedHighscoresKeys = Object.keys(unsubmittedHighscores);
-                    for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
-                        // Create functions so that we have closures
-                        // https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example/19323214#19323214
-                        funcs.push ( function(index) { addScore( localStorage.game103Id, unsubmittedHighscores[unsubmittedHighscoresKeys[index]], 
-                            function(response) {
-                                console.log( "Successfully submitted score of " + unsubmittedHighscores[unsubmittedHighscoresKeys[index]] + " for " + game103Username + " (" + localStorage.game103Id + ")" ); 
-                                delete unsubmittedHighscores[unsubmittedHighscoresKeys[index]];
-                            }, 
-                            function() { 
-                                console.log("failed to submit score") 
-                            } 
-                        ) }.bind(this, i) );
-
-                    }
-
-                    // Now run the functions
-                    for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
-                        funcs[i]();
-                    }
-                }
+                // Submit high scores
+                submitScores();
 
                 return;
             }
@@ -1668,6 +1776,39 @@ function existEnemies() {
         }
     }
 
+}
+
+/**
+ * Submit high scores
+ */
+function submitScores() {
+    // Submit the score with a sanity check for having a game 103 ID
+    if( localStorage.game103Id ) {
+        var funcs = [];
+
+        // for each of the unsubmitted high scores
+        var unsubmittedHighscoresKeys = Object.keys(unsubmittedHighscores);
+        for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
+            // Create functions so that we have closures
+            // https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example/19323214#19323214
+            funcs.push ( function(index) { addScore( localStorage.game103Id, unsubmittedHighscores[unsubmittedHighscoresKeys[index]], 
+                function(response) {
+                    console.log( "Successfully submitted score of " + unsubmittedHighscores[unsubmittedHighscoresKeys[index]] + " for " + game103Username + " (" + localStorage.game103Id + ")" ); 
+                    delete unsubmittedHighscores[unsubmittedHighscoresKeys[index]];
+                    localStorage.cocoaTownUnsubmittedHighscores = JSON.stringify(unsubmittedHighscores);
+                }, 
+                function() { 
+                    console.log("failed to submit score") 
+                } 
+            ) }.bind(this, i) );
+
+        }
+
+        // Now run the functions
+        for( var i=0; i<unsubmittedHighscoresKeys.length; i++ ) {
+            funcs[i]();
+        }
+    }
 }
 
 /**
@@ -1907,7 +2048,7 @@ function chasePlayer(enemy) {
  * @returns the next building to deliver to (note this is one less than the actual number on the door of the building)
  */
 function generateNextBuilding() {
-    var nextBuilding = Math.floor(Math.random() * numBuildings);
+    var nextBuilding = Math.floor(Math.random() * numBuildings) + 1; // +1 for no Cocoa House
     if(currentBuilding && nextBuilding == currentBuilding) {
         return generateNextBuilding();
     }
@@ -1940,6 +2081,12 @@ function deliver() {
         openDoor(objects[currentBuilding].door.shape);
 
         closeDoor(door.shape);
+
+        if( !mute ) {
+            // Play a random delivery sound sound
+            var track = Math.floor( Math.random() * deliveryAudio.length );
+            deliveryAudio[track].play();
+        }
 
         increaseDifficulty();
     }
@@ -2025,7 +2172,7 @@ function anglePointer() {
  * Toggle the state of the game being paused
  */
 function togglePause() {
-    if( !document.querySelector(".pause-button") ) {
+    if( !document.querySelector(".pause-button") ) { // Draw the pause button on the first pause
         drawPause();
     }
     if( stopped ) {
@@ -2034,6 +2181,7 @@ function togglePause() {
         document.querySelector(".menu").classList.add("menu-hidden");
         document.querySelector(".bar").style.opacity = 1;
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-pause'></i>";
+        playMainTheme();
     }
     else {
         returnToMainMenuScreen(); // Make sure we always unpause to the main screen
@@ -2044,6 +2192,60 @@ function togglePause() {
         document.querySelector(".bar").style.opacity = 0;
         document.querySelector(".menu").classList.remove("menu-hidden");
         document.querySelector(".pause-button").innerHTML = "<i class='fas fa-play'></i>";
+        stopMainTheme();
+    }
+}
+
+/**
+ * Toggle between muted and unmuted
+ */
+function toggleMute() {
+    if(mute) {
+        mute = false;
+        if( document.querySelector(".menu").classList.contains("menu-hidden") ) {
+            playMainTheme();
+        }
+        document.querySelector(".mute-button").innerHTML = "<i class='fas fa-volume-up'></i>";
+    }
+    else {
+        mute = true;
+        stopMainTheme();
+        document.querySelector(".mute-button").innerHTML = "<i class='fas fa-volume-mute'></i>";
+    }
+}
+
+/**
+ * Stop the main theme song
+ */
+function stopMainTheme() {
+    if( mainTheme.readyState >= 3 ) {
+        mainTheme.pause();
+    }
+    else {
+        mainTheme.removeEventListener('canplaythrough', playMainThemeAfterReady, false); 
+    }
+}
+
+/**
+ * Play the main theme song
+ */
+function playMainTheme() {
+    if( !mute && document.querySelector(".menu").classList.contains("menu-hidden") ) {
+        if( mainTheme.readyState >= 3 ) {
+            mainTheme.play();
+        }
+        else {
+            mainTheme.addEventListener('canplaythrough', playMainThemeAfterReady, false);
+        }
+    }
+}
+
+/**
+ * Play the main music theme
+ */
+function playMainThemeAfterReady() {
+    if( !mute && document.querySelector(".menu").classList.contains("menu-hidden") ) {
+        mainTheme.play();
     }
 }
 
@@ -2144,7 +2346,7 @@ function updateBar() {
     document.querySelector(".bar-score").innerText = playerScore;
     document.querySelector(".bar-hi-score").innerText = localStorage.cocoaTownHighScore;
     document.querySelector(".bar-money").innerText = localStorage.cocoaTownCoins;
-    document.querySelector(".bar-deliver").innerText = (currentBuilding + 1);
+    document.querySelector(".bar-deliver").innerText = (currentBuilding) // house number no longer needs +1, since cocoa house being first provides the offset (house number 1 = objects[1])
 
     var powerupKeys = Object.keys(powerups);
     for(var i=0; i<powerupKeys.length; i++) {
@@ -2221,6 +2423,12 @@ function drawMenu() {
 
     menuFrame.appendChild(menuButtons);
 
+    var muteButton = document.createElement("div");
+    muteButton.classList.add("menu-button");
+    muteButton.classList.add("mute-button");
+    menuFrame.appendChild(muteButton);
+    muteButton.onclick = toggleMute;
+
     menu.appendChild(menuFrame);
 
     // Credits menu frame
@@ -2235,11 +2443,12 @@ function drawMenu() {
 
     var credits = document.createElement("div");
     credits.classList.add("menu-credits");
-    credits.innerHTML = "Concept, Art, Programming: James Grams<br>\
-    Music: Kasey Grams<br>\
+    credits.innerHTML = "Concept, Art, Programming, Human Sounds: James Grams<br>\
+    Music, Human Sounds: Kasey Grams<br>\
     Icons: <a target='blank' rel='noopener' href='https://fontawesome.com/'>Font Awesome</a><br>\
     Fonts: <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Crimson+Text'>Crimson Text by Sebastian Kosch</a>, <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Acme'>Acme by Huerta Tipográfica</a><br>\
-    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='/resources/logo.png'/><br>© 2019 Game 103 (game103.net)</a>";
+    Barking Sounds: <a target='blank' rel='noopener' href='https://www.youtube.com/c/crazymonkeymusic'>Crazy Monkey</a><br>\
+    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='resources/logo.png'/><br>© 2019 Game 103 (game103.net)</a>";
     menuFrame.appendChild(credits);
     
     menu.appendChild(menuFrame);
@@ -2372,7 +2581,6 @@ function drawMenu() {
                             }
                         }, function() { 
                             console.log("An error occured loading more scores");
-                            console.log(err);
                             highScoresTable.onscroll = function() {return false;};
                         } );
                     }
@@ -2406,7 +2614,6 @@ function drawMenu() {
                 }, function() { 
                     menuHighScoresTable.innerText = "Sorry, an error occurred loading scores."; 
                     console.log("An error occured loading scores");
-                    console.log(err);
                 } );
             }
         };
@@ -2611,6 +2818,8 @@ function drawMenu() {
             returnToMainMenuScreen();
         }
     }
+    mute = !mute;
+    toggleMute();
 }
 
 /**
@@ -3004,6 +3213,9 @@ function reset() {
         "invincible": 0,
         "fly": 0
     };
+    stopMainTheme();
+    mainTheme.currentTime = 0; // Start the main theme over
+
     drawWorld();
     tick();
 
@@ -3011,19 +3223,31 @@ function reset() {
     document.body.onkeyup = function(e) {
         keyDown[keyMap[e.which]] = false; // This is not for just press
 
-        // On p press
+        // On p press or space
         if( e.keyCode == 80 || e.keyCode == 32 ) {
-            togglePause();
+            if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
+            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+                togglePause();
+            }
+        }
+
+        // On m press
+        if( e.keyCode == 77 ) {
+            if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
+            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+                toggleMute();
+            }
         }
     };
     document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed) { touchMove(e); } };
-    document.body.ontouchmove = function(e) {touchMove(e);};
+    document.body.ontouchmove = function(e) {touchMove(e); e.preventDefault();};
     document.body.ontouchend = function(e) {
         keyDown.right = false;
         keyDown.left = false;
         keyDown.up = false;
         keyDown.down = false;
     }
+
 }
 
 /**
@@ -3145,6 +3369,9 @@ function makeRequest(type, url, parameters, callback, errorCallback) {
     }
 }
 
+/**
+ * Load a new user
+ */
 function loadNewUser() {
     addUser( function(response) {
         try {
@@ -3161,6 +3388,73 @@ function loadNewUser() {
             console.log(err);
         }
     } );
+}
+
+// Wait for a web font to load
+// taken from here: https://stackoverflow.com/questions/4383226/using-jquery-to-know-when-font-face-fonts-are-loaded
+function waitForWebfonts(fonts, callback) {
+    var loadedFonts = 0;
+    for(var i = 0, l = fonts.length; i < l; ++i) {
+        (function(font) {
+            var node = document.createElement('span');
+            // Characters that vary significantly among different fonts
+            node.innerHTML = 'giItT1WQy@!-/#';
+            // Visible - so we can measure it - but not on the screen
+            node.style.position      = 'absolute';
+            node.style.left          = '-10000px';
+            node.style.top           = '-10000px';
+            // Large font size makes even subtle changes obvious
+            node.style.fontSize      = '300px';
+            // Reset any font properties
+            node.style.fontFamily    = 'sans-serif';
+            node.style.fontVariant   = 'normal';
+            node.style.fontStyle     = 'normal';
+            node.style.fontWeight    = 'normal';
+            node.style.letterSpacing = '0';
+            document.body.appendChild(node);
+
+            // Remember width with no applied web font
+            var width = node.offsetWidth;
+
+            node.style.fontFamily = font + ', sans-serif';
+
+            var interval;
+            function checkFont() {
+                // Compare current width with original width
+                if(node && node.offsetWidth != width) {
+                    ++loadedFonts;
+                    node.parentNode.removeChild(node);
+                    node = null;
+                }
+
+                // If all fonts have been loaded
+                if(loadedFonts >= fonts.length) {
+                    if(interval) {
+                        clearInterval(interval);
+                    }
+                    if(loadedFonts == fonts.length) {
+                        callback();
+                        return true;
+                    }
+                }
+            };
+
+            if(!checkFont()) {
+                interval = setInterval(checkFont, 50);
+            }
+        })(fonts[i]);
+    }
+};
+
+/**
+ * Load the game.
+ * For now this is just web fonts for now.
+ */
+function load() {
+    document.body.innerHTML = "<div class='global-spinner'><i class='fas fa-spinner'></i></div>";
+    waitForWebfonts(["Acme"], function() {
+        reset();
+    });
 }
 
 ////////// Main Program ////////////
@@ -3241,8 +3535,47 @@ var updateUserEndpoint = highScoresDomain + "update_user.php";
 var game103Username = "";
 var requestCount = 0;
 var currentHighScoresPage = 1;
-var unsubmittedHighscores = [];
+var unsubmittedHighscores = {};
+var mute = false;
 
+var deliveryAudio = [
+    new Audio("resources/now-the-party-can-start.mp3"),
+    new Audio("resources/thank-you-james.mp3"),
+    new Audio("resources/thank-you-kasey.mp3"),
+    new Audio("resources/this-is-great.mp3"),
+    new Audio("resources/wow-my-favorite.mp3"),
+    new Audio("resources/yes-the-ice-creams-here.mp3")
+];
+var barkAudio = [
+    new Audio("resources/bark.mp3"),
+    new Audio("resources/bark2.mp3"),
+    new Audio("resources/bark3.mp3")
+];
+var mainTheme = new Audio("resources/main-theme.mp3");
+mainTheme.load();
+
+for(var i=0;i<deliveryAudio.length;i++) {
+    deliveryAudio[i].load();
+}
+for(var i=0;i<barkAudio.length;i++) {
+    barkAudio[i].load();
+}
+
+mainTheme.loop = true;
+mainTheme.volume = 0.6;
+//mainTheme.addEventListener('canplaythrough', function() { mainTheme.play(); mainTheme.pause(); }, false);
+
+// we might have unsubmitted high scores in local storage
+if( localStorage.cocoaTownUnsubmittedHighscores ) {
+    try {
+        unsubmittedHighscores = JSON.parse(localStorage.cocoaTownUnsubmittedHighscores);
+        // try to submit the scores
+        submitScores();
+    } 
+    catch(err) {
+        localStorage.cocoaTownUnsubmittedHighscores = "";
+    }
+}
 // make sure cocoaTownHighScore is not null
 if( !localStorage.cocoaTownHighScore ) {
     localStorage.cocoaTownHighScore = 0;
@@ -3283,8 +3616,7 @@ else {
 }
 
 scaleToScreen();
-
-reset();
 document.oncontextmenu = new Function("return false;"); // disable right click
-
 document.body.onresize = scaleToScreen;
+
+load();

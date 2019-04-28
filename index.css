@@ -3,7 +3,7 @@
 	font-style: normal;
 	font-display: block;
 	src: local('Open Sans Regular'), local('OpenSans-Regular'),
-		url('/resources/Acme-Regular.ttf') format('truetype') /* Safari, Android, iOS */
+		url('resources/Acme-Regular.ttf') format('truetype') /* Safari, Android, iOS */
 }
 
 @font-face {
@@ -11,7 +11,7 @@
 	font-style: normal;
 	font-display: block;
 	src: local('Open Sans Regular'), local('OpenSans-Regular'),
-		url('/resources/CrimsonText-Regular.ttf') format('truetype') /* Safari, Android, iOS */
+		url('resources/CrimsonText-Regular.ttf') format('truetype') /* Safari, Android, iOS */
 }
 
 * {
@@ -19,14 +19,15 @@
 }
 
 html {
-    background-color: rgb(0, 94, 5);
+    background-color: rgb(0, 48, 2);
     overflow: hidden;
     margin: 0;
     position: fixed;
 }
 
 body {
-    background-color: rgb(0, 94, 5);
+    /*background-color: rgb(0, 48, 2);*/
+    background-color: rgb(0, 133, 29);
     width: 1200px;
     height: 675px;
     overflow: hidden;
@@ -37,7 +38,7 @@ body {
     transform-origin: top left;
 }
 
-.world {
+.world, .world-overlay {
     width: 3000px;
     height: 3000px;
     position: absolute;
@@ -45,6 +46,11 @@ body {
     top: calc( 100% / 2 - 1500px);
     left: calc(100% / 2 - 1500px);
     background-color: rgb(0, 133, 29);
+    overflow: visible;
+}
+
+.world-overlay {
+    background-color: transparent;
 }
 
 .player {
@@ -76,10 +82,29 @@ body {
     fill: white;
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside {
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside, .tree-trunk, .tree, .cocoa-house, .cocoa-house-roof, .cocoa-house-text-border {
     fill: transparent;
     stroke-width: 2px;
     stroke: black;
+}
+
+.tree-trunk, .cocoa-house {
+    fill: rgb(88, 43, 0);
+}
+
+.cocoa-house-text {
+    fill: white;
+    font-size: 20px;
+    font-family: "Crimson Text", serif;
+    letter-spacing: 2px;
+}
+
+.cocoa-house-roof, .cocoa-house-text-border {
+    fill: rgb(0, 80, 67);
+}
+
+.tree {
+    fill: rgb(3, 94, 3);
 }
 
 .door, .compass {
@@ -495,7 +520,7 @@ body {
 }
 
 .menu-high-scores-table-column:nth-child(1) {
-    margin-right: 10px;
+    width: 35px;
 }
 
 .menu-high-scores-table-column:nth-child(2) {
@@ -552,9 +577,11 @@ body {
 .fa-spinner {
     animation-name: spin;
     animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
 }
 
-.pause-button {
+.pause-button, .mute-button {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -562,9 +589,13 @@ body {
     opacity: 0.6;
 }
 
-.pause-button:active {
+.pause-button:active, .mute-button:active {
     position: absolute;
     top: 15px;
+}
+
+.mute-button {
+    opacity: 1;
 }
 
 .message-success {
@@ -573,4 +604,16 @@ body {
 
 .message-failure {
     color: rgb(180, 0, 0);
+}
+
+.global-spinner {
+    width: 100%;
+    color: rgb(0, 48, 2);
+    font-size: 48px;
+    text-align: center;
+    display: block;
+    position: absolute;
+    left:50%;
+    top:50%;
+    transform: translateX(-50%)translateY(-50%)
 }
