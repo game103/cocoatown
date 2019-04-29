@@ -3217,6 +3217,7 @@ function reset() {
     mainTheme.currentTime = 0; // Start the main theme over
 
     drawWorld();
+    //drawInsideHouse();
     tick();
 
     document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
@@ -3457,6 +3458,24 @@ function load() {
     });
 }
 
+//// Inner House functions
+
+function drawInsideHouse() {
+
+    // width 1200
+    // height 675
+
+    var container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    container.classList.add("inside-house");
+    document.body.appendChild(container);
+
+    var path = drawPath( [ [0,607.5], [1080, 607.5], [1200, 675] ] , container );
+    path.classList.add("inside-house-floor");
+    path = drawPath( [ [1200, 675], [1080, 607.5], [1080, 0] ] , container );
+    path.classList.add("inside-house-wall");
+
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -3615,8 +3634,9 @@ else {
     }, function() { console.log("HTTP error while loading user: creating a new one."); loadNewUser(); } /* Try to load a new user on error */ );
 }
 
+
+// Start the game
 scaleToScreen();
 document.oncontextmenu = new Function("return false;"); // disable right click
 document.body.onresize = scaleToScreen;
-
 load();
