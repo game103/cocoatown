@@ -82,7 +82,7 @@ body {
     fill: white;
 }
 
-.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside, .tree-trunk, .tree, .cocoa-house, .cocoa-house-roof, .cocoa-house-text-border {
+.building, .brick, .window, .roof, .door, .dog, .enemy, .scoop, .cone, .powerup, .compass, .mat, .door-inside, .tree-trunk, .tree, .cocoa-house, .cocoa-house-roof, .cocoa-house-text-border, .flowers {
     fill: transparent;
     stroke-width: 2px;
     stroke: black;
@@ -623,8 +623,45 @@ body {
     height: 100%;
 }
 
-.inside-house-floor, .inside-house-wall {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed {
     stroke: black;
     stroke-width: 2px;
+    overflow: visible;
+}
+
+.inside-house-floor, .inside-house-wall {
     fill: transparent;
+}
+
+.inside-house-floor {
+    fill: tan;
+}
+
+.inside-house-wall, .inside-house {
+    fill: white;
+    background-color: white;
+}
+
+.desk-body, .desk-leg {
+    fill: rgb(158, 102, 29);
+}
+
+.computer-frame {
+    fill: gray;
+}
+
+.computer-screen, .tv-screen {
+    fill: black;
+}
+
+.tv-frame {
+    fill: silver;
+}
+
+.book-name {
+    transform: rotate(90deg);
+    font-size: 12px;
+    stroke: transparent;
+    fill: white;
+    font-family: "Crimson Text", "serif";
 }

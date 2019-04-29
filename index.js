@@ -1218,6 +1218,21 @@ function drawTree(x, y, container) {
 }
 
 /**
+ * Draw flowers
+ */
+function drawFlowers(x, y, container) {
+    var flower1 = drawCircle( x-flowerRadius, y-flowerRadius/2, flowerRadius, container );
+    flower1.classList.add("flowers");
+    flower1.style.fill = getRandomColor();
+    var flower2 = drawCircle( x+flowerRadius, y-flowerRadius/2, flowerRadius, container );
+    flower2.classList.add("flowers");
+    flower2.style.fill = getRandomColor();
+    var flower3 = drawCircle( x, y+flowerRadius/2, flowerRadius, container );
+    flower3.classList.add("flowers");
+    flower3.style.fill = getRandomColor();
+}
+
+/**
  * Draw a rectange
  * @param {number} width - the width of the house
  * @param {number} height - the height of the house
@@ -1388,15 +1403,16 @@ function drawWorld() {
         return 0;
     } );
 
-    // draw cocoa house roof
-    var cocoaHouseRoof = { x1: cocoaHouseX - cocoaHouseRoofInfo.roofOut, y1: cocoaHouseY - cocoaHouseRoofInfo.roofHeight, x2: cocoaHouseX + cocoaHouseWidth + cocoaHouseRoofInfo.roofOut, y2: cocoaHouseY };
-    objects.push(cocoaHouseRoof);
+    var roofBarrierHeight = 5;
 
+    addRoofObjects(cocoaHouseX, cocoaHouseY, cocoaHouseWidth, cocoaHouseRoofInfo.roofOut, cocoaHouseRoofInfo.roofHeight, 0, roofBarrierHeight);
+    
     var houseNumber = 1;
     for( var i=1; i<numBuildings+1; i++ ) {
         var buildingResponse = drawBuilding( objects[i].x2 - objects[i].x1, objects[i].y2-objects[i].y1+playerAllowedHouseOverlap, objects[i].x1, objects[i].y1, container, houseNumber );
         // Add the roof to the objects
-        objects.push( { x1: objects[i].x1 - buildingResponse.roofOut, y1: objects[i].y1 - buildingResponse.roofHeight, x2: objects[i].x2 + buildingResponse.roofOut, y2: objects[i].y1 } );
+        addRoofObjects(objects[i].x1, objects[i].y1, objects[i].x2 - objects[i].x1, buildingResponse.roofOut, buildingResponse.roofHeight, objects[i].x2 - objects[i].x1, roofBarrierHeight);
+
         enemyBuildings[i].x1 = enemyBuildings[i].x1 - buildingResponse.roofOut;
         enemyBuildings[i].x2 = enemyBuildings[i].x2 + buildingResponse.roofOut;
         enemyBuildings[i].y1 = enemyBuildings[i].y1 - buildingResponse.roofHeight;
@@ -1407,20 +1423,22 @@ function drawWorld() {
 
     var worldOverlay =document.createElementNS("http://www.w3.org/2000/svg", "svg");
     worldOverlay.classList.add("world-overlay");
-    for(var y=100; y<canvasHeight+200; y+=100 ) {
-        for( var x = 0; x <= 900; x+=60 ) {
-            drawTree( (x-900)-15+ Math.random() * 20, y+ Math.random() * 20, worldOverlay );
-            drawTree( x+canvasWidth - 40+ Math.random() * 20, y+ Math.random() * 20, worldOverlay );
+    for(var y=200; y<canvasHeight+200; y+=200) {
+        for( var x = 0; x <= 900; x+=120) {
+            // 55 (tree width) - 15 = 40
+            drawTree( (x-900)-15 + Math.random() * 60, y + Math.random() * 100, worldOverlay );
+            drawTree( x+canvasWidth-40 + Math.random() * 60, y + Math.random() * 100, worldOverlay );
         }
     }
-    for(var x=30-900; x<canvasWidth-30+900; x+=60 ) {
-        for( var y = 0; y <= 600; y+=100 ) {
-            drawTree( x + Math.random() * 20, (y-600)+60 + Math.random() * 20, container );
-            drawTree( x + Math.random() * 20, canvasHeight+140+y + Math.random() * 20, worldOverlay );
+    for(var x=60-900; x<canvasWidth-30+900; x+=120) {
+        for( var y = 0; y <= 600; y+=200) {
+            // 200 (tree height) - 60 = 140
+            drawTree( x + Math.random() * 60, (y-600)+60 - Math.random() * 100, container );
+            drawTree( x + Math.random() * 60, canvasHeight+140+y + Math.random() * 100, worldOverlay );
         }
     }
 
-
+    spawnFlowers(numFlowers, container);
     spawnEnemies(numEnemies, container);
     spawnPowerups(numPowerups, container);
     //drawMat(objects[currentBuilding].door, container);
@@ -1437,6 +1455,30 @@ function drawWorld() {
 
     drawBar();
     drawMenu();
+}
+
+function addRoofObjects(buildingX, buildingY, buildingWidth, roofOut, roofHeight, roofEndingWidth, roofBarrierHeight) {
+    var startingWidth = roofOut * 2 + buildingWidth;
+
+    for(var i=roofBarrierHeight; i<=roofHeight; i+=roofBarrierHeight) {
+        // at i == roofHeight equals, the width is 0...
+
+        var percentToTop = i/roofHeight;
+        var currentWidth = (startingWidth - roofEndingWidth) - (startingWidth - roofEndingWidth)*percentToTop + roofEndingWidth;
+        var currentOffset = (startingWidth-currentWidth)/2;
+
+        // We draw a rectangular object, starting in the top left corner
+        // This object will not exceed the boundaries of the roof
+        // its top side will hit the horizontal boundaries of the roof
+        // and it will go directly down
+        // since currentWidth is calculated to hit both sides from the TOP
+        objects.push( {
+            x1: buildingX - roofOut + currentOffset,
+            x2: buildingX - roofOut + currentOffset + currentWidth,
+            y1: buildingY - i,
+            y2: buildingY - (i+roofBarrierHeight),
+        } );
+    }
 }
 
 /**
@@ -1456,16 +1498,16 @@ function spawnEnemies(enemyCount, container) {
 
             enemy = { x1: x - enemyRadius, y1: y - enemyRadius, x2: x + enemyRadius, y2: y+enemyRadius };
             var overlaps = false;
-            for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-60, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap+20 };
+            for(var j=0; j<objects.length; j++) {
+                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
                 if( collisionTest(enemy, curOverlapObject) ) {
                     overlaps = true;
                 }
             }
             // Add the extra spacing to the current enemy here, since all the enemies are the same size
             var overlapEnemy = { x1: enemy.x1 - 50, y1: enemy.y1 - 50, x2: enemy.x2 + 50, y2: enemy.y2 + 50 };
-            for(var i=0; i<enemies.length; i++) {
-                if( collisionTest(overlapEnemy, enemies[i]) ) {
+            for(var j=0; j<enemies.length; j++) {
+                if( collisionTest(overlapEnemy, enemies[j]) ) {
                     overlaps = true;
                 }
             }
@@ -1529,6 +1571,14 @@ function moveHorizontal(amount) {
         document.querySelector(".world-overlay").style.left = world.style.left;
         playerX -= amount;
     }
+    else {
+        if( amount > 0 && amount-1 > 0 ) {
+            moveHorizontal(amount-1);
+        }
+        else if( amount < 0 && amount+1 < 0 ) {
+            moveHorizontal(amount+1);
+        }
+    }
 }
 
 /**
@@ -1559,6 +1609,14 @@ function moveVertical(amount) {
         world.style.top = "calc( 100% / 2 - " + (canvasHeight/2+worldVerticalOffset) + "px)";
         document.querySelector(".world-overlay").style.top = world.style.top;
         playerY -= amount;
+    }
+    else {
+        if( amount > 0 && amount-1 > 0 ) {
+            moveVertical(amount-1);
+        }
+        else if( amount < 0 && amount+1 < 0 ) {
+            moveVertical(amount+1);
+        }
     }
 }
 
@@ -1738,6 +1796,8 @@ function existEnemies() {
         // TODO add entry to cocoa house from game
         // TODO add inside house
         // TODO iframe testing on iOS > don't scroll parent
+        // TODO pond that slows you down?
+        // TODO - spawn constants?
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -3062,16 +3122,16 @@ function spawnPowerups(powerupCount, container) {
 
             powerup = { x1: x - powerupRadius, y1: y - powerupRadius, x2: x + powerupRadius, y2: y+powerupRadius };
             var overlaps = false;
-            for(var i=0; i<objects.length; i++) {
-                var curOverlapObject = { x1: objects[i].x1-30, y1: objects[i].y1-60, x2: objects[i].x2+30, y2: objects[i].y2+playerAllowedHouseOverlap+20 };
+            for(var j=0; j<objects.length; j++) {
+                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
                 if( collisionTest(powerup, curOverlapObject) ) {
                     overlaps = true;
                 }
             }
             // Add the extra spacing to the powerup here, since all the powerups are the same size
             var overlapPowerup = { x1: powerup.x1 - 50, y1: powerup.y1 - 50, x2: powerup.x2 + 50, y2: powerup.y2 + 50 };
-            for(var i=0; i<powerupsOnScreen.length; i++) {
-                if( collisionTest(overlapPowerup, powerupsOnScreen[i]) ) {
+            for(var j=0; j<powerupsOnScreen.length; j++) {
+                if( collisionTest(overlapPowerup, powerupsOnScreen[j]) ) {
                     overlaps = true;
                 }
             }
@@ -3083,6 +3143,34 @@ function spawnPowerups(powerupCount, container) {
                 var powerupShape = drawPowerup(x, y, powerupRadius, powerup.type, container);
                 powerup.shape = powerupShape;
                 powerupsOnScreen.push(powerup);
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * Spawn Flowers
+ * @param {number} flowerCount - the number of flowers to draw
+ * @param {HTMLElement} container - the svg container on which to draw
+ */
+function spawnFlowers(flowerCount, container) {
+    for( var i=0; i<flowerCount; i++ ) {
+        var flower;
+        while( true ) {
+            var x = Math.floor(Math.random() * (canvasWidth)/10) * 10;
+            var y = Math.floor(Math.random() * (canvasHeight)/10) * 10;
+
+            flower = { x1: x-flowerRadius*2, y1: y-flowerRadius, x2: x+flowerRadius*2, y2: y+flowerRadius };
+            var overlaps = false;
+            for(var j=0; j<objects.length; j++) {
+                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
+                if( collisionTest(flower, curOverlapObject) ) {
+                    overlaps = true;
+                }
+            }
+            if( !overlaps ) {
+                drawFlowers(x, y, container);
                 break;
             }
         }
@@ -3216,8 +3304,8 @@ function reset() {
     stopMainTheme();
     mainTheme.currentTime = 0; // Start the main theme over
 
-    drawWorld();
-    //drawInsideHouse();
+    //drawWorld();
+    drawInsideHouse();
     tick();
 
     document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
@@ -3461,7 +3549,6 @@ function load() {
 //// Inner House functions
 
 function drawInsideHouse() {
-
     // width 1200
     // height 675
 
@@ -3469,10 +3556,159 @@ function drawInsideHouse() {
     container.classList.add("inside-house");
     document.body.appendChild(container);
 
-    var path = drawPath( [ [0,607.5], [1080, 607.5], [1200, 675] ] , container );
+    var path = drawPath( [ [0,607.5], [1080, 607.5], [1200, 675], [1200, 680], [-5, 685], [-5, 607.5] ] , container  );
     path.classList.add("inside-house-floor");
-    path = drawPath( [ [1200, 675], [1080, 607.5], [1080, 0] ] , container );
+    path = drawPath( [ [1200, 675], [1080, 607.5], [1080, 0], [1080, -5], [1205, -5], [1205, 680] ] , container );
     path.classList.add("inside-house-wall");
+
+    drawDesk(330, 460, container);
+    drawComputer(340, 400, container);
+    drawTV(740, 300, container);
+    drawBook(90, 90, "steelblue", "Mary Poppins", container);
+    drawDogBed(600, 500, container);
+}
+
+function drawDesk(x, y, container) {
+    var deskGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    deskGroup.classList.add("desk");
+    deskGroup.setAttribute("x", x);
+    deskGroup.setAttribute("y", y)
+
+    var leg = drawRectangle(20, 170, 0, 0, deskGroup);
+    leg.classList.add("desk-leg");
+
+    leg = drawRectangle(20, 170, 180, 0, deskGroup);
+    leg.classList.add("desk-leg");
+
+    var body = drawRectangle(200, 40, 0, 0, deskGroup);
+    body.classList.add("desk-body");
+
+    deskGroup.classList.add("house-item");
+    container.appendChild(deskGroup);
+
+    return deskGroup;
+}
+
+function drawComputer(x, y, container) {
+    var computerGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    computerGroup.classList.add("computer");
+    computerGroup.setAttribute("x", x);
+    computerGroup.setAttribute("y", y)
+
+    var stand = drawRectangle(10, 25, 60, 97.5, computerGroup);
+    stand.classList.add("computer-frame");
+    var base = drawRectangle(30, 10, 50, 122.5, computerGroup);
+    base.classList.add("computer-frame");
+    var frame = drawRectangle(130, 97.5, 0, 0, computerGroup);
+    frame.classList.add("computer-frame");
+    var screen = drawRectangle(110, 77.5, 10, 10, computerGroup);
+    screen.classList.add("computer-screen");
+
+    computerGroup.classList.add("house-item");
+    container.appendChild(computerGroup);
+
+    return computerGroup;
+}
+
+function drawTV(x, y, container) {
+    var tvGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    tvGroup.classList.add("tv");
+    tvGroup.setAttribute("x", x);
+    tvGroup.setAttribute("y", y)
+
+    var frame = drawRectangle(220, 132.5, 0, 0, tvGroup);
+    frame.classList.add("tv-frame");
+    var screen = drawRectangle(200, 112.5, 10, 10, tvGroup);
+    screen.classList.add("tv-screen");
+
+    tvGroup.classList.add("house-item");
+    container.appendChild(tvGroup);
+
+    return tvGroup;
+}
+
+function drawBook(x, y, fill, text, container) {
+    var bookGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    bookGroup.classList.add("book");
+    bookGroup.setAttribute("x", x);
+    bookGroup.setAttribute("y", y);
+
+    var book = drawRectangle(18.5, 80, 0, 0, bookGroup);
+    book.classList.add("book");
+    book.style.fill = fill;
+
+    var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    textElement.innerHTML = text;
+    textElement.classList.add("book-name");
+    textElement.setAttribute("x", 7);
+    textElement.setAttribute("y", -6);
+    textElement.setAttribute("textLength", 66);
+    bookGroup.appendChild(textElement);
+
+    bookGroup.classList.add("house-item");
+    container.appendChild(bookGroup);
+
+    return bookGroup;
+}
+
+function drawDogBed(x, y, container) {
+
+    var dogBedGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    dogBedGroup.classList.add("dog-bed");
+    dogBedGroup.setAttribute("x", x);
+    dogBedGroup.setAttribute("y", y);
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M " + (10) + " " + (0));
+    d.push("C " + (70) + " " + (-5) + "," + (10) + " " + (48) + "," + (80) + " " + (50));
+    d.push("C " + (80) + " " + (50) + "," + (170) + " " + (50) + "," + (170) + " " + (50));
+    d.push("C " + (240) + " " + (48) + "," + (180) + " " + (-5) + "," + (240) + " " + (0));
+    d.push("C " + (250) + " " + (0) + "," + (250) + " " + (10) + "," + (250) + " " + (10));
+    d.push("C " + (255) + " " + (100) + "," + (240) + " " + (100) + "," + (225) + " " + (100));
+    d.push("C " + (200) + " " + (100) + "," + (25) + " " + (100) + "," + (25) + " " + (100));
+    d.push("C " + (10) + " " + (100) + "," + (-5) + " " + (100) + "," + (0) + " " + (10));
+    d.push("C " + (0) + " " + (0) + "," + (10) + " " + (0) + "," + (10) + " " + (0));
+    path.setAttribute("d", d.join(" "));
+    dogBedGroup.appendChild( path );
+    path.classList.add("dog-bed");
+
+    container.appendChild( dogBedGroup );
+}
+
+function drawNotepad() {
+
+}
+
+function drawClock() {
+
+}
+
+function drawBookshelf() {
+
+}
+
+function drawCalendar() {
+
+}
+
+function drawPictureFrame() {
+
+}
+
+function drawNewspaper() {
+
+}
+
+function drawTelephone() {
+
+}
+
+function drawMusicPlayer() {
+
+}
+
+function drawCassettes() {
 
 }
 
@@ -3542,6 +3778,8 @@ var powerupTicks = 10000/fps; // ten seconds of powerup
 var changeWhenSafe; // Powerup changes to make when safe to do so, keys for size and then other needed powerups
 var isFlying;
 var pauseButtonIsPressed;
+var flowerRadius = 5;
+var numFlowers = 50;
 
 var highScoresDomain = "https://game103.net/ws/scores/";
 var highScoresGame = "ct";
