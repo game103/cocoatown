@@ -623,7 +623,7 @@ body {
     height: 100%;
 }
 
-.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper {
     stroke: black;
     stroke-width: 2px;
     overflow: visible;
@@ -647,11 +647,11 @@ body {
 }
 
 .computer-frame {
-    fill: gray;
+    fill: rgb(39, 39, 39);
 }
 
 .computer-screen, .tv-screen {
-    fill: black;
+    fill: rgb(65, 64, 64);
 }
 
 .tv-frame {
@@ -664,4 +664,65 @@ body {
     stroke: transparent;
     fill: white;
     font-family: "Crimson Text", "serif";
+}
+
+.dog-bed {
+    fill: rgb(233, 233, 233);
+}
+
+.dog-bed-inner {
+    fill: rgb(151, 55, 26);
+}
+
+.notepad {
+    fill: rgb(255, 255, 119);
+}
+
+.sticky {
+    stroke: none;
+    fill: rgb(189, 189, 91);
+}
+
+.clock-wood {
+    fill: rgb(82, 34, 12);
+}
+
+.clock-face {
+    fill: white;
+}
+
+.clock-digit {
+    stroke: none;
+    fill: black;
+    font-size: 8px;
+}
+
+.clock-hand {
+    stroke-linecap: round;
+}
+
+.bookshelf-background {
+    fill: rgb(83, 51, 27);
+}
+
+.bookshelf-shelf {
+    fill: rgb(58, 35, 17);
+}
+
+.picture-frame-frame {
+    fill: rgb(66, 37, 15);
+}
+
+.newspaper-paper {
+    fill: white;
+}
+
+.newspaper-title {
+    fill: black;
+    stroke-width: 1px;
+    font-size: 10px;
+}
+
+.newspaper-photo {
+    fill: grey;
 }

@@ -3158,8 +3158,8 @@ function spawnFlowers(flowerCount, container) {
     for( var i=0; i<flowerCount; i++ ) {
         var flower;
         while( true ) {
-            var x = Math.floor(Math.random() * (canvasWidth)/10) * 10;
-            var y = Math.floor(Math.random() * (canvasHeight)/10) * 10;
+            var x = Math.floor(Math.random() * (canvasWidth-300)/10) * 10 + 150;
+            var y = Math.floor(Math.random() * (canvasHeight-300)/10) * 10 + 150;
 
             flower = { x1: x-flowerRadius*2, y1: y-flowerRadius, x2: x+flowerRadius*2, y2: y+flowerRadius };
             var overlaps = false;
@@ -3566,6 +3566,11 @@ function drawInsideHouse() {
     drawTV(740, 300, container);
     drawBook(90, 90, "steelblue", "Mary Poppins", container);
     drawDogBed(600, 500, container);
+    drawNotepad(1000, 300, container);
+    drawClock(350, 350, container);
+    drawBookshelf(200, 50, container);
+    drawPictureFrame(800, 150, container);
+    drawNewspaper(700, 50, container);
 }
 
 function drawDesk(x, y, container) {
@@ -3634,7 +3639,7 @@ function drawBook(x, y, fill, text, container) {
     bookGroup.setAttribute("y", y);
 
     var book = drawRectangle(18.5, 80, 0, 0, bookGroup);
-    book.classList.add("book");
+    book.classList.add("book-spine");
     book.style.fill = fill;
 
     var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -3671,33 +3676,174 @@ function drawDogBed(x, y, container) {
     d.push("C " + (0) + " " + (0) + "," + (10) + " " + (0) + "," + (10) + " " + (0));
     path.setAttribute("d", d.join(" "));
     dogBedGroup.appendChild( path );
-    path.classList.add("dog-bed");
+    path.classList.add("dog-bed-outer");
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = []; 
+    var downOffset = 10;
+    var horizontalOffset = 10;
+    d.push("M " + (10) + " " + (0+downOffset));
+    d.push("C " + (70-horizontalOffset) + " " + (-5+downOffset) + "," + (10-horizontalOffset) + " " + (48+downOffset) + "," + (80) + " " + (50+downOffset));
+    d.push("C " + (80) + " " + (50+downOffset) + "," + (170) + " " + (50+downOffset) + "," + (170) + " " + (50+downOffset));
+    d.push("C " + (240+horizontalOffset) + " " + (48+downOffset) + "," + (180+horizontalOffset) + " " + (-5+downOffset) + "," + (240) + " " + (0+downOffset));
+    d.push("C " + (250) + " " + (0+downOffset) + "," + (250) + " " + (10+downOffset) + "," + (250) + " " + (10));
+    d.push("C " + (255) + " " + (100) + "," + (240) + " " + (100) + "," + (225) + " " + (100));
+    d.push("C " + (200) + " " + (100) + "," + (25) + " " + (100) + "," + (25) + " " + (100));
+    d.push("C " + (10) + " " + (100) + "," + (-5) + " " + (100) + "," + (0) + " " + (10+downOffset));
+    d.push("C " + (0) + " " + (0+downOffset) + "," + (10) + " " + (0+downOffset) + "," + (10) + " " + (0+downOffset));
+    path.setAttribute("d", d.join(" "));
+    dogBedGroup.appendChild( path );
+    path.classList.add("dog-bed-inner");
 
     container.appendChild( dogBedGroup );
+
+    return dogBedGroup;
 }
 
-function drawNotepad() {
+function drawNotepad(x, y, container) {
+    var notepadGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    notepadGroup.classList.add("notepad");
+    notepadGroup.setAttribute("x", x);
+    notepadGroup.setAttribute("y", y);
 
+    var notepad = drawRectangle(30, 30, 0, 0, notepadGroup);
+    notepad.classList.add("pad");
+
+    var sticky = drawRectangle(28, 5, 1, 1, notepadGroup);
+    sticky.classList.add("sticky");
+
+    container.appendChild( notepadGroup );
+
+    return notepadGroup;
 }
 
-function drawClock() {
+function drawClock(x, y, container) {
+    var clockGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    clockGroup.classList.add("clock");
+    clockGroup.setAttribute("x", x);
+    clockGroup.setAttribute("y", y);
 
+    var clockWood = drawCircle(0, 0, 30, clockGroup);
+    clockWood.classList.add("clock-wood");
+
+    var clockFace = drawCircle(0, 0, 26, clockGroup);
+    clockFace.classList.add("clock-face");
+
+    for(var i=1; i<13; i++) {
+        var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textElement.innerHTML = i;
+        textElement.classList.add("clock-digit");
+        var point = getPointOnCircumference(0, 0, 19, (2*Math.PI)/12 * i - Math.PI/2);
+        textElement.setAttribute("x", point[0]-2);
+        textElement.setAttribute("y", point[1]+3.5);
+        clockGroup.appendChild(textElement);
+    }
+
+    var clockHourHand = drawLine(0, 0, 12, 0, clockGroup);
+    clockHourHand.classList.add("clock-hand");
+    clockHourHand.classList.add("clock-hour-hand");
+    var clockMinuteHand = drawLine(0, 0, 15, 0, clockGroup);
+    clockMinuteHand.classList.add("clock-hand");
+    clockMinuteHand.classList.add("clock-minute-hand");
+
+    container.appendChild( clockGroup );
+
+    setClockTime();
+    setInterval(setClockTime, 30000);
+
+    return clockGroup;
 }
 
-function drawBookshelf() {
+function setClockTime() {
+    var time = new Date();
+    var hours = time.getHours();
+    var minutes = time.getMinutes();
+    var hoursRotate = (2*Math.PI)/12 * hours - Math.PI/2;
+    var minutesRotate = (2*Math.PI)/60 * minutes -Math.PI/2;
+    hoursRotate += minutesRotate/12;
+    document.querySelector(".clock-hour-hand").style.transform = "rotate("+hoursRotate+"rad)";
+    document.querySelector(".clock-minute-hand").style.transform = "rotate("+minutesRotate+"rad)";
+}
 
+function drawBookshelf(x, y, container) {
+
+    var bookshelfGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    bookshelfGroup.classList.add("bookshelf");
+    bookshelfGroup.setAttribute("x", x);
+    bookshelfGroup.setAttribute("y", y);
+
+    var background = drawRectangle(200, 500, 0, 0, bookshelfGroup);
+    background.classList.add("bookshelf-background");
+    var shelf = drawRectangle(180, 100, 10, 10, bookshelfGroup);
+    shelf.classList.add("bookshelf-shelf");
+    var shelf = drawRectangle(180, 100, 10, 120, bookshelfGroup);
+    shelf.classList.add("bookshelf-shelf");
+    var shelf = drawRectangle(180, 100, 10, 230, bookshelfGroup);
+    shelf.classList.add("bookshelf-shelf");
+    var shelf = drawRectangle(180, 100, 10, 340, bookshelfGroup);
+    shelf.classList.add("bookshelf-shelf");
+
+    container.appendChild( bookshelfGroup );
+
+    return bookshelfGroup;
 }
 
 function drawCalendar() {
 
 }
 
-function drawPictureFrame() {
+function drawPictureFrame(x, y, container) {
 
+    var pictureFrameGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    pictureFrameGroup.classList.add("picture-frame");
+    pictureFrameGroup.setAttribute("x", x);
+    pictureFrameGroup.setAttribute("y", y);
+
+    var pictureFrame = drawRectangle(73.125, 130, 0, 0, pictureFrameGroup);
+    pictureFrame.classList.add("picture-frame-frame");
+    pictureFrameGroup.appendChild(pictureFrame);
+
+    var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    picture.classList.add("picture-frame-picture");
+    picture.setAttribute("x", 10);
+    picture.setAttribute("y", 10);
+    picture.setAttribute("width", 53.125);
+    picture.setAttribute("height", 110);
+    pictureFrameGroup.appendChild(picture);
+
+    container.appendChild(pictureFrameGroup);
+
+    return pictureFrameGroup;
 }
 
-function drawNewspaper() {
+function drawNewspaper(x, y, container) {
 
+    var newspaperGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    newspaperGroup.classList.add("newspaper");
+    newspaperGroup.setAttribute("x", x);
+    newspaperGroup.setAttribute("y", y);
+
+    var newspaper = drawRectangle(90, 70, 0, 0, newspaperGroup);
+    newspaper.classList.add("newspaper-paper");
+
+    var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    textElement.innerHTML = "NEWS";
+    textElement.classList.add("newspaper-title");
+    textElement.setAttribute("x", 20);
+    textElement.setAttribute("y", 15);
+    textElement.setAttribute("textLength", 50);
+    newspaperGroup.appendChild(textElement);
+
+    drawLine(5, 20, 85, 20, newspaperGroup).classList.add("newspaper");
+
+    for(var i=0; i<8; i++) {
+        drawLine(5, 28 + i*5, 25, 28 + i*5, newspaperGroup).classList.add("newspaper");
+        drawLine(30, 28 + i*5, 50, 28 + i*5, newspaperGroup).classList.add("newspaper");
+    }
+
+    drawRectangle(30, 34, 55, 28, newspaperGroup).classList.add("newspaper-photo");
+
+    container.appendChild(newspaperGroup);
 }
 
 function drawTelephone() {
@@ -3708,7 +3854,11 @@ function drawMusicPlayer() {
 
 }
 
-function drawCassettes() {
+function drawLamp() {
+
+}
+
+function drawBall() {
 
 }
 
@@ -3760,7 +3910,7 @@ var enemySightedDistanceX;
 var enemySightedDistanceY;
 var maxSightedDistanceXIncrease = 130; // Scale is maintained at 16/9, Y is increased accordingly
 var enemyMovementAmount = 6;
-var enemyPadding = 20; // Distance an enemy must remain from an object beyond a direct collision
+var enemyPadding = 25; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
 var maxDifficulty = 50;
 var objects; // Objects that the player can hit.
