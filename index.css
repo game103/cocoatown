@@ -18,6 +18,10 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
+*:not(input) {
+    user-select: none;
+}
+
 html {
     background-color: rgb(0, 48, 2);
     overflow: hidden;
@@ -621,9 +625,10 @@ body {
 .inside-house {
     width: 100%;
     height: 100%;
+    display: none;
 }
 
-.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog, .calendar {
     stroke: black;
     stroke-width: 2px;
     overflow: visible;
@@ -699,6 +704,7 @@ body {
 
 .clock-hand {
     stroke-linecap: round;
+    transform-origin: 30px 30px;
 }
 
 .bookshelf-background {
@@ -744,5 +750,103 @@ body {
 .inside-dog .dog-body {
     transform-origin: top left;
     transform: scaleX(-1.75)scaleY(1.75);
-    stroke-width: 5px;
+}
+
+.inside-dog .dog-body .dog {
+    stroke-width: 1.142px;
+}
+
+.calendar {
+    fill: white;
+}
+
+.calendar-month, .calendar-day-label, .calendar-day {
+    fill: black;
+    stroke-width: 1px;
+    font-size: 10px;
+}
+
+.calendar-day-label, .calendar-day {
+    font-size: 7px;
+}
+
+.calendar-day {
+    stroke: none;
+}
+
+.calendar-strike {
+    stroke-width: 2px;
+    stroke: red;
+}
+
+.menu-button-inner-house.back-button, .menu-button-inner-house.inventory-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    text-align: center;
+    display: none;
+}
+
+.menu-button-inner-house.back-button:active, .menu-button-inner-house.inventory-button:active {
+    position: absolute;
+    top: 15px;
+}
+
+.menu-button-inner-house.inventory-button {
+    left: 90px;
+}
+
+.inventory {
+    background-color: rgba(142, 200, 248, 0.8);
+    color: black;
+    position: absolute;
+    top: 10px;
+    font-size: 15px;
+    margin: 0;
+    left: 175px;
+    border-radius: 25px;
+    width: 0;
+    transition: width 0.5s ease;
+    padding: 0;
+    display: block;
+    margin: 5px;
+}
+
+.inventory-expanded {
+    width: calc(100% - 195px);
+}
+
+.inventory-slider {
+    margin: 5px;
+    padding: 5px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.inventory-item {
+    height: 70px;
+    width: 70px;
+    display: inline-block;
+    background-color: white;
+    border: 2px solid black;
+    margin: 5px 15px;
+    border-radius: 10px;
+    position: relative;
+    pointer-events: auto;
+    vertical-align: bottom;
+}
+
+.inventory-item:not(:last-child) {
+    cursor: pointer;
+}
+
+.inventory-svg {
+    transform-origin: top left;
+    position: absolute;
+    overflow: visible;
+}
+
+.house-item {
+    cursor: pointer;
 }

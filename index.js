@@ -1239,7 +1239,7 @@ function drawFlowers(x, y, container) {
  * @param {number} x - the x coordinate of the house
  * @param {number} y - the y coordinate of the house
  * @param {HTMLElement} container - the svg container on which to draw
- * @returns information about the roof (out and height)
+ * @returns information about the roof (out and height) and door 
  */
 function drawCocoaHouse(width, height, x, y, container) {
 
@@ -1263,7 +1263,11 @@ function drawCocoaHouse(width, height, x, y, container) {
     roofBar.classList.add("brick");
 
     // draw the entrance
-    var entrance = drawRectangle(50, 70, x+width/2 - 25, y+(height-70), container);
+    var entranceWidth = 50;
+    var entranceHeight = 70;
+    var entranceX = x+width/2 - 25;
+    var entranceY = y+(height-70);
+    var entrance = drawRectangle(entranceWidth, entranceHeight, entranceX, entranceY, container);
     entrance = drawCircle(x+width/2, y+(height-70), 25, container);
 
     // draw the label
@@ -1281,7 +1285,7 @@ function drawCocoaHouse(width, height, x, y, container) {
     container.appendChild(text);
     textBorder.classList.add("cocoa-house-text-border");
 
-    return { roofOut: roofOut, roofHeight: roofHeight };
+    return { roofOut: roofOut, roofHeight: roofHeight, door: { x1: entranceX, x2: entranceX + entranceWidth, y1: entranceY, y2: entranceY + entranceHeight } };
 }
 
 /**
@@ -1351,14 +1355,14 @@ function drawWorld() {
     var cocoaHouseHeight = 120;
     var cocoaHouseX = playerX - cocoaHouseWidth/2 + playerWidth/2;
     var cocoaHouseY = playerY - 100;
-    var cocoaHouseRoofInfo = drawCocoaHouse( cocoaHouseWidth, cocoaHouseHeight, cocoaHouseX, cocoaHouseY, container );
-    var cocoaHouse = { special: "Cocoa", x1: cocoaHouseX, x2: cocoaHouseX + cocoaHouseWidth, y1: cocoaHouseY, y2: cocoaHouseY + cocoaHouseHeight - playerAllowedHouseOverlap };
+    var cocoaHouseInfo = drawCocoaHouse( cocoaHouseWidth, cocoaHouseHeight, cocoaHouseX, cocoaHouseY, container );
+    var cocoaHouse = { special: "Cocoa", x1: cocoaHouseX, x2: cocoaHouseX + cocoaHouseWidth, y1: cocoaHouseY, y2: cocoaHouseY + cocoaHouseHeight - playerAllowedHouseOverlap, door: cocoaHouseInfo.door };
     objects.push( cocoaHouse );
     enemyBuildings.push(JSON.parse(JSON.stringify(cocoaHouse)));
     enemyBuildings[0].y2 += playerAllowedHouseOverlap;
-    enemyBuildings[0].x1 = enemyBuildings[0].x1 - cocoaHouseRoofInfo.roofOut;
-    enemyBuildings[0].x2 = enemyBuildings[0].x2 + cocoaHouseRoofInfo.roofOut;
-    enemyBuildings[0].y1 = enemyBuildings[0].y1 - cocoaHouseRoofInfo.roofHeight;
+    enemyBuildings[0].x1 = enemyBuildings[0].x1 - cocoaHouseInfo.roofOut;
+    enemyBuildings[0].x2 = enemyBuildings[0].x2 + cocoaHouseInfo.roofOut;
+    enemyBuildings[0].y1 = enemyBuildings[0].y1 - cocoaHouseInfo.roofHeight;
 
     // Temporarily add an object for the player
     var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
@@ -1405,7 +1409,7 @@ function drawWorld() {
 
     var roofBarrierHeight = 5;
 
-    addRoofObjects(cocoaHouseX, cocoaHouseY, cocoaHouseWidth, cocoaHouseRoofInfo.roofOut, cocoaHouseRoofInfo.roofHeight, 0, roofBarrierHeight);
+    addRoofObjects(cocoaHouseX, cocoaHouseY, cocoaHouseWidth, cocoaHouseInfo.roofOut, cocoaHouseInfo.roofHeight, 0, roofBarrierHeight);
     
     var houseNumber = 1;
     for( var i=1; i<numBuildings+1; i++ ) {
@@ -1793,11 +1797,13 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO add entry to cocoa house from game
-        // TODO add inside house
         // TODO iframe testing on iOS > don't scroll parent
-        // TODO pond that slows you down?
         // TODO - spawn constants?
+        // TODO perma cocoa in house
+        // TODO add interaction functions
+        // TODO add store
+        // TODO testing
+        // TODO - mobile house place items..
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2818,26 +2824,31 @@ function drawMenu() {
 
     // Add the event listeners
     menuPlayButton.onclick = function() {
-        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+        if( stopped ) {
             togglePause();
         }
     }
+    menuHomeButton.onclick = function() {
+        if( stopped ) {
+            enterHouse();
+        }
+    }
     menuCreditsButton.onclick = function() {
-        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+        if( stopped ) {
             document.querySelector(".menu-frame-main").style.display = "none";
             document.querySelector(".menu-frame-credits").style.display = "block";
             document.querySelector(".menu-button-back").style.display = "block";
         }
     }
     menuInstructionsButton.onclick = function() {
-        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+        if( stopped ) {
             document.querySelector(".menu-frame-main").style.display = "none";
             document.querySelector(".menu-frame-instructions").style.display = "block";
             document.querySelector(".menu-button-back").style.display = "block";
         }
     }
     menuHighScoreButton.onclick = function() {
-        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+        if( stopped ) {
             document.querySelector(".menu-frame-main").style.display = "none";
             document.querySelector(".menu-frame-high-scores").style.display = "block";
             document.querySelector(".menu-button-back").style.display = "block";
@@ -2874,12 +2885,54 @@ function drawMenu() {
         }
     }
     menuBackButton.onclick = function() {
-        if( getComputedStyle(document.querySelector(".menu")).opacity == 1 && this.offsetParent != null ) {
+        if( stopped ) {
             returnToMainMenuScreen();
         }
     }
     mute = !mute;
     toggleMute();
+}
+
+/**
+ * Enter the dog house
+ */
+function enterHouse() {
+    document.querySelector(".world").style.display = "none";
+    document.querySelector(".player").style.display = "none";
+    document.querySelector(".world-overlay").style.display = "none";
+    if( document.querySelector(".pause-button") ) {
+        document.querySelector(".pause-button").style.display = "none";
+    }
+    document.querySelector(".bar").style.display = "none";
+    document.querySelector(".menu").style.display = "none";
+    document.querySelector(".inside-house").style.display = "block";
+    document.querySelector(".menu-button-inner-house.back-button").style.display = "block";
+    document.querySelector(".menu-button-inner-house.inventory-button").style.display = "block";
+    document.querySelector(".inventory").style.display = "block";
+
+    moveMode = false;
+    placeHouseItems();
+    drawInventory();
+}
+
+/**
+ * Leave the dog house
+ */
+function leaveHouse() {
+    document.body.onmousemove = null;
+    document.body.onmouseup = null;
+    document.querySelector(".inside-house").style.display = "none";
+    document.querySelector(".menu-button-inner-house.back-button").style.display = "none";
+    document.querySelector(".menu-button-inner-house.inventory-button").style.display = "none";
+    document.querySelector(".inventory").style.display = "none";
+    document.querySelector(".world").style.display = "block";
+    document.querySelector(".player").style.display = "block";
+    document.querySelector(".world-overlay").style.display = "block";
+    if( document.querySelector(".pause-button") ) {
+        document.querySelector(".pause-button").style.display = "block";
+    }
+    document.querySelector(".bar").style.display = "block";
+    document.querySelector(".menu").style.display = "block";
 }
 
 /**
@@ -3304,8 +3357,9 @@ function reset() {
     stopMainTheme();
     mainTheme.currentTime = 0; // Start the main theme over
 
-    //drawWorld();
+    drawWorld();
     drawInsideHouse();
+    document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
     tick();
 
     document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
@@ -3315,7 +3369,8 @@ function reset() {
         // On p press or space
         if( e.keyCode == 80 || e.keyCode == 32 ) {
             if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
-            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement &&
+            document.querySelector(".inside-house").style.display != "block" ) {
                 togglePause();
             }
         }
@@ -3327,9 +3382,21 @@ function reset() {
                 toggleMute();
             }
         }
+
+        // On enter press
+        if( e.keyCode == 13 ) {
+            if( !stopped ) {
+                var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
+                var cocoaHouseDoorObject = objects[0].door;
+                if( collisionTest(playerObject, cocoaHouseDoorObject) ) {
+                    togglePause();
+                    enterHouse();
+                }
+            }
+        }
     };
-    document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed) { touchMove(e); } };
-    document.body.ontouchmove = function(e) {touchMove(e); e.preventDefault();};
+    document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed && !stopped) { touchMove(e); } };
+    document.body.ontouchmove = function(e) { if(!stopped) { touchMove(e); e.preventDefault(); } };
     document.body.ontouchend = function(e) {
         keyDown.right = false;
         keyDown.left = false;
@@ -3351,6 +3418,8 @@ function scaleToScreen() {
     x = w.innerWidth || e.clientWidth || g.clientWidth,
     y = w.innerHeight|| e.clientHeight|| g.clientHeight;
     // Make sure these divisors match the css
+    screenScaleX = x/1200;
+    screenScaleY = y/675;
     document.body.style.transform = "scaleX("+(x/1200)+")";
     document.body.style.transform += "scaleY("+(y/675)+")";
 }
@@ -3548,6 +3617,9 @@ function load() {
 
 //// Inner House functions
 
+/**
+ * Draw the inside of Cocoa's house
+ */
 function drawInsideHouse() {
     // width 1200
     // height 675
@@ -3560,28 +3632,295 @@ function drawInsideHouse() {
     path.classList.add("inside-house-floor");
     path = drawPath( [ [1200, 675], [1080, 607.5], [1080, 0], [1080, -5], [1205, -5], [1205, 680] ] , container );
     path.classList.add("inside-house-wall");
-
-    var dogSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    dogSvg.classList.add("inside-dog");
-    var insideDog = drawDogBody(dogSvg);
-    dogSvg.setAttribute("x",240);
-    dogSvg.setAttribute("y",510);
-    container.appendChild(dogSvg);
     
+    drawHouseButtons();
 
-    drawDogBed(30, 530, container);
-    drawDesk(370, 460, container);
-    drawBookshelf(750, 130, container);
-    drawComputer(340, 400, container);
-    drawTV(740, 300, container);
-    drawBook(90, 90, "steelblue", "Mary Poppins", container);
-    drawNotepad(1000, 300, container);
-    drawClock(350, 350, container);
-    drawPictureFrame(800, 150, container);
-    drawNewspaper(700, 50, container);
-    drawSpeaker(500, 500, container);
+    // Idempotent
+    placeHouseItems();
+    drawInventory();
 }
 
+/**
+ * Place items inside the house
+ * This function is idempotent
+ */
+function placeHouseItems() {
+
+    var curHouseItems = document.querySelectorAll(".inside-house .house-item");
+    for(var i=0; i<curHouseItems.length; i++) {
+        curHouseItems[i].parentElement.removeChild(curHouseItems[i]);
+    }
+
+    var container = document.querySelector(".inside-house");
+
+    // Place each of the house items appropriately and add interaction
+    for( var i=0; i<houseItems.length; i++ ) {
+
+        var item = houseItems[i].function(houseItems[i].x, houseItems[i].y, container);
+        item.setAttribute("index", i);
+
+        // On mouse down, the the item to moving
+        item.onmousedown = function(e) {
+            if( moveMode ) {
+                startMovingItem(e, this);
+            }
+        }
+
+        // on double click, bring the item to the front
+        item.ondblclick = function(e) {
+            var parent = this.parentElement;
+            parent.removeChild(this);
+            parent.appendChild(this);
+            // Needed for saving
+            var index = parseInt(this.getAttribute("index"));
+            var tempItem = houseItems[index];
+            houseItems.push(tempItem);
+            houseItems.splice(index, 1);
+        }
+    }
+
+    // On mouse move, move the item
+    document.body.onmousemove = function(e) {
+        var x = e.clientX;
+        var y = e.clientY;
+        x = x/screenScaleX;
+        y = y/screenScaleY;
+        if( moveMode ) {
+            var moveItem = document.querySelector(".house-item-moving");
+            if( moveItem ) {
+                moveItem.setAttribute("x", x - parseFloat(moveItem.getAttribute("start-x")));
+                moveItem.setAttribute("y", y - parseFloat(moveItem.getAttribute("start-y")));
+            }
+        }
+    }
+
+    // On mouse up, save the item's position
+    document.body.onmouseup = function(e) {
+        if( moveMode ) {
+            var moveItem = document.querySelector(".house-item-moving");
+            if( moveItem ) {
+                stopMovingItem(e, moveItem);
+            }
+        }
+    }
+
+    saveHouse();
+
+}
+ /**
+  * Begin moving an item
+  * @param {event} e - the mouse event
+  * @param {HTMLElement} item - the item to move
+  */
+function startMovingItem(e, item) {
+    
+    // sanity check
+    var curMovingItem = document.querySelector(".house-item-moving");
+    if(curMovingItem) {
+        stopMovingItem(e, curMovingItem);
+    }
+
+    var x = e.clientX;
+    var y = e.clientY;
+    x = x/screenScaleX;
+    y = y/screenScaleY;
+    item.classList.add("house-item-moving");
+    item.setAttribute( "start-x", (x - parseFloat(item.getAttribute("x"))) );
+    item.setAttribute( "start-y", (y - parseFloat(item.getAttribute("y"))) );
+}
+
+/**
+ * Stop moving an item
+ * @param {event} e - the mouse event
+ * @param {HTMLElement} item - the item to move
+ */
+function stopMovingItem(e, item) {
+    // update positions
+    houseItems[parseInt(item.getAttribute("index"))].x = parseFloat(item.getAttribute("x"));
+    houseItems[parseInt(item.getAttribute("index"))].y = parseFloat(item.getAttribute("y"));
+    item.classList.remove("house-item-moving");
+
+    var backInInventorySpot = document.querySelector(".inventory-item:last-child");
+    var rect = backInInventorySpot.getBoundingClientRect();
+
+    if( e.clientY < rect.bottom
+        && e.clientY > rect.top
+        && e.clientX < rect.right
+        && e.clientX > rect.left ) {
+
+        var index = parseInt(item.getAttribute("index"));
+        var item = houseItems[index];
+        
+        inventory.push(item);
+        houseItems.splice(index, 1);
+
+        placeHouseItems();
+        drawInventory(true);
+    }
+    else {
+        saveHouse();
+    }
+}
+
+/**
+ * Save the current house configuration
+ */
+function saveHouse() {
+    localStorage.cocoaTownHouseItems = JSON.stringify(houseItems);
+    localStorage.cocoaTownInventory = JSON.stringify(inventory);
+}
+
+/**
+ * Load a house configuration
+ */
+function loadHouse() {
+    var items = JSON.parse(localStorage.cocoaTownHouseItems);
+    items = setFunctions(items);
+    houseItems = items;
+    items = JSON.parse(localStorage.cocoaTownInventory);
+    items = setFunctions(items);
+    inventory = items;
+}
+
+/**
+ * Set functions to be what they should be (after using JSON.parse to get inventory or house items)
+ * @param {Array.Object} - a copy of the inventory or availableItems array
+ * @returns - the array
+ */
+function setFunctions(items) {
+    for( var i=0; i<items.length; i++ ) {
+        for( var j=0; j<availableItems.length; j++ ) {
+            if( items[i].name == availableItems[j].name ) {
+                items[i].function = availableItems[j].function;
+            }
+        }
+    }
+    return items;
+}
+
+/**
+ * Draw the buttons for the house (back and inventory)
+ */
+function drawHouseButtons() {
+    var back = document.createElement("div");
+    back.classList.add("menu-button");
+    back.classList.add("back-button");
+    back.classList.add("menu-button-inner-house");
+    back.innerHTML = "<i class='fas fa-hand-point-left'></i>";
+
+    back.onclick = leaveHouse;
+
+    document.body.appendChild(back);
+
+    var inventoryButton = document.createElement("div");
+    inventoryButton.classList.add("menu-button");
+    inventoryButton.classList.add("inventory-button");
+    inventoryButton.classList.add("menu-button-inner-house");
+    inventoryButton.innerHTML = "<i class='fas fa-suitcase'></i>";
+
+    inventoryButton.onclick = function() {
+        if( moveMode ) {
+            document.querySelector(".inventory").classList.remove("inventory-expanded");
+            moveMode = false;
+        }
+        else {
+            document.querySelector(".inventory").classList.add("inventory-expanded");
+            moveMode = true;
+        }
+    }
+
+    document.body.appendChild(inventoryButton);
+}
+
+/**
+ * Draw the inventory
+ * This function is somewhat idempotent as it deletes the old inventory
+ * However, you will have to give it a parameter if you want it 
+ * expanded by default
+ * @param {boolean} expanded - true if the inventory is open as soon as being created
+ */
+function drawInventory(expanded) {
+
+    var inventorySection = document.querySelector(".inventory");
+    if( inventorySection ) {
+        inventorySection.parentElement.removeChild(inventorySection);
+    }
+
+    var inventoryContainer = document.createElement("div");
+    inventoryContainer.classList.add("inventory");
+    if( expanded ) {
+        inventoryContainer.classList.add("inventory-expanded");
+    }
+    document.body.appendChild(inventoryContainer);
+
+    var inventorySlider = document.createElement("div");
+    inventorySlider.classList.add("inventory-slider");
+    inventoryContainer.appendChild(inventorySlider);
+
+    for( var i=0; i<inventory.length+1; i++ ) {
+        var inventoryItem = document.createElement("div");
+        inventoryItem.classList.add("inventory-item");
+        inventoryItem.setAttribute("index", i);
+        inventorySlider.appendChild(inventoryItem);
+        
+        if( i < inventory.length ) {
+            var inventorySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            var inventoryPicture = inventory[i].function(0, 0, inventorySvg);
+            inventorySvg.classList.add("inventory-svg");
+            inventoryItem.appendChild(inventorySvg);
+
+            // width and height of an inventory item box is 70px - make sure this matches css
+            var width = inventoryPicture.getBBox().width;
+            var height = inventoryPicture.getBBox().height;
+            if( width >= height ) {
+                var ratio = width/height;
+                var resize = 50/width;
+                inventorySvg.style.left = "10px";
+                var verticalPadding = (70 - (50 / ratio)) / 2;
+                inventorySvg.style.top = verticalPadding + "px";
+                inventorySvg.style.transform = "scale("+resize+")";
+            }
+            else {
+                var ratio = height/width;
+                var resize = 50/height;
+                inventorySvg.style.top = "10px";
+                var horizontalPadding = (70 - (50 / ratio)) / 2;
+                inventorySvg.style.left = horizontalPadding + "px";
+                inventorySvg.style.transform = "scale("+resize+")";
+            }
+
+            // Get ready to placeHouseItems
+            inventoryItem.onmousedown=function(e) {
+                var index = parseInt(this.getAttribute("index"));
+                var item = inventory[index];
+
+                houseItems.push(item);
+                inventory.splice(index, 1);
+                item.x = e.clientX-10;
+                item.y = e.clientY-10;
+                item.x = item.x/screenScaleX;
+                item.y = item.y/screenScaleY;
+
+                placeHouseItems();
+                drawInventory(true);
+
+                var curHouseItems = document.querySelectorAll(".inside-house .house-item");
+                var newHouseItem = curHouseItems[curHouseItems.length-1];
+
+                startMovingItem(e, newHouseItem);
+            }
+        }
+    } 
+
+}
+
+/**
+ * Draw a desk
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawDesk(x, y, container) {
     var deskGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     deskGroup.classList.add("desk");
@@ -3603,6 +3942,13 @@ function drawDesk(x, y, container) {
     return deskGroup;
 }
 
+/**
+ * Draw a computer
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawComputer(x, y, container) {
     var computerGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     computerGroup.classList.add("computer");
@@ -3613,9 +3959,9 @@ function drawComputer(x, y, container) {
     stand.classList.add("computer-frame");
     var base = drawRectangle(30, 10, 50, 122.5, computerGroup);
     base.classList.add("computer-frame");
-    var frame = drawRectangle(130, 97.5, 0, 0, computerGroup);
+    var frame = drawRectangle(130, 102.5, 0, 0, computerGroup);
     frame.classList.add("computer-frame");
-    var screen = drawRectangle(110, 77.5, 10, 10, computerGroup);
+    var screen = drawRectangle(110, 82.5, 10, 10, computerGroup);
     screen.classList.add("computer-screen");
 
     computerGroup.classList.add("house-item");
@@ -3624,6 +3970,13 @@ function drawComputer(x, y, container) {
     return computerGroup;
 }
 
+/**
+ * Draw a tv
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawTV(x, y, container) {
     var tvGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     tvGroup.classList.add("tv");
@@ -3641,6 +3994,13 @@ function drawTV(x, y, container) {
     return tvGroup;
 }
 
+/**
+ * Draw a book
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawBook(x, y, fill, text, container) {
     var bookGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     bookGroup.classList.add("book");
@@ -3665,12 +4025,27 @@ function drawBook(x, y, fill, text, container) {
     return bookGroup;
 }
 
+/**
+ * Draw a dog bed
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawDogBed(x, y, container) {
 
     var dogBedGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     dogBedGroup.classList.add("dog-bed");
     dogBedGroup.setAttribute("x", x);
     dogBedGroup.setAttribute("y", y);
+
+    // the the dog
+    var dogSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    dogSvg.classList.add("inside-dog");
+    var insideDog = drawDogBody(dogSvg);
+    dogSvg.setAttribute("x",210);
+    dogSvg.setAttribute("y",-20);
+    dogBedGroup.appendChild(dogSvg);
 
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
@@ -3704,11 +4079,19 @@ function drawDogBed(x, y, container) {
     dogBedGroup.appendChild( path );
     path.classList.add("dog-bed-inner");
 
+    dogBedGroup.classList.add("house-item");
     container.appendChild( dogBedGroup );
 
     return dogBedGroup;
 }
 
+/**
+ * Draw a sticky note
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawNotepad(x, y, container) {
     var notepadGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     notepadGroup.classList.add("notepad");
@@ -3721,37 +4104,45 @@ function drawNotepad(x, y, container) {
     var sticky = drawRectangle(28, 5, 1, 1, notepadGroup);
     sticky.classList.add("sticky");
 
+    notepadGroup.classList.add("house-item");
     container.appendChild( notepadGroup );
 
     return notepadGroup;
 }
 
+/**
+ * Draw a working clock
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawClock(x, y, container) {
     var clockGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     clockGroup.classList.add("clock");
     clockGroup.setAttribute("x", x);
     clockGroup.setAttribute("y", y);
 
-    var clockWood = drawCircle(0, 0, 30, clockGroup);
+    var clockWood = drawCircle(30, 30, 30, clockGroup);
     clockWood.classList.add("clock-wood");
 
-    var clockFace = drawCircle(0, 0, 26, clockGroup);
+    var clockFace = drawCircle(30, 30, 26, clockGroup);
     clockFace.classList.add("clock-face");
 
     for(var i=1; i<13; i++) {
         var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
         textElement.innerHTML = i;
         textElement.classList.add("clock-digit");
-        var point = getPointOnCircumference(0, 0, 19, (2*Math.PI)/12 * i - Math.PI/2);
+        var point = getPointOnCircumference(30, 30, 19, (2*Math.PI)/12 * i - Math.PI/2);
         textElement.setAttribute("x", point[0]-2);
         textElement.setAttribute("y", point[1]+3.5);
         clockGroup.appendChild(textElement);
     }
 
-    var clockHourHand = drawLine(0, 0, 12, 0, clockGroup);
+    var clockHourHand = drawLine(30, 30, 42, 30, clockGroup);
     clockHourHand.classList.add("clock-hand");
     clockHourHand.classList.add("clock-hour-hand");
-    var clockMinuteHand = drawLine(0, 0, 15, 0, clockGroup);
+    var clockMinuteHand = drawLine(30, 30, 45, 30, clockGroup);
     clockMinuteHand.classList.add("clock-hand");
     clockMinuteHand.classList.add("clock-minute-hand");
 
@@ -3760,9 +4151,14 @@ function drawClock(x, y, container) {
     setClockTime();
     setInterval(setClockTime, 30000);
 
+    clockGroup.classList.add("house-item");
+
     return clockGroup;
 }
 
+/**
+ * Make sure all clocks have the correct time
+ */
 function setClockTime() {
     var time = new Date();
     var hours = time.getHours();
@@ -3770,10 +4166,20 @@ function setClockTime() {
     var hoursRotate = (2*Math.PI)/12 * hours - Math.PI/2;
     var minutesRotate = (2*Math.PI)/60 * minutes -Math.PI/2;
     hoursRotate += minutesRotate/12;
-    document.querySelector(".clock-hour-hand").style.transform = "rotate("+hoursRotate+"rad)";
-    document.querySelector(".clock-minute-hand").style.transform = "rotate("+minutesRotate+"rad)";
+    var clocks = document.querySelectorAll(".clock");
+    for( var i=0; i<clocks.length; i++ ) {
+        clocks[i].querySelector(".clock-hour-hand").style.transform = "rotate("+hoursRotate+"rad)";
+        clocks[i].querySelector(".clock-minute-hand").style.transform = "rotate("+minutesRotate+"rad)";
+    }
 }
 
+/**
+ * Draw a bookshelf
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawBookshelf(x, y, container) {
 
     var bookshelfGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3794,13 +4200,96 @@ function drawBookshelf(x, y, container) {
 
     container.appendChild( bookshelfGroup );
 
+    bookshelfGroup.classList.add("house-item");
+
     return bookshelfGroup;
 }
 
-function drawCalendar() {
+/**
+ * Draw a calendar
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
+function drawCalendar(x, y, container) {
+
+    var calendarGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    calendarGroup.classList.add("calendar");
+    calendarGroup.setAttribute("x", x);
+    calendarGroup.setAttribute("y", y);
+
+    var calendar = drawRectangle(100, 118, 0, 0, calendarGroup);
+    calendar.classList.add("calendar-background");
+    calendarGroup.appendChild(calendar);
+
+    var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    textElement.innerHTML = new Date().toLocaleString('en-us', { month: 'long' });
+    textElement.classList.add("calendar-month");
+    textElement.setAttribute("x", 25);
+    textElement.setAttribute("y", 15);
+    textElement.setAttribute("textLength", 50);
+    calendarGroup.appendChild(textElement);
+
+
+    for(var i=0; i<6; i++) {
+        drawLine(5, 35+i*15, 95, 35+i*15, calendarGroup).classList.add("calendar");
+    }
+    for(var i=0; i<8; i++) {
+        drawLine(5+i*13, 35, 5+i*13, 110, calendarGroup).classList.add("calendar");
+    }
+
+    var days = ["S", "M", "T", "W", "Th", "F", "Sa"];
+    for(var i=0; i<days.length; i++) {
+        var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textElement.innerHTML = days[i];
+        textElement.classList.add("calendar-day-label");
+        textElement.setAttribute("x", 5+i*13 + 3);
+        textElement.setAttribute("y", 30);
+        calendarGroup.appendChild(textElement);
+    }
+
+    var currentDay = 1;
+    var daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 0).getDate();
+    var row = 1;
+    var column = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
+    var actualDay = new Date().getDate();
+    while(currentDay < daysInMonth) {
+        var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textElement.innerHTML = currentDay;
+        textElement.classList.add("calendar-day");
+        textElement.setAttribute("x", 5+column*13 + 3);
+        textElement.setAttribute("y", 30+row*15 + 2);
+        calendarGroup.appendChild(textElement);
+
+        if( currentDay < actualDay ) {
+            drawLine(5+column*13+1, 30+row*15+3, 5+column*13+12, 30+row*15-8, calendarGroup).classList.add("calendar-strike");
+        }
+
+        column++;
+        if( column >= days.length ) {
+            row ++;
+            column = 0;
+        }
+
+        currentDay++;
+    }
+
+    calendarGroup.classList.add("house-item");
+
+    container.appendChild(calendarGroup);
+
+    return calendarGroup;
 
 }
 
+/**
+ * Draw a picture frame
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawPictureFrame(x, y, container) {
 
     var pictureFrameGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3808,7 +4297,7 @@ function drawPictureFrame(x, y, container) {
     pictureFrameGroup.setAttribute("x", x);
     pictureFrameGroup.setAttribute("y", y);
 
-    var pictureFrame = drawRectangle(73.125, 130, 0, 0, pictureFrameGroup);
+    var pictureFrame = drawRectangle(81.875, 130, 0, 0, pictureFrameGroup);
     pictureFrame.classList.add("picture-frame-frame");
     pictureFrameGroup.appendChild(pictureFrame);
 
@@ -3816,16 +4305,25 @@ function drawPictureFrame(x, y, container) {
     picture.classList.add("picture-frame-picture");
     picture.setAttribute("x", 10);
     picture.setAttribute("y", 10);
-    picture.setAttribute("width", 53.125);
+    picture.setAttribute("width", 61.875);
     picture.setAttribute("height", 110);
     picture.setAttribute("href", "resources/elephant.jpg");
     pictureFrameGroup.appendChild(picture);
 
     container.appendChild(pictureFrameGroup);
 
+    pictureFrameGroup.classList.add("house-item");
+
     return pictureFrameGroup;
 }
 
+/**
+ * Draw a newspaper
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawNewspaper(x, y, container) {
 
     var newspaperGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3855,9 +4353,18 @@ function drawNewspaper(x, y, container) {
 
     container.appendChild(newspaperGroup);
 
+    newspaperGroup.classList.add("house-item");
+
     return newspaperGroup;
 }
 
+/**
+ * Draw a stereo speaker
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
 function drawSpeaker(x, y, container) {
     var speakerGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     speakerGroup.classList.add("speaker");
@@ -3876,7 +4383,31 @@ function drawSpeaker(x, y, container) {
 
     container.appendChild(speakerGroup);
 
+    speakerGroup.classList.add("house-item");
+
     return speakerGroup;
+}
+
+/**
+ * Draw a tennis ball (enemy)
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
+function drawTennisBallForHouse(x, y, container) {
+    var ballGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    ballGroup.classList.add("ball");
+    ballGroup.setAttribute("x", x);
+    ballGroup.setAttribute("y", y);
+
+    drawEnemy( 15, 15, 15, ballGroup );
+    
+    container.appendChild(ballGroup);
+
+    ballGroup.classList.add("house-item");
+
+    return ballGroup;
 }
 
 ////////// Main Program ////////////
@@ -3961,6 +4492,90 @@ var requestCount = 0;
 var currentHighScoresPage = 1;
 var unsubmittedHighscores = {};
 var mute = false;
+
+var screenScaleX = 1;
+var screenScaleY = 1;
+var availableItems = [
+    {
+        "name": "Dog Bed",
+        "function": drawDogBed,
+        "price": 100,
+    },
+    {
+        "name": "Table",
+        "function": drawDesk,
+        "price": 120,
+    },
+    {
+        "name": "Ball",
+        "function": drawTennisBallForHouse,
+        "price": 50
+    },
+    {
+        "name": "Bookshelf",
+        "function": drawBookshelf,
+        "price": 300
+    },
+    {
+        "name": "Computer",
+        "function": drawComputer,
+        "price": 750
+    },
+    {
+        "name": "TV",
+        "function": drawTV,
+        "price": 500
+    },
+    {
+        "name": "Mary Poppins",
+        "function": function(x, y, container) { return drawBook(x, y, "steelblue", "Mary Poppins", container); }
+    },
+    {
+        "name": "Stickies",
+        "function": drawNotepad,
+        "price": 50
+    },
+    {
+        "name": "Clock",
+        "function": drawClock,
+        "price": 150
+    },
+    {
+        "name": "Picture",
+        "function": drawPictureFrame,
+        "price": 90
+    },
+    {
+        "name": "Newspaper",
+        "function": drawNewspaper,
+        "price": 100
+    },
+    {
+        "name": "Speaker",
+        "function": drawSpeaker,
+        "price": 300
+    },
+    {
+        "name": "Calendar",
+        "function": drawCalendar,
+        "price": 200
+    }
+];
+var inventory = [];
+var houseItems = [];
+var moveMode = false;
+
+// TODO remove this
+if( !localStorage.cocoaTownInventory ) {
+    for( var i=0; i<availableItems.length; i++ ) {
+        inventory.push( JSON.parse(JSON.stringify(availableItems[i])));
+        inventory[i].function = availableItems[i].function;
+    }
+}
+
+if( localStorage.cocoaTownInventory && localStorage.cocoaTownHouseItems ) {
+    loadHouse();
+}
 
 var deliveryAudio = [
     new Audio("resources/now-the-party-can-start.mp3"),
