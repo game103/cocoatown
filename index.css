@@ -623,7 +623,7 @@ body {
     height: 100%;
 }
 
-.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog {
     stroke: black;
     stroke-width: 2px;
     overflow: visible;
@@ -725,4 +725,24 @@ body {
 
 .newspaper-photo {
     fill: grey;
+}
+
+.speaker-block, .speaker-circle-inner {
+    fill: rgb(34, 34, 34);
+}
+
+.speaker-circle {
+    fill: rgb(54, 54, 54);
+}
+
+.inside-dog {
+    fill: black;
+    stroke: none;
+    transform-origin: top left;
+}
+
+.inside-dog .dog-body {
+    transform-origin: top left;
+    transform: scaleX(-1.75)scaleY(1.75);
+    stroke-width: 5px;
 }

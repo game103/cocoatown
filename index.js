@@ -3561,16 +3561,25 @@ function drawInsideHouse() {
     path = drawPath( [ [1200, 675], [1080, 607.5], [1080, 0], [1080, -5], [1205, -5], [1205, 680] ] , container );
     path.classList.add("inside-house-wall");
 
-    drawDesk(330, 460, container);
+    var dogSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    dogSvg.classList.add("inside-dog");
+    var insideDog = drawDogBody(dogSvg);
+    dogSvg.setAttribute("x",240);
+    dogSvg.setAttribute("y",510);
+    container.appendChild(dogSvg);
+    
+
+    drawDogBed(30, 530, container);
+    drawDesk(370, 460, container);
+    drawBookshelf(750, 130, container);
     drawComputer(340, 400, container);
     drawTV(740, 300, container);
     drawBook(90, 90, "steelblue", "Mary Poppins", container);
-    drawDogBed(600, 500, container);
     drawNotepad(1000, 300, container);
     drawClock(350, 350, container);
-    drawBookshelf(200, 50, container);
     drawPictureFrame(800, 150, container);
     drawNewspaper(700, 50, container);
+    drawSpeaker(500, 500, container);
 }
 
 function drawDesk(x, y, container) {
@@ -3809,6 +3818,7 @@ function drawPictureFrame(x, y, container) {
     picture.setAttribute("y", 10);
     picture.setAttribute("width", 53.125);
     picture.setAttribute("height", 110);
+    picture.setAttribute("href", "resources/elephant.jpg");
     pictureFrameGroup.appendChild(picture);
 
     container.appendChild(pictureFrameGroup);
@@ -3844,22 +3854,29 @@ function drawNewspaper(x, y, container) {
     drawRectangle(30, 34, 55, 28, newspaperGroup).classList.add("newspaper-photo");
 
     container.appendChild(newspaperGroup);
+
+    return newspaperGroup;
 }
 
-function drawTelephone() {
+function drawSpeaker(x, y, container) {
+    var speakerGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    speakerGroup.classList.add("speaker");
+    speakerGroup.setAttribute("x", x);
+    speakerGroup.setAttribute("y", y);
 
-}
+    var speaker = drawRectangle(50, 100, 0, 0, speakerGroup);
+    speaker.classList.add("speaker-block");
+    speakerGroup.appendChild(speaker);
 
-function drawMusicPlayer() {
+    drawCircle(25, 72, 20, speakerGroup).classList.add("speaker-circle");
+    drawCircle(25, 72, 5, speakerGroup).classList.add("speaker-circle-inner");
 
-}
+    drawCircle(25, 30, 15, speakerGroup).classList.add("speaker-circle");
+    drawCircle(25, 30, 3, speakerGroup).classList.add("speaker-circle-inner");
 
-function drawLamp() {
+    container.appendChild(speakerGroup);
 
-}
-
-function drawBall() {
-
+    return speakerGroup;
 }
 
 ////////// Main Program ////////////
