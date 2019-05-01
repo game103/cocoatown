@@ -1798,11 +1798,12 @@ function existEnemies() {
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
         // TODO add interaction functions
-        // TODO add store
-        // TODO testing
-        // TODO - mobile house place items.. touch events
+        // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
-        // TODO move mode not always working? It is the mary poppins book i think...
+        // TODO testing
+        // TODO different cursor when putting an item away
+        // TODO scroll to same place you were when putting item away
+        // TODO delete item option?
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2931,6 +2932,9 @@ function leaveHouse() {
     document.querySelector(".menu-button-inner-house.store-button").style.display = "none";
     document.querySelector(".store-menu").style.display = "none";
     document.querySelector(".inventory").style.display = "none";
+    if( !document.querySelector(".store-menu").classList.contains("store-menu-hidden") ) {
+        toggleStore();
+    }
     document.querySelector(".world").style.display = "block";
     document.querySelector(".player").style.display = "block";
     document.querySelector(".world-overlay").style.display = "block";
@@ -3371,8 +3375,8 @@ function reset() {
 
     document.body.onkeydown = function(e) {
         keyDown[keyMap[e.which]] = true;
-        if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
-            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+        if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" ) {
             return false; // No keyboard browser control
         }
     };
@@ -3381,8 +3385,8 @@ function reset() {
 
         // On p press or space
         if( e.keyCode == 80 || e.keyCode == 32 ) {
-            if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
-            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement &&
+            if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" &&
             document.querySelector(".inside-house").style.display != "block" ) {
                 togglePause();
                 // Prevent keyboard browser control
@@ -3393,8 +3397,8 @@ function reset() {
 
         // On m press
         if( e.keyCode == 77 ) {
-            if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
-            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+            if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" ) {
                 toggleMute();
             }
         }
@@ -3678,28 +3682,47 @@ function placeHouseItems() {
 
         // On mouse down, the the item to moving
         item.onmousedown = function(e) {
-            if( moveMode ) {
-                startMovingItem(e, this);
+            if( !interacting ) {
+                if( moveMode ) {
+                    startMovingItem(e, this);
+                }
+                else {
+                    var curItem = this;
+                    moveModeTimeout = setTimeout(function() { setMoveMode(true); startMovingItem(e, curItem); }, 750);
+                }
+                // We don't want to end move mode
+                e.stopPropagation();
+                e.preventDefault();
             }
-            else {
-                var curItem = this;
-                moveModeTimeout = setTimeout(function() { setMoveMode(true); startMovingItem(e, curItem); }, 750);
-            }
-            // We don't want to end move mode
-            e.stopPropagation();
-            e.preventDefault();
         }
 
         // on double click, bring the item to the front
         item.ondblclick = function(e) {
-            var parent = this.parentElement;
-            parent.removeChild(this);
-            parent.appendChild(this);
-            // Needed for saving
-            var index = parseInt(this.getAttribute("index"));
-            var tempItem = houseItems[index];
-            houseItems.push(tempItem);
-            houseItems.splice(index, 1);
+            if( !interacting ) {
+                var parent = this.parentElement;
+                parent.removeChild(this);
+                parent.appendChild(this);
+                // Needed for saving
+                var index = parseInt(this.getAttribute("index"));
+                var tempItem = houseItems[index];
+                houseItems.push(tempItem);
+                houseItems.splice(index, 1);
+            }
+        }
+
+        // On click interact with the item if not move mode
+        item.onclick = function(e) {
+            if( !moveMode && !interacting ) {
+                var index = parseInt(this.getAttribute("index"));
+                var curItem = houseItems[index];
+                console.log(index);
+                if( curItem.interact ) {
+                    curItem.interact(curItem);
+                    interacting = true;
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }
         }
     }
 
@@ -3731,6 +3754,7 @@ function placeHouseItems() {
         }
     }
 
+    // Close move mode on mouse down if inventory not open
     document.body.onmousedown = function(e) {
         if( !document.querySelector(".inventory").classList.contains("inventory-expanded") ) {
             setMoveMode(false);
@@ -3741,6 +3765,9 @@ function placeHouseItems() {
 
 }
 
+/**
+ * Set move mode
+ */
 function setMoveMode(val) {
     var insideHouse = document.querySelector(".inside-house");
     if( val ) {
@@ -3850,6 +3877,7 @@ function setFunctions(items) {
         for( var j=0; j<availableItems.length; j++ ) {
             if( items[i].name == availableItems[j].name ) {
                 items[i].function = availableItems[j].function;
+                items[i].interact = availableItems[j].interact;
             }
         }
     }
@@ -3866,7 +3894,7 @@ function drawHouseButtons() {
     back.classList.add("menu-button-inner-house");
     back.innerHTML = "<i class='fas fa-hand-point-left'></i>";
 
-    back.onclick = leaveHouse;
+    back.onclick = function() { if(!interacting) leaveHouse(); };
 
     document.body.appendChild(back);
 
@@ -3876,7 +3904,7 @@ function drawHouseButtons() {
     cart.classList.add("menu-button-inner-house");
     cart.innerHTML = '<i class="fas fa-shopping-cart"></i>';
 
-    cart.onclick = toggleStore;
+    cart.onclick = function() { if(!interacting) toggleStore(); };
 
     document.body.appendChild(cart);
 
@@ -3887,14 +3915,16 @@ function drawHouseButtons() {
     inventoryButton.innerHTML = "<i class='fas fa-suitcase'></i>";
 
     inventoryButton.onclick = function(e) {
-        var inventoryBar = document.querySelector(".inventory");
-        if( inventoryBar.classList.contains("inventory-expanded") ) {
-            inventoryBar.classList.remove("inventory-expanded");
-            setMoveMode(false);
-        }
-        else {
-            inventoryBar.classList.add("inventory-expanded");
-            setMoveMode(true);
+        if( !interacting ) {
+            var inventoryBar = document.querySelector(".inventory");
+            if( inventoryBar.classList.contains("inventory-expanded") ) {
+                inventoryBar.classList.remove("inventory-expanded");
+                setMoveMode(false);
+            }
+            else {
+                inventoryBar.classList.add("inventory-expanded");
+                setMoveMode(true);
+            }
         }
     }
 
@@ -3936,6 +3966,8 @@ function drawInventory(expanded) {
             createItemIcon("inventory-svg", 50, 20, inventory[i], inventoryItem);
 
             // Get ready to placeHouseItems
+            // No need to check for interacting since can't interact on move mode
+            // and thus the bar will not be open when we can interact with an item
             inventoryItem.onmousedown=function(e) {
                 var index = parseInt(this.getAttribute("index"));
                 var item = inventory[index];
@@ -4057,6 +4089,46 @@ function drawComputer(x, y, container) {
     container.appendChild(computerGroup);
 
     return computerGroup;
+}
+
+/**
+ * Interact with the computer
+ */
+function interactComputer(item) {
+    var fullComputer = document.createElement("div");
+    fullComputer.classList.add("full-computer");
+
+    var screen = document.createElement("div");
+    screen.classList.add("full-computer-screen");
+    fullComputer.appendChild(screen);
+
+    var addressBar = document.createElement("input");
+    addressBar.setAttribute("type", "text");
+    addressBar.innerText = "https://game103.net";
+    screen.appendChild(addressBar);
+
+    document.body.appendChild(fullComputer);
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick,
+        "onkeyup": document.body.onkeyup
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        fullComputer.parentNode.removeChild(fullComputer);
+    }
+    document.body.onkeyup = function(e) {
+        if( e.keyCode == 13 ) {
+
+        }
+    }
+
+    fullComputer.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
 }
 
 /**
@@ -4200,6 +4272,55 @@ function drawNotepad(x, y, container) {
 }
 
 /**
+ * Interact with the notepad
+ */
+function interactNotepad(item) {
+    var fullNotepad = document.createElement("div");
+    fullNotepad.classList.add("full-notepad");
+
+    var text = item.text ? item.text : "";
+
+    var textInput = document.createElement("textarea");
+    textInput.innerText = text;
+    fullNotepad.appendChild(textInput);
+
+    document.body.appendChild(fullNotepad);
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick,
+        "onkeyup": document.body.onkeyup
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        fullNotepad.parentNode.removeChild(fullNotepad);
+    }
+    document.body.onkeyup = function() {
+        item.text = textInput.value;
+        saveHouse();
+    }
+
+    fullNotepad.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+}
+
+/**
+ * Restore interaction functions to body after they were replaced
+ * in the interaction function
+ * @param {object} item - the item (from houseItems) containing the restore functions
+ */
+function restoreInteractionFuctions(item) {
+    var keys = Object.keys(item.restoreFunctions);
+    for( var i=0; i<keys.length; i++ ) {
+        document.body[keys[i]] = item.restoreFunctions[keys[i]];
+    }
+    interacting = false;
+}
+
+/**
  * Draw a working clock
  * @param {number} x - the x coordinate of the left side of the item 
  * @param {number} y - the y coordinate of the top of the item
@@ -4339,11 +4460,11 @@ function drawCalendar(x, y, container) {
     }
 
     var currentDay = 1;
-    var daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 0).getDate();
+    var daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
     var row = 1;
     var column = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
     var actualDay = new Date().getDate();
-    while(currentDay < daysInMonth) {
+    while(currentDay <= daysInMonth) {
         var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
         textElement.innerHTML = currentDay;
         textElement.classList.add("calendar-day");
@@ -4358,6 +4479,13 @@ function drawCalendar(x, y, container) {
         column++;
         if( column >= days.length ) {
             row ++;
+            if( row > 5 ) {
+                drawLine(5, 35+row*15, 95, 35+row*15, calendarGroup).classList.add("calendar");
+                for(var i=0; i<8; i++) {
+                    drawLine(5+i*13, 35+15*(row-1), 5+i*13, 35+15*row, calendarGroup).classList.add("calendar");
+                }  
+                calendar.setAttribute("height", parseFloat(calendar.getAttribute("height")) + 15);       
+            }
             column = 0;
         }
 
@@ -4700,6 +4828,8 @@ var spawnOverlapHorizontal = 30;
 var spawnOverlapDown = 20;
 var spawnOverlapUp = 60;
 
+var interacting = false;
+
 var highScoresDomain = "https://game103.net/ws/scores/";
 var highScoresGame = "ct";
 var loadHighScoresEndpoint = highScoresDomain + "load_scores.php";
@@ -4740,6 +4870,7 @@ var availableItems = [
     {
         "name": "Computer",
         "function": drawComputer,
+        "interact": interactComputer,
         "price": 750
     },
     {
@@ -4754,6 +4885,7 @@ var availableItems = [
     {
         "name": "Stickies",
         "function": drawNotepad,
+        "interact": interactNotepad,
         "price": 50
     },
     {

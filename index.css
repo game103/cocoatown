@@ -356,6 +356,7 @@ body {
 
 .menu-hidden, .store-menu-hidden {
     opacity: 0;
+    pointer-events: none;
 }
 
 .menu-frame {
@@ -944,4 +945,53 @@ body {
 .store-money-indicator {
     font-size: 20px;
     margin-bottom: 10px;
+}
+
+.full-notepad {
+    position: absolute;
+    width: 800px;
+    height: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    background-image: linear-gradient(to bottom, rgb(189, 189, 91), rgb(189, 189, 91) 15%, rgb(255, 255, 119) 15% );
+    border: 2px solid black;
+    border-bottom: none;
+}
+
+.full-notepad textarea {
+    position: absolute;
+    top: 110px;
+    height: 490px;
+    left: 20px;
+    width: 780px;
+    background: transparent;
+    resize: none;
+    color: black;
+    border: 0 none;
+    outline: none;
+    font-family: "Acme", sans-serif;
+    font-size: 24px;
+}
+
+.full-computer {
+    position: absolute;
+    bottom: 0;
+    background-color: rgb(39, 39, 39);    
+    left: 50%;
+    transform: translateX(-50%);
+    border: 2px solid black;
+    width: 870px;
+    height: 670px;
+}
+
+.full-computer-screen {
+    width: 800px;
+    height: 600px;
+    margin: 35px;
+    background-color: rgb(65, 64, 64);
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX( calc(-50% - 35px) );
 }
