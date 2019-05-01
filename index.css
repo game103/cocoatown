@@ -339,7 +339,7 @@ body {
     left: 30px;
 }
 
-.menu {
+.menu, .store-menu {
     background-color: rgba(142, 200, 248, 0.8);
     position: absolute;
     width: 350px;
@@ -352,10 +352,9 @@ body {
     border-radius: 25px;
     opacity: 1;
     transition: opacity 0.5s;
-    position: relative;
 }
 
-.menu-hidden {
+.menu-hidden, .store-menu-hidden {
     opacity: 0;
 }
 
@@ -367,7 +366,7 @@ body {
     display: block;
 }
 
-.menu-title {
+.menu-title, .store-menu-title {
     font-size: 35px;
     /*outline-color:  steelblue;*/
     text-shadow: -1px -1px 0 black,
@@ -781,7 +780,7 @@ body {
     stroke: red;
 }
 
-.menu-button-inner-house.back-button, .menu-button-inner-house.inventory-button {
+.menu-button-inner-house {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -789,13 +788,19 @@ body {
     display: none;
 }
 
-.menu-button-inner-house.back-button:active, .menu-button-inner-house.inventory-button:active {
+.menu-button-inner-house.back-button:active, .menu-button-inner-house.inventory-button:active,
+.menu-button-inner-house.store-button:active {
     position: absolute;
     top: 15px;
 }
 
 .menu-button-inner-house.inventory-button {
     left: 90px;
+}
+
+.menu-button-inner-house.store-button {
+    right: 10px;
+    left: auto;
 }
 
 .inventory {
@@ -815,10 +820,10 @@ body {
 }
 
 .inventory-expanded {
-    width: calc(100% - 195px);
+    width: calc(100% - 280px);
 }
 
-.inventory-slider {
+.inventory-slider, .store-slider {
     margin: 10px 0;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -835,7 +840,6 @@ body {
     margin: 5px 15px;
     border-radius: 10px;
     position: relative;
-    pointer-events: auto;
     vertical-align: bottom;
 }
 
@@ -843,7 +847,7 @@ body {
     cursor: pointer;
 }
 
-.inventory-svg {
+.inventory-svg, .store-svg {
     transform-origin: top left;
     position: absolute;
     overflow: visible;
@@ -856,4 +860,88 @@ body {
 .move-mode .house-item {
     cursor: move;
     opacity: 0.8;
+}
+
+.store-item:first-child {
+    margin-left: 0;
+}
+
+.store-item:last-child {
+    margin-right: 0;
+}
+
+.store-item {
+    height: 220px;
+    width: 120px;
+    display: inline-block;
+    background-color: white;
+    border: 2px solid black;
+    margin: 5px 15px;
+    border-radius: 10px;
+    position: relative;
+    vertical-align: bottom;
+    font-family: "Acme";
+}
+
+.store-item-name {
+    position: absolute;
+    top: 5px;
+    width: 100%;
+    font-size: 16px;
+}
+
+.store-item-price::before {
+    content: "$";
+}
+
+.store-svg {
+    margin-top: 5px;
+}
+
+.store-item-price {
+    position: absolute;
+    top: 110px;
+    width: 100%;
+    font-size: 18px;
+}
+
+.store-menu {
+    width: 510px;
+}
+
+.store-slider {
+    margin: 0;
+}
+
+.store-item-buy-button {
+    position: absolute;
+    top: 145px;
+    left: calc( 50% - 5px );
+    transform: translateX(-50%);
+}
+
+.store-item-buy-button:active {
+    position: absolute;
+    top: 150px;
+}
+
+.store-money-indicator:before {
+    content: "Money:\00a0$";
+}
+
+.store-item-owned {
+    position: absolute;
+    width: 100%;
+    top: 130px;
+    left: 0;
+    font-size: 14px;
+}
+
+.store-item-owned:after {
+    content: "\00a0 owned";
+}
+
+.store-money-indicator {
+    font-size: 20px;
+    margin-bottom: 10px;
 }

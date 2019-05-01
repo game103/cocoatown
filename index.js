@@ -1801,6 +1801,8 @@ function existEnemies() {
         // TODO add store
         // TODO testing
         // TODO - mobile house place items.. touch events
+        // TODO cocoa memorial videos
+        // TODO move mode not always working? It is the mary poppins book i think...
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2905,11 +2907,14 @@ function enterHouse() {
     document.querySelector(".inside-house").style.display = "block";
     document.querySelector(".menu-button-inner-house.back-button").style.display = "block";
     document.querySelector(".menu-button-inner-house.inventory-button").style.display = "block";
+    document.querySelector(".menu-button-inner-house.store-button").style.display = "block";
+    document.querySelector(".store-menu").style.display = "block";
     document.querySelector(".inventory").style.display = "block";
 
     setMoveMode(false);
     placeHouseItems();
     drawInventory();
+    updateStoreMoney(); // we probably got more money
 }
 
 /**
@@ -2923,6 +2928,8 @@ function leaveHouse() {
     document.querySelector(".inside-house").style.display = "none";
     document.querySelector(".menu-button-inner-house.back-button").style.display = "none";
     document.querySelector(".menu-button-inner-house.inventory-button").style.display = "none";
+    document.querySelector(".menu-button-inner-house.store-button").style.display = "none";
+    document.querySelector(".store-menu").style.display = "none";
     document.querySelector(".inventory").style.display = "none";
     document.querySelector(".world").style.display = "block";
     document.querySelector(".player").style.display = "block";
@@ -3359,6 +3366,7 @@ function reset() {
     drawWorld();
     drawInsideHouse();
     document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
+    document.querySelector(".store-menu").style.display = "none"; // Hide the store after it is drawn so all the items are the right size
     tick();
 
     document.body.onkeydown = function(e) {
@@ -3642,6 +3650,7 @@ function drawInsideHouse() {
     path.classList.add("inside-house-wall");
     
     drawHouseButtons();
+    drawStore();
 
     // Idempotent
     placeHouseItems();
@@ -3723,7 +3732,9 @@ function placeHouseItems() {
     }
 
     document.body.onmousedown = function(e) {
-        setMoveMode(false);
+        if( !document.querySelector(".inventory").classList.contains("inventory-expanded") ) {
+            setMoveMode(false);
+        }
     }
 
     saveHouse();
@@ -3859,6 +3870,16 @@ function drawHouseButtons() {
 
     document.body.appendChild(back);
 
+    var cart = document.createElement("div");
+    cart.classList.add("menu-button");
+    cart.classList.add("store-button");
+    cart.classList.add("menu-button-inner-house");
+    cart.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+
+    cart.onclick = toggleStore;
+
+    document.body.appendChild(cart);
+
     var inventoryButton = document.createElement("div");
     inventoryButton.classList.add("menu-button");
     inventoryButton.classList.add("inventory-button");
@@ -3912,30 +3933,7 @@ function drawInventory(expanded) {
         inventorySlider.appendChild(inventoryItem);
         
         if( i < inventory.length ) {
-            var inventorySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            var inventoryPicture = inventory[i].function(0, 0, inventorySvg);
-            inventorySvg.classList.add("inventory-svg");
-            inventoryItem.appendChild(inventorySvg);
-
-            // width and height of an inventory item box is 70px - make sure this matches css
-            var width = inventoryPicture.getBBox().width;
-            var height = inventoryPicture.getBBox().height;
-            if( width >= height ) {
-                var ratio = width/height;
-                var resize = 50/width;
-                inventorySvg.style.left = "10px";
-                var verticalPadding = (70 - (50 / ratio)) / 2;
-                inventorySvg.style.top = verticalPadding + "px";
-                inventorySvg.style.transform = "scale("+resize+")";
-            }
-            else {
-                var ratio = height/width;
-                var resize = 50/height;
-                inventorySvg.style.top = "10px";
-                var horizontalPadding = (70 - (50 / ratio)) / 2;
-                inventorySvg.style.left = horizontalPadding + "px";
-                inventorySvg.style.transform = "scale("+resize+")";
-            }
+            createItemIcon("inventory-svg", 50, 20, inventory[i], inventoryItem);
 
             // Get ready to placeHouseItems
             inventoryItem.onmousedown=function(e) {
@@ -3966,6 +3964,43 @@ function drawInventory(expanded) {
 
     setClockTime();
 
+}
+
+/**
+ * Create an icon for an item
+ * @param {string} className - the class name for the icon
+ * @param {number} size - the max width/height of the icon 
+ * @param {number} padding - the padding for the icon
+ * @param {object} item - the item object (see available items, inventory, or houseItems)
+ * @param {HTMLElement} container - the element on which to draw the icon
+ */
+function createItemIcon(className, size, padding, item, container) {
+    var inventorySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    var inventoryPicture = item.function(0, 0, inventorySvg);
+    inventorySvg.classList.add(className);
+    container.appendChild(inventorySvg);
+
+    // width and height of an inventory item box is 70px - make sure this matches css
+    var width = inventoryPicture.getBBox().width;
+    var height = inventoryPicture.getBBox().height;
+    if( width >= height ) {
+        var ratio = width/height;
+        var resize = size/width;
+        inventorySvg.style.left = padding/2 + "px";
+        var verticalPadding = ((size+padding) - (size / ratio)) / 2;
+        inventorySvg.style.top = verticalPadding + "px";
+        inventorySvg.style.transform = "scale("+resize+")";
+    }
+    else {
+        var ratio = height/width;
+        var resize = size/height;
+        inventorySvg.style.top = padding/2 + "px";
+        var horizontalPadding = ((size+padding) - (size / ratio)) / 2;
+        inventorySvg.style.left = horizontalPadding + "px";
+        inventorySvg.style.transform = "scale("+resize+")";
+    }
+
+    return inventorySvg;
 }
 
 /**
@@ -4464,6 +4499,133 @@ function drawTennisBallForHouse(x, y, container) {
     return ballGroup;
 }
 
+/**
+ * Draw the store
+ */
+function drawStore() {
+    var background = document.createElement("div");
+    background.classList.add("store-menu");
+    background.classList.add("store-menu-hidden"); // The store is hidden by default when you first enter the house
+    document.body.appendChild(background);
+
+    var menuTitle = document.createElement("div");
+    menuTitle.classList.add("store-menu-title");
+    menuTitle.innerText = "Store";
+    background.appendChild(menuTitle);
+
+    var storeMoneyIndicator = document.createElement("div");
+    storeMoneyIndicator.classList.add("store-money-indicator");
+    background.appendChild(storeMoneyIndicator);
+
+    var storeSlider = document.createElement("div");
+    storeSlider.classList.add("store-slider");
+    background.appendChild(storeSlider);
+
+    // Start at 1 to avoid dog bed
+    for( var i=1; i<availableItems.length; i++ ) {
+        var storeItem = document.createElement("div");
+        storeItem.classList.add("store-item");
+        storeItem.setAttribute("index", i);
+        storeSlider.appendChild(storeItem);
+
+        createItemIcon("store-svg", 70, 50, availableItems[i], storeItem);
+
+        var itemDetails = document.createElement("div");
+        itemDetails.classList.add("store-item-name");
+        itemDetails.innerText = availableItems[i].name;
+        storeItem.appendChild(itemDetails);
+
+        itemDetails = document.createElement("div");
+        itemDetails.classList.add("store-item-price");
+        itemDetails.innerText = availableItems[i].price;
+        storeItem.appendChild(itemDetails);
+
+        itemDetails = document.createElement("div");
+        itemDetails.classList.add("store-item-owned");
+        itemDetails.innerText = "";
+        storeItem.appendChild(itemDetails);
+
+        var itemButton = document.createElement("div");
+        itemButton.classList.add("menu-button");
+        itemButton.classList.add("store-item-buy-button");
+        itemButton.innerText = "Buy";
+        storeItem.appendChild(itemButton);
+
+        // Buy an item
+        itemButton.onclick = function() {
+            var price = parseInt(this.parentNode.querySelector(".store-item-price").innerText);
+            if( localStorage.cocoaTownCoins >= price ) {
+                localStorage.cocoaTownCoins -= price;
+                inventory.push( JSON.parse(JSON.stringify(  availableItems[ parseInt(this.parentNode.getAttribute("index")) ]  )) );
+                inventory = setFunctions(inventory);
+                updateStoreMoney();
+                updateStoreOwned();
+                var expanded = document.querySelector(".inventory").classList.contains("inventory-expanded");
+                drawInventory(expanded);
+            }
+        }
+
+    }
+
+    updateStoreMoney();
+    updateStoreOwned();
+}
+
+/**
+ * Update the amount of money the player has in the store and what the player buy
+ */
+function updateStoreMoney() {
+    document.querySelector(".store-money-indicator").innerText = localStorage.cocoaTownCoins;
+    // Dependent on the store items being in the order they are in in the
+    // available items array.
+    var buyButtons = document.querySelectorAll(".store-item-buy-button");
+    for( var i=1; i<availableItems.length; i++) {
+        if( availableItems[i].price > localStorage.cocoaTownCoins ) {
+            buyButtons[i-1].style.opacity = 0.5;
+        }
+        else {
+            buyButtons[i-1].style.display = 1;
+        }
+    }
+}
+
+/**
+ * Update the amount of items owned in the store
+ */
+function updateStoreOwned() {
+    // Dependent on the store items being in the order they are in in the
+    // available items array.
+    var storeItems = document.querySelectorAll(".store-item-owned");
+    for( var i=1; i<availableItems.length; i++) {
+        var count = 0;
+        for( var j=0; j<houseItems.length; j++ ) {
+            if( availableItems[i].name == houseItems[j].name ) {
+                count ++;
+            }
+        }
+        for( var j=0; j<inventory.length; j++ ) {
+            if( availableItems[i].name == inventory[j].name ) {
+                count ++;
+            }
+        }
+        storeItems[i-1].innerText = count;
+    }
+}
+
+/**
+ * Toggle the visibility of the store
+ */
+function toggleStore() {
+    var store = document.querySelector(".store-menu");
+
+    if( store.classList.contains("store-menu-hidden") ) {
+        store.classList.remove("store-menu-hidden");
+    }
+    else {
+        store.classList.add("store-menu-hidden");
+    }
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -4680,6 +4842,9 @@ if( !localStorage.cocoaTownHighScore ) {
 // make sure cocoaTownCoins is not null
 if( !localStorage.cocoaTownCoins ) {
     localStorage.cocoaTownCoins = 0;
+}
+else {
+    localStorage.cocoaTownCoins = 400;
 }
 // make sure we have a game103 id
 if( !localStorage.game103Id ) {
