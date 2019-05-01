@@ -16,6 +16,7 @@
 
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-user-select: none;
 }
 
 *:not(input) {
@@ -40,6 +41,7 @@ body {
     top: 0;
     left: 0;
     transform-origin: top left;
+    -webkit-overflow-scrolling: auto;
 }
 
 .world, .world-overlay {
@@ -628,7 +630,7 @@ body {
     display: none;
 }
 
-.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog, .calendar {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog, .calendar, .ball {
     stroke: black;
     stroke-width: 2px;
     overflow: visible;
@@ -817,11 +819,11 @@ body {
 }
 
 .inventory-slider {
-    margin: 5px;
-    padding: 5px;
+    margin: 10px 0;
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 }
 
 .inventory-item {
@@ -849,4 +851,9 @@ body {
 
 .house-item {
     cursor: pointer;
+}
+
+.move-mode .house-item {
+    cursor: move;
+    opacity: 0.8;
 }

@@ -1491,7 +1491,7 @@ function addRoofObjects(buildingX, buildingY, buildingWidth, roofOut, roofHeight
  * @param {HTMLElement} container - the svg canvas to add the enemies to
  */
 function spawnEnemies(enemyCount, container) {
-    var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
+    var playerObject = { x1: playerX - spawnPlayerPadding, y1: playerY - spawnPlayerPadding, x2: playerX + playerWidth + spawnPlayerPadding, y2: playerY + playerHeight + spawnPlayerPadding };
 
     for( var i=0; i<enemyCount; i++ ) {
 
@@ -1503,7 +1503,7 @@ function spawnEnemies(enemyCount, container) {
             enemy = { x1: x - enemyRadius, y1: y - enemyRadius, x2: x + enemyRadius, y2: y+enemyRadius };
             var overlaps = false;
             for(var j=0; j<objects.length; j++) {
-                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
+                var curOverlapObject = { x1: objects[j].x1-spawnOverlapHorizontal, y1: objects[j].y1-spawnOverlapUp, x2: objects[j].x2+spawnOverlapHorizontal, y2: objects[j].y2+playerAllowedHouseOverlap+spawnOverlapDown };
                 if( collisionTest(enemy, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -1797,13 +1797,10 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO iframe testing on iOS > don't scroll parent
-        // TODO - spawn constants?
-        // TODO perma cocoa in house
         // TODO add interaction functions
         // TODO add store
         // TODO testing
-        // TODO - mobile house place items..
+        // TODO - mobile house place items.. touch events
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2910,7 +2907,7 @@ function enterHouse() {
     document.querySelector(".menu-button-inner-house.inventory-button").style.display = "block";
     document.querySelector(".inventory").style.display = "block";
 
-    moveMode = false;
+    setMoveMode(false);
     placeHouseItems();
     drawInventory();
 }
@@ -2920,7 +2917,9 @@ function enterHouse() {
  */
 function leaveHouse() {
     document.body.onmousemove = null;
+    document.body.onmousedown = null;
     document.body.onmouseup = null;
+    setMoveMode(false);
     document.querySelector(".inside-house").style.display = "none";
     document.querySelector(".menu-button-inner-house.back-button").style.display = "none";
     document.querySelector(".menu-button-inner-house.inventory-button").style.display = "none";
@@ -3014,9 +3013,9 @@ function drawPause() {
     pause.innerHTML = "<i class='fas fa-play'></i>"; // We start out paused
     document.body.appendChild(pause);
 
-    pause.ontouchstart = function() { pauseButtonIsPressed = true; }
+    pause.ontouchstart = function(e) { pauseButtonIsPressed = true; };
     pause.onclick = togglePause;
-    pause.ontouchend = function() { pauseButtonIsPressed = false; }
+    pause.ontouchend = function(e) { pauseButtonIsPressed = false; };
 }
 
 /**
@@ -3164,7 +3163,7 @@ function drawPowerup(x, y, radius, type, container) {
  * @param {HTMLElement} container - the svg container on which to draw
  */
 function spawnPowerups(powerupCount, container) {
-    var playerObject = { x1: playerX - 20, y1: playerY - 20, x2: playerX + playerWidth + 20, y2: playerY + playerHeight + 20 };
+    var playerObject = { x1: playerX - spawnPlayerPadding, y1: playerY - spawnPlayerPadding, x2: playerX + playerWidth + spawnPlayerPadding, y2: playerY + playerHeight + spawnPlayerPadding };
 
     for( var i=0; i<powerupCount; i++ ) {
 
@@ -3176,7 +3175,7 @@ function spawnPowerups(powerupCount, container) {
             powerup = { x1: x - powerupRadius, y1: y - powerupRadius, x2: x + powerupRadius, y2: y+powerupRadius };
             var overlaps = false;
             for(var j=0; j<objects.length; j++) {
-                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
+                var curOverlapObject = { x1: objects[j].x1-spawnOverlapHorizontal, y1: objects[j].y1-spawnOverlapUp, x2: objects[j].x2+spawnOverlapHorizontal, y2: objects[j].y2+playerAllowedHouseOverlap+spawnOverlapDown };
                 if( collisionTest(powerup, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -3217,7 +3216,7 @@ function spawnFlowers(flowerCount, container) {
             flower = { x1: x-flowerRadius*2, y1: y-flowerRadius, x2: x+flowerRadius*2, y2: y+flowerRadius };
             var overlaps = false;
             for(var j=0; j<objects.length; j++) {
-                var curOverlapObject = { x1: objects[j].x1-30, y1: objects[j].y1-60, x2: objects[j].x2+30, y2: objects[j].y2+playerAllowedHouseOverlap+20 };
+                var curOverlapObject = { x1: objects[j].x1-spawnOverlapHorizontal, y1: objects[j].y1-spawnOverlapUp, x2: objects[j].x2+spawnOverlapHorizontal, y2: objects[j].y2+playerAllowedHouseOverlap+spawnOverlapDown };
                 if( collisionTest(flower, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -3362,7 +3361,13 @@ function reset() {
     document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
     tick();
 
-    document.body.onkeydown = function(e) {keyDown[keyMap[e.which]] = true;};
+    document.body.onkeydown = function(e) {
+        keyDown[keyMap[e.which]] = true;
+        if( document.querySelector(".menu-high-scores-info-password-input") != document.activeElement && 
+            document.querySelector(".menu-high-scores-info-username-input") != document.activeElement ) {
+            return false; // No keyboard browser control
+        }
+    };
     document.body.onkeyup = function(e) {
         keyDown[keyMap[e.which]] = false; // This is not for just press
 
@@ -3372,6 +3377,9 @@ function reset() {
             document.querySelector(".menu-high-scores-info-username-input") != document.activeElement &&
             document.querySelector(".inside-house").style.display != "block" ) {
                 togglePause();
+                // Prevent keyboard browser control
+                e.preventDefault();
+                e.stopPropagation();
             }
         }
 
@@ -3396,7 +3404,7 @@ function reset() {
         }
     };
     document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed && !stopped) { touchMove(e); } };
-    document.body.ontouchmove = function(e) { if(!stopped) { touchMove(e); e.preventDefault(); } };
+    document.body.ontouchmove = function(e) { if(!stopped) { touchMove(e); } };
     document.body.ontouchend = function(e) {
         keyDown.right = false;
         keyDown.left = false;
@@ -3664,6 +3672,13 @@ function placeHouseItems() {
             if( moveMode ) {
                 startMovingItem(e, this);
             }
+            else {
+                var curItem = this;
+                moveModeTimeout = setTimeout(function() { setMoveMode(true); startMovingItem(e, curItem); }, 750);
+            }
+            // We don't want to end move mode
+            e.stopPropagation();
+            e.preventDefault();
         }
 
         // on double click, bring the item to the front
@@ -3702,11 +3717,35 @@ function placeHouseItems() {
                 stopMovingItem(e, moveItem);
             }
         }
+        if( moveModeTimeout ) {
+            clearTimeout(moveModeTimeout);
+        }
+    }
+
+    document.body.onmousedown = function(e) {
+        setMoveMode(false);
     }
 
     saveHouse();
 
 }
+
+function setMoveMode(val) {
+    var insideHouse = document.querySelector(".inside-house");
+    if( val ) {
+        if( insideHouse ) {
+            insideHouse.classList.add("move-mode");
+        }
+        moveMode = true;
+    }
+    else {
+        if( insideHouse ) {
+            insideHouse.classList.remove("move-mode");
+        }
+        moveMode = false;
+    }
+}
+
  /**
   * Begin moving an item
   * @param {event} e - the mouse event
@@ -3750,12 +3789,20 @@ function stopMovingItem(e, item) {
 
         var index = parseInt(item.getAttribute("index"));
         var item = houseItems[index];
-        
-        inventory.push(item);
-        houseItems.splice(index, 1);
 
-        placeHouseItems();
-        drawInventory(true);
+        // Can't put away dog bed
+        if( item.name != "Dog Bed" ) {
+        
+            inventory.push(item);
+            houseItems.splice(index, 1);
+
+            placeHouseItems();
+            drawInventory(true);
+
+        }
+        else {
+            saveHouse();
+        }
     }
     else {
         saveHouse();
@@ -3818,14 +3865,15 @@ function drawHouseButtons() {
     inventoryButton.classList.add("menu-button-inner-house");
     inventoryButton.innerHTML = "<i class='fas fa-suitcase'></i>";
 
-    inventoryButton.onclick = function() {
-        if( moveMode ) {
-            document.querySelector(".inventory").classList.remove("inventory-expanded");
-            moveMode = false;
+    inventoryButton.onclick = function(e) {
+        var inventoryBar = document.querySelector(".inventory");
+        if( inventoryBar.classList.contains("inventory-expanded") ) {
+            inventoryBar.classList.remove("inventory-expanded");
+            setMoveMode(false);
         }
         else {
-            document.querySelector(".inventory").classList.add("inventory-expanded");
-            moveMode = true;
+            inventoryBar.classList.add("inventory-expanded");
+            setMoveMode(true);
         }
     }
 
@@ -3908,9 +3956,15 @@ function drawInventory(expanded) {
                 var newHouseItem = curHouseItems[curHouseItems.length-1];
 
                 startMovingItem(e, newHouseItem);
+
+                // We don't want to end move mode
+                e.stopPropagation();
+                e.preventDefault();
             }
         }
     } 
+
+    setClockTime();
 
 }
 
@@ -4479,6 +4533,11 @@ var pauseButtonIsPressed;
 var flowerRadius = 5;
 var numFlowers = 50;
 
+var spawnPlayerPadding = 20;
+var spawnOverlapHorizontal = 30;
+var spawnOverlapDown = 20;
+var spawnOverlapUp = 60;
+
 var highScoresDomain = "https://game103.net/ws/scores/";
 var highScoresGame = "ct";
 var loadHighScoresEndpoint = highScoresDomain + "load_scores.php";
@@ -4564,17 +4623,16 @@ var availableItems = [
 var inventory = [];
 var houseItems = [];
 var moveMode = false;
-
-// TODO remove this
-if( !localStorage.cocoaTownInventory ) {
-    for( var i=0; i<availableItems.length; i++ ) {
-        inventory.push( JSON.parse(JSON.stringify(availableItems[i])));
-        inventory[i].function = availableItems[i].function;
-    }
-}
+var moveModeTimeout = null;
 
 if( localStorage.cocoaTownInventory && localStorage.cocoaTownHouseItems ) {
     loadHouse();
+}
+else {
+    houseItems.push( JSON.parse(JSON.stringify(availableItems[0])) ); // Add the dog bed to house items by default
+    houseItems[0].x = 78;
+    houseItems[0].y = 535;
+    houseItems = setFunctions(houseItems);
 }
 
 var deliveryAudio = [
@@ -4659,4 +4717,5 @@ else {
 scaleToScreen();
 document.oncontextmenu = new Function("return false;"); // disable right click
 document.body.onresize = scaleToScreen;
+setTimeout(function() {window.scrollTo(0,0)}, 50);
 load();
