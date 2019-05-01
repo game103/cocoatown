@@ -4843,9 +4843,7 @@ if( !localStorage.cocoaTownHighScore ) {
 if( !localStorage.cocoaTownCoins ) {
     localStorage.cocoaTownCoins = 0;
 }
-else {
-    localStorage.cocoaTownCoins = 400;
-}
+
 // make sure we have a game103 id
 if( !localStorage.game103Id ) {
     loadNewUser();
