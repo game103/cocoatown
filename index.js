@@ -1801,7 +1801,8 @@ function existEnemies() {
         // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
         // TODO testing
-        // TODO door glitch on other browsers
+        // TODO door glitch on other browsers - chrome webkit glitch for iframe foreign objects.
+        // TODO encyclopedia
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -3662,21 +3663,32 @@ function drawInsideHouse() {
 /**
  * Place items inside the house
  * This function is idempotent
+ * @param {boolean} noAddOrRemove - true if we aren't removing any items, we just want to make sure the functions are right
  */
-function placeHouseItems() {
+function placeHouseItems(noRemove) {
 
     var curHouseItems = document.querySelectorAll(".inside-house .house-item");
-    for(var i=0; i<curHouseItems.length; i++) {
-        curHouseItems[i].parentElement.removeChild(curHouseItems[i]);
+    if( !noRemove ) {
+        for(var i=0; i<curHouseItems.length; i++) {
+            curHouseItems[i].parentElement.removeChild(curHouseItems[i]);
+        }
     }
 
     var container = document.querySelector(".inside-house");
 
+    curHouseItems = document.querySelectorAll(".inside-house .house-item");
+
     // Place each of the house items appropriately and add interaction
     for( var i=0; i<houseItems.length; i++ ) {
 
-        var item = houseItems[i].function(houseItems[i].x, houseItems[i].y, container);
-        item.setAttribute("index", i);
+        var item;
+        if( i >= curHouseItems.length ) {
+            item = houseItems[i].function(houseItems[i].x, houseItems[i].y, container, houseItems[i], i);
+            item.setAttribute("index", i);
+        }
+        else {
+            item = curHouseItems[i];
+        }
 
         // On mouse down, the the item to moving
         item.onmousedown = function(e) {
@@ -3686,7 +3698,7 @@ function placeHouseItems() {
                 }
                 else {
                     var curItem = this;
-                    moveModeTimeout = setTimeout(function() { setMoveMode(true); startMovingItem(e, curItem); }, 750);
+                    moveModeTimeout = setTimeout(function() { setMoveMode(true); startMovingItem(e, curItem); moveModeTimeout = null; }, 500);
                 }
                 // We don't want to end move mode
                 e.stopPropagation();
@@ -3697,6 +3709,8 @@ function placeHouseItems() {
         // on double click, bring the item to the front
         item.ondblclick = function(e) {
             if( !interacting ) {
+                clearTimeout(interactTimeout);
+                interactTimeout = null;
                 var parent = this.parentElement;
                 parent.removeChild(this);
                 parent.appendChild(this);
@@ -3705,20 +3719,40 @@ function placeHouseItems() {
                 var tempItem = houseItems[index];
                 houseItems.push(tempItem);
                 houseItems.splice(index, 1);
+                placeHouseItems(); // We can't avoid restarting the videos here since we are reodering items.
             }
         }
 
         // On click interact with the item if not move mode
         item.onclick = function(e) {
-            if( !moveMode && !interacting ) {
-                var index = parseInt(this.getAttribute("index"));
-                var curItem = houseItems[index];
-                if( curItem.interact ) {
-                    curItem.interact(curItem);
-                    interacting = true;
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
+            if( !moveMode && !interacting && !interactTimeout ) {
+                // We don't need to clear moveModeTimeout here since that
+                // was on mouse up
+                var that = this;
+                // Set a timeout to give the option to double click
+                interactTimeout = setTimeout( function() {
+                    if( !moveMode && !interacting ) {
+                        // Don't wait for move mode
+                        if( moveModeTimeout ) {
+                            clearTimeout(moveModeTimeout);
+                        }
+                        var index = parseInt(that.getAttribute("index"));
+                        var curItem = houseItems[index];
+                        if( curItem.interact ) {
+                            document.querySelectorAll("body > .menu-button-inner-house").forEach( function(el) {
+                                el.style.display = "none";
+                            });
+                            if( !document.querySelector(".store-menu").classList.contains("store-menu-hidden") ) {
+                                toggleStore();
+                            }
+                            curItem.interact(curItem, index);
+                            interacting = true;
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    }
+                    interactTimeout = null;
+                }, 300 );
             }
         }
     }
@@ -3748,6 +3782,7 @@ function placeHouseItems() {
         }
         if( moveModeTimeout ) {
             clearTimeout(moveModeTimeout);
+            moveModeTimeout = null;
         }
     }
 
@@ -3831,7 +3866,12 @@ function stopMovingItem(e, item) {
             inventory.push(item);
             houseItems.splice(index, 1);
 
-            placeHouseItems();
+            // remove the item manually from the visual space (draw inventory will add it to the inventory)
+            // do this so the TVs aren't interrupted from playing
+            var itemRepresentation = document.querySelectorAll(".inside-house .house-item")[index];
+            itemRepresentation.parentNode.removeChild(itemRepresentation);
+
+            placeHouseItems(true);
             drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
 
         }
@@ -3977,7 +4017,7 @@ function drawInventory(expanded, scrollTo) {
                 item.x = item.x/screenScaleX;
                 item.y = item.y/screenScaleY;
 
-                placeHouseItems();
+                placeHouseItems(true);
                 drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
 
                 var curHouseItems = document.querySelectorAll(".inside-house .house-item");
@@ -4010,12 +4050,15 @@ function drawInventory(expanded, scrollTo) {
  */
 function createItemIcon(className, size, padding, item, container) {
     var inventorySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    var inventoryPicture = item.function(0, 0, inventorySvg);
+    var inventoryPicture = item.function(0, 0, inventorySvg, item);
     inventorySvg.classList.add(className);
     container.appendChild(inventorySvg);
 
     // width and height of an inventory item box is 70px - make sure this matches css
     var width = inventoryPicture.getBBox().width;
+    if( inventoryPicture.classList.contains("book") ) {
+        width = inventoryPicture.querySelector(".book-spine").getBBox().width;
+    }
     var height = inventoryPicture.getBBox().height;
     if( width >= height ) {
         var ratio = width/height;
@@ -4176,21 +4219,204 @@ function gotoSite(button, item) {
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns an svg containing the item
  */
-function drawTV(x, y, container) {
+function drawTV(x, y, container, item, index) {
     var tvGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     tvGroup.classList.add("tv");
     tvGroup.setAttribute("x", x);
-    tvGroup.setAttribute("y", y)
+    tvGroup.setAttribute("y", y);
 
     var frame = drawRectangle(220, 132.5, 0, 0, tvGroup);
     frame.classList.add("tv-frame");
     var screen = drawRectangle(200, 112.5, 10, 10, tvGroup);
     screen.classList.add("tv-screen");
 
+    // Create the foreign object
+    var foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+    foreignObject.setAttribute("x", 10);
+    foreignObject.setAttribute("y", 10);
+    foreignObject.setAttribute("width", 200);
+    foreignObject.setAttribute("height", 112.5);
+    tvGroup.appendChild(foreignObject);
+
+    // Create the iframe
+    var iframe = document.querySelector("iframe[index='"+index+"']");
+    if( !iframe ) {
+        iframe = document.createElementNS("http://www.w3.org/1999/xhtml", "iframe");
+    }
+    iframe.classList.remove("full-tv-screen-site");
+    iframe.classList.add("tv-iframe");
+    iframe.setAttribute("index", index);
+    foreignObject.appendChild(iframe);
+
+    if( item && item.power && item.page ) {
+        gotoSiteTV(iframe, item.page, item, null);
+    }
+
     tvGroup.classList.add("house-item");
     container.appendChild(tvGroup);
 
     return tvGroup;
+}
+
+/**
+ * Interact with the TV
+ */
+function interactTV(item, index) {
+    var tv = document.querySelectorAll(".inside-house .house-item")[index];
+    var tvFrame = document.querySelectorAll(".inside-house .house-item")[index].querySelector(".tv-frame");
+    var tvScreen = document.querySelectorAll(".inside-house .house-item")[index].querySelector(".tv-screen");
+    var tvForeignObject = document.querySelectorAll(".inside-house .house-item")[index].querySelector("foreignObject");
+    var tvIframe = tvForeignObject.querySelector("iframe");
+
+    
+
+    // Clone all items and put before the TV
+    var items = document.querySelectorAll(".inside-house .house-item");
+    var clones = [];
+    for( var i=0; i<items.length; i++ ) {
+        var clone = items[i].cloneNode(true);
+        var cIframe = clone.querySelector(".tv-iframe");
+        if( cIframe ) {
+            cIframe.parentNode.removeChild(cIframe);
+        }
+        document.querySelector(".inside-house").insertBefore(clone, tv);
+        clones.push(clone);
+        if( i != index ) {
+            items[i].style.display = "none";
+        }
+    }
+
+    var oldX = tv.getAttribute("x");
+    var oldY = tv.getAttribute("y");
+    var oldWidth = tvFrame.getAttribute("width");
+    var oldHeight = tvFrame.getAttribute("height");
+    var oldScreenX = tvScreen.getAttribute("x");
+    var oldTvFunction = tv.onclick;
+
+    tvFrame.setAttribute("width", "1046");
+    tvFrame.setAttribute("height", "660");
+    tvScreen.setAttribute("width", "976");
+    tvScreen.setAttribute("height", "549");
+    tvScreen.setAttribute("x", "35");
+    tvScreen.setAttribute("y", "35");
+    tvForeignObject.setAttribute("width", "976");
+    tvForeignObject.setAttribute("height", "625");
+    tvForeignObject.setAttribute("x", "35");
+    tvForeignObject.setAttribute("y", "35");
+    tv.setAttribute("x", 77);
+    tv.setAttribute("y", 15);
+    tvIframe.style.height = "calc(100% - 70px)";
+    tvIframe.style.pointerEvents = "auto";
+
+    var addressBar = document.createElement("input");
+    addressBar.setAttribute("type", "text");
+    addressBar.setAttribute("placeholder", "YouTube watch string (e.g. ZjTnENSYAcM)");
+    var url = item.page ? item.page : "ZjTnENSYAcM";
+    addressBar.setAttribute("value", url);
+    tvForeignObject.appendChild(addressBar);
+
+    var tvGoButton = document.createElement("div");
+    var tvPowerButton = document.createElement("div");
+
+    tvGoButton.innerHTML = '<i class="fas fa-arrow-right"></i>';
+    tvGoButton.classList.add("menu-button");
+    tvGoButton.classList.add("menu-button-tv-go");
+    tvGoButton.onclick = function(e) {
+        // Try to find the iframe to see if it is visible
+        gotoSiteTV(this.parentNode.querySelector("iframe"), addressBar.value, item, tvPowerButton);
+    }
+    tvForeignObject.appendChild(tvGoButton);
+
+    tvPowerButton.innerHTML = '<i class="fas fa-power-off"></i>';
+    tvPowerButton.classList.add("menu-button");
+    tvPowerButton.classList.add("menu-button-tv-power");
+    tvPowerButton.onclick = function(e) {
+        var watchScreen = this.parentNode.querySelector("iframe");
+        if( watchScreen.getAttribute("src") ) {
+            tvForeignObject.removeChild(tvIframe);
+            tvForeignObject.setAttribute("src", "");
+            item.power = false;
+        }
+        else {
+            tvForeignObject.appendChild(tvIframe);
+            item.power = true;
+            gotoSiteTV(tvIframe, addressBar.value, item, tvPowerButton);
+        }
+        saveHouse();
+    }
+    tvForeignObject.appendChild(tvPowerButton);
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick,
+        "onkeyup": document.body.onkeyup
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        tvFrame.setAttribute("width", oldWidth);
+        tvFrame.setAttribute("height", oldHeight);
+        tvScreen.setAttribute("width", oldWidth-20);
+        tvScreen.setAttribute("height", oldHeight-20);
+        tvScreen.setAttribute("x", oldScreenX);
+        tvScreen.setAttribute("y", oldScreenX);
+        tvForeignObject.setAttribute("width", oldWidth-20);
+        tvForeignObject.setAttribute("height", oldHeight-20);
+        tvForeignObject.setAttribute("x", oldScreenX);
+        tvForeignObject.setAttribute("y", oldScreenX);
+        tv.setAttribute("x", oldX);
+        tv.setAttribute("y", oldY);
+        tvIframe.style.height = "100%";
+        addressBar.parentNode.removeChild(addressBar);
+        tvGoButton.parentNode.removeChild(tvGoButton);
+        tvPowerButton.parentNode.removeChild(tvPowerButton);
+        tvIframe.style.pointerEvents = "none";
+
+        // Remove clones, add back normal items
+        for( var i=0; i<items.length; i++ ) {
+            var clone = clones[i];
+            clone.parentNode.removeChild(clone);
+            items[i].style.display = "block";
+        }
+
+        tv.onclick = oldTvFunction;
+    }
+    document.body.onkeyup = function(e) {
+        if( e.keyCode == 13 ) {
+            tvGoButton.click();
+        }
+    }
+
+    tv.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+}
+
+/**
+ * Go to a youtube video on the tv
+ * @param {HTMLElement} button - the go button for the computer
+ * @param {object} item - the item the computer corresponds to
+ */
+function gotoSiteTV(iframe, val, item, powerButton) {
+    if( !iframe ) {
+        // This will recall gotoSiteTV once the power is on.
+        powerButton.click();
+    }
+    else {
+        item.page = val;
+        val = "https://www.youtube.com/embed/" + val;
+        if(val.indexOf("?") != -1) {
+            val += "&"
+        }
+        else {
+            val += "?"
+        }
+        val += "autoplay=1";
+        val += "&loop=1";
+        saveHouse();
+        iframe.src = val;
+    }
 }
 
 /**
@@ -4356,6 +4582,9 @@ function restoreInteractionFuctions(item) {
         document.body[keys[i]] = item.restoreFunctions[keys[i]];
     }
     interacting = false;
+    document.querySelectorAll("body > .menu-button-inner-house").forEach( function(el) {
+        el.style.display = "block";
+    });
 }
 
 /**
@@ -4545,7 +4774,7 @@ function drawCalendar(x, y, container) {
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns an svg containing the item
  */
-function drawPictureFrame(x, y, container) {
+function drawPictureFrame(x, y, container, item) {
 
     var pictureFrameGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     pictureFrameGroup.classList.add("picture-frame");
@@ -4562,7 +4791,13 @@ function drawPictureFrame(x, y, container) {
     picture.setAttribute("y", 10);
     picture.setAttribute("width", 61.875);
     picture.setAttribute("height", 110);
-    picture.setAttribute("href", "resources/elephant.jpg");
+
+    var href = "resources/elephant.jpg";
+    if( item && item.imgData ) {
+        href = item.imgData;
+    }
+
+    picture.setAttribute("href", href);
     pictureFrameGroup.appendChild(picture);
 
     container.appendChild(pictureFrameGroup);
@@ -4570,6 +4805,45 @@ function drawPictureFrame(x, y, container) {
     pictureFrameGroup.classList.add("house-item");
 
     return pictureFrameGroup;
+}
+
+/**
+ * Interact with the picture frame
+ */
+function interactPicture(item, index) {
+    var pictureSelect = document.createElement("input");
+    pictureSelect.setAttribute("type", "file");
+    pictureSelect.classList.add("picture-select");
+    document.body.appendChild(pictureSelect);
+
+    pictureSelect.onchange = function() {
+        var image = document.querySelectorAll(".inside-house .house-item")[index].querySelector("image");
+        var file = pictureSelect.files[0];
+        var reader  = new FileReader();
+
+        reader.addEventListener("load", function () {
+            image.setAttribute("href", reader.result);
+            item.imgData = reader.result;
+            saveHouse();
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        pictureSelect.parentNode.removeChild(pictureSelect);
+    }
+
+    pictureSelect.onclick = function(e) {
+        e.stopPropagation();
+    }
 }
 
 /**
@@ -4611,6 +4885,41 @@ function drawNewspaper(x, y, container) {
     newspaperGroup.classList.add("house-item");
 
     return newspaperGroup;
+}
+
+/**
+ * Interact with the newspaper
+ */
+function interactNewspaper(item) {
+    var fullNewspaper = document.createElement("div");
+    fullNewspaper.classList.add("full-newspaper");
+
+    var fullNewspaperTitle = document.createElement("div");
+    fullNewspaperTitle.classList.add("full-newspaper-title");
+    fullNewspaperTitle.innerText = "NEWS";
+    fullNewspaper.appendChild(fullNewspaperTitle);
+
+    fullNewspaperNews = document.createElement("div");
+    fullNewspaperNews.classList.add("full-newspaper-news");
+    fullNewspaperNews.innerHTML = '<a class="twitter-timeline" href="https://twitter.com/CUTEFUNNYANIMAL?ref_src=twsrc%5Etfw">Tweets by CUTEFUNNYANIMAL</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>';
+    fullNewspaper.appendChild(fullNewspaperNews);
+
+    document.body.appendChild(fullNewspaper);
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        fullNewspaper.parentNode.removeChild(fullNewspaper);
+    }
+
+    fullNewspaper.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
 }
 
 /**
@@ -4915,6 +5224,7 @@ var availableItems = [
     {
         "name": "TV",
         "function": drawTV,
+        "interact": interactTV,
         "price": 500
     },
     {
@@ -4935,11 +5245,13 @@ var availableItems = [
     {
         "name": "Picture",
         "function": drawPictureFrame,
+        "interact": interactPicture,
         "price": 90
     },
     {
         "name": "Newspaper",
         "function": drawNewspaper,
+        "interact": interactNewspaper,
         "price": 100
     },
     {
@@ -4957,6 +5269,7 @@ var inventory = [];
 var houseItems = [];
 var moveMode = false;
 var moveModeTimeout = null;
+var interactTimeout = null;
 
 if( localStorage.cocoaTownInventory && localStorage.cocoaTownHouseItems ) {
     loadHouse();
