@@ -16,11 +16,11 @@
 
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
-    -webkit-user-select: none;
 }
 
 *:not(input) {
     user-select: none;
+    -webkit-user-select: none;
 }
 
 html {
@@ -557,7 +557,7 @@ body {
     width: 80px;
 }
 
-.menu-high-scores-info input {
+input {
     width: 170px;
     border-radius: 10px;
     border: 0;
@@ -810,7 +810,6 @@ body {
     position: absolute;
     top: 10px;
     font-size: 15px;
-    margin: 0;
     left: 175px;
     border-radius: 25px;
     width: 0;
@@ -825,11 +824,15 @@ body {
 }
 
 .inventory-slider, .store-slider {
-    margin: 10px 0;
+    margin: 10px;
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
+}
+
+.inventory-slider {
+    margin: 15px; /* can't have padding on inventory like menu */
 }
 
 .inventory-item {
@@ -844,7 +847,7 @@ body {
     vertical-align: bottom;
 }
 
-.inventory-item:not(:last-child) {
+.inventory-item {
     cursor: pointer;
 }
 
@@ -863,11 +866,11 @@ body {
     opacity: 0.8;
 }
 
-.store-item:first-child {
+.inventory-item:first-child, .store-item:first-child {
     margin-left: 0;
 }
 
-.store-item:last-child {
+.inventory-item:last-child, .store-item:last-child {
     margin-right: 0;
 }
 
@@ -989,9 +992,29 @@ body {
     width: 800px;
     height: 600px;
     margin: 35px;
-    background-color: rgb(65, 64, 64);
+    /*background-color: rgb(65, 64, 64);*/
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX( calc(-50% - 35px) );
+    background-color: white;
+}
+
+.full-computer-screen .menu-button {
+    text-align: center;
+}
+
+.full-computer-screen input {
+    width: calc(100% - 99px);
+    border: 2px solid black;
+    margin-left: 5px;
+}
+
+.full-computer-screen-site {
+    position: absolute;
+    border: none;
+    width: 100%;
+    height: 535px;
+    top: 63px;
+    border-top: 2px solid black;
 }

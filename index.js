@@ -1801,9 +1801,7 @@ function existEnemies() {
         // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
         // TODO testing
-        // TODO different cursor when putting an item away
-        // TODO scroll to same place you were when putting item away
-        // TODO delete item option?
+        // TODO door glitch on other browsers
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -3715,7 +3713,6 @@ function placeHouseItems() {
             if( !moveMode && !interacting ) {
                 var index = parseInt(this.getAttribute("index"));
                 var curItem = houseItems[index];
-                console.log(index);
                 if( curItem.interact ) {
                     curItem.interact(curItem);
                     interacting = true;
@@ -3835,7 +3832,7 @@ function stopMovingItem(e, item) {
             houseItems.splice(index, 1);
 
             placeHouseItems();
-            drawInventory(true);
+            drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
 
         }
         else {
@@ -3937,8 +3934,9 @@ function drawHouseButtons() {
  * However, you will have to give it a parameter if you want it 
  * expanded by default
  * @param {boolean} expanded - true if the inventory is open as soon as being created
+ * @param {number} scrollTo - how far to scroll the expanded inventory to
  */
-function drawInventory(expanded) {
+function drawInventory(expanded, scrollTo) {
 
     var inventorySection = document.querySelector(".inventory");
     if( inventorySection ) {
@@ -3980,7 +3978,7 @@ function drawInventory(expanded) {
                 item.y = item.y/screenScaleY;
 
                 placeHouseItems();
-                drawInventory(true);
+                drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
 
                 var curHouseItems = document.querySelectorAll(".inside-house .house-item");
                 var newHouseItem = curHouseItems[curHouseItems.length-1];
@@ -3993,6 +3991,10 @@ function drawInventory(expanded) {
             }
         }
     } 
+
+    if( scrollTo ) {
+        inventorySlider.scrollTo(scrollTo, 0);
+    }
 
     setClockTime();
 
@@ -4102,10 +4104,24 @@ function interactComputer(item) {
     screen.classList.add("full-computer-screen");
     fullComputer.appendChild(screen);
 
+    var iframe = document.createElement("iframe");
+    iframe.classList.add("full-computer-screen-site");
+    screen.appendChild(iframe);
+
     var addressBar = document.createElement("input");
     addressBar.setAttribute("type", "text");
-    addressBar.innerText = "https://game103.net";
+    var url = item.page ? item.page : "https://game103.net";
+    addressBar.setAttribute("value", url);
     screen.appendChild(addressBar);
+
+    var browserGoButton = document.createElement("div");
+    browserGoButton.innerHTML = '<i class="fas fa-arrow-right"></i>';
+    browserGoButton.classList.add("menu-button");
+    browserGoButton.classList.add("menu-button-browser-go");
+    browserGoButton.onclick = function() {
+        gotoSite(this, item);
+    }
+    screen.appendChild(browserGoButton);
 
     document.body.appendChild(fullComputer);
 
@@ -4120,7 +4136,7 @@ function interactComputer(item) {
     }
     document.body.onkeyup = function(e) {
         if( e.keyCode == 13 ) {
-
+            gotoSite(browserGoButton, item);
         }
     }
 
@@ -4129,6 +4145,28 @@ function interactComputer(item) {
         e.stopPropagation();
         return false;
     }
+
+    gotoSite(browserGoButton, item);
+}
+
+/**
+ * Go to a site on the computer
+ * @param {HTMLElement} button - the go button for the computer
+ * @param {object} item - the item the computer corresponds to
+ */
+function gotoSite(button, item) {
+    var val = button.parentNode.querySelector("input").value;
+    if( !val.match(/^https?:\/\//ig) ) {
+        if( val.match(/\.[a-z]+$/ig) ) {
+            val = "http://" + val;
+        }
+        else {
+            val = "https://bing.com/search?q=" + val;
+        }
+    }
+    item.page = val;
+    saveHouse();
+    button.parentNode.querySelector("iframe").src = val;
 }
 
 /**
@@ -4682,14 +4720,15 @@ function drawStore() {
         // Buy an item
         itemButton.onclick = function() {
             var price = parseInt(this.parentNode.querySelector(".store-item-price").innerText);
-            if( localStorage.cocoaTownCoins >= price ) {
-                localStorage.cocoaTownCoins -= price;
+            if( parseInt(localStorage.cocoaTownCoins) >= price ) {
+                localStorage.cocoaTownCoins = parseInt(localStorage.cocoaTownCoins) - price;
                 inventory.push( JSON.parse(JSON.stringify(  availableItems[ parseInt(this.parentNode.getAttribute("index")) ]  )) );
                 inventory = setFunctions(inventory);
                 updateStoreMoney();
                 updateStoreOwned();
                 var expanded = document.querySelector(".inventory").classList.contains("inventory-expanded");
-                drawInventory(expanded);
+                drawInventory(expanded, expanded ? document.querySelector(".inventory-slider").scrollLeft : null);
+                saveHouse();
             }
         }
 
@@ -4708,11 +4747,11 @@ function updateStoreMoney() {
     // available items array.
     var buyButtons = document.querySelectorAll(".store-item-buy-button");
     for( var i=1; i<availableItems.length; i++) {
-        if( availableItems[i].price > localStorage.cocoaTownCoins ) {
+        if( availableItems[i].price > parseInt(localStorage.cocoaTownCoins) ) {
             buyButtons[i-1].style.opacity = 0.5;
         }
         else {
-            buyButtons[i-1].style.display = 1;
+            buyButtons[i-1].style.opacity = 1;
         }
     }
 }
