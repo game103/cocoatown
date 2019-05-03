@@ -1797,16 +1797,13 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO add interaction functions
         // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
         // TODO testing
-        // TODO encyclopedia
-        // TODO test youtube playlist
-        // TODO code review
+        // TODO code review - make sure you're saving house in all the right places after interact and movement.
         // TODO look into music not stopping after saving and getting a new song.
-        // TODO look into quota
-        // TODO multiple music tracks
+        // TODO look into quota/localforage > store more data
+        // TODO door glitch on other browsers
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -3761,14 +3758,14 @@ function placeHouseItems(noRemove) {
                             if( !document.querySelector(".store-menu").classList.contains("store-menu-hidden") ) {
                                 toggleStore();
                             }
-                            curItem.interact(curItem, index);
                             interacting = true;
+                            curItem.interact(curItem, index);
                             e.stopPropagation();
                             e.preventDefault();
                         }
                     }
                     interactTimeout = null;
-                }, 300 );
+                }, 150 );
             }
         }
     }
@@ -3815,6 +3812,7 @@ function placeHouseItems(noRemove) {
         setMoveMode(false);
     }
 
+    setClockTime();
     saveHouse();
 
 }
@@ -3985,7 +3983,9 @@ function drawHouseButtons() {
     cart.classList.add("menu-button-inner-house");
     cart.innerHTML = '<i class="fas fa-shopping-cart"></i>';
 
-    cart.onclick = function(e) { if(!interacting) toggleStore(); };
+    cart.onclick = function(e) { if(!interacting) { 
+        toggleStore();
+    } };
     cart.onmousedown = function(e) {
         if( !interacting ) {
             e.stopPropagation();
@@ -4010,6 +4010,9 @@ function drawHouseButtons() {
             else {
                 inventoryBar.classList.add("inventory-expanded");
                 setMoveMode(true);
+                if( !document.querySelector(".store-menu").classList.contains("store-menu-hidden") ) {
+                    toggleStore();
+                }
             }
         }
     }
@@ -4486,28 +4489,93 @@ function gotoSiteTV(iframe, val, item, powerButton) {
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns an svg containing the item
  */
-function drawBook(x, y, fill, text, container) {
+function drawBook(x, y, fill, textFill, text, pages, container) {
     var bookGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     bookGroup.classList.add("book");
     bookGroup.setAttribute("x", x);
     bookGroup.setAttribute("y", y);
 
-    var book = drawRectangle(18.5, 80, 0, 0, bookGroup);
+    var bookSizeMultiplier = pages/70;
+    if( bookSizeMultiplier > 1.75 ) {
+        bookSizeMultiplier = 1.75;
+    }
+    else if( bookSizeMultiplier < 1 ) {
+        bookSizeMultiplier = 1;
+    } 
+
+    var book = drawRectangle(18.5 * bookSizeMultiplier, 80, 0, 0, bookGroup);
     book.classList.add("book-spine");
     book.style.fill = fill;
 
     var textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    textElement.innerHTML = text;
+    var spineText = text.length > 10 ? text.substring(0, 8) + " ..." : text;
+    textElement.innerHTML = spineText;
     textElement.classList.add("book-name");
     textElement.setAttribute("x", 7);
-    textElement.setAttribute("y", -6);
+    textElement.setAttribute("y", -6 + (-6*(bookSizeMultiplier-1)*1.1) );
     textElement.setAttribute("textLength", 66);
+    textElement.style.fill = textFill;
     bookGroup.appendChild(textElement);
 
     bookGroup.classList.add("house-item");
     container.appendChild(bookGroup);
 
     return bookGroup;
+}
+
+/**
+ * Interact with a book
+ */
+function interactBook(item) {
+    var fullBook = document.createElement("div");
+    fullBook.classList.add("full-book");
+    fullBook.style.backgroundColor = item.color;
+
+    var fullBookPage = document.createElement("div");
+    fullBookPage.classList.add("full-book-page");
+    fullBook.appendChild(fullBookPage);
+
+    var fullBookTitle = document.createElement("div");
+    fullBookTitle.classList.add("full-book-title");
+    fullBookTitle.innerText = item.name;
+    fullBookPage.appendChild(fullBookTitle);
+
+    var fullBookSubTitle = document.createElement("div");
+    fullBookSubTitle.classList.add("full-book-subtitle");
+    fullBookSubTitle.innerText = item.author;
+    fullBookPage.appendChild(fullBookSubTitle);
+
+    var fullBookText = document.createElement("iframe");
+    fullBookText.setAttribute("src", item.src);
+    fullBookText.classList.add("full-book-text");
+    fullBookPage.appendChild(fullBookText);
+
+    fullBookText.onload = function() {
+        fullBookText.contentDocument.onscroll = function() {
+            item.position = fullBookText.contentWindow.document.scrollingElement.scrollTop;
+            saveHouse();
+        }
+        if( item.position ) {
+            fullBookText.contentWindow.scrollTo(0, item.position);
+        }
+    }
+
+    document.body.appendChild(fullBook);
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        fullBook.parentNode.removeChild(fullBook);
+    }
+
+    fullBook.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
 }
 
 /**
@@ -4694,6 +4762,23 @@ function drawClock(x, y, container) {
 }
 
 /**
+ * Interact with the clock
+ */
+function interactClock(item) {
+    if( !item.offset ) {
+        item.offset = 0;
+    }
+    item.offset++;
+    if( item.offset == 12 ) {
+        item.offset = 0;
+    }
+    saveHouse();
+    setClockTime();
+    item.restoreFunctions = {};
+    restoreInteractionFuctions(item);
+}
+
+/**
  * Make sure all clocks have the correct time
  */
 function setClockTime() {
@@ -4705,7 +4790,24 @@ function setClockTime() {
     hoursRotate += minutesRotate/12;
     var clocks = document.querySelectorAll(".clock");
     for( var i=0; i<clocks.length; i++ ) {
-        clocks[i].querySelector(".clock-hour-hand").style.transform = "rotate("+hoursRotate+"rad)";
+
+        var tempHoursRotate = hoursRotate;
+        if( clocks[i].parentNode.classList.contains("inside-house") ) {
+            var index = clocks[i].getAttribute("index");
+            if( index && houseItems[index] && houseItems[index].offset ) {
+                tempHoursRotate = (2*Math.PI)/12 * (houseItems[index].offset+hours) - Math.PI/2;
+                console.log(hours);
+                console.log(houseItems[index].offset);
+            }
+        }
+        else if( clocks[i].parentNode.classList.contains("inventory-svg") ) {
+            var index = clocks[i].parentNode.parentNode.getAttribute("index");
+            if( index && inventory[index] && inventory[index].offset ) {
+                tempHoursRotate = (2*Math.PI)/12 * (inventory[index].offset+hours) - Math.PI/2;
+            }
+        }
+
+        clocks[i].querySelector(".clock-hour-hand").style.transform = "rotate("+tempHoursRotate+"rad)";
         clocks[i].querySelector(".clock-minute-hand").style.transform = "rotate("+minutesRotate+"rad)";
     }
 }
@@ -4950,7 +5052,7 @@ function drawNewspaper(x, y, container) {
 /**
  * Interact with the newspaper
  */
-function interactNewspaper(item) {
+function interactNewspaper(item, index) {
     var fullNewspaper = document.createElement("div");
     fullNewspaper.classList.add("full-newspaper");
 
@@ -4959,10 +5061,31 @@ function interactNewspaper(item) {
     fullNewspaperTitle.innerText = "NEWS";
     fullNewspaper.appendChild(fullNewspaperTitle);
 
-    fullNewspaperNews = document.createElement("div");
+    var timeline = item.timeline ? item.timeline : "https://twitter.com/CUTEFUNNYANIMAL?ref_src=twsrc%5Etfw";
+
+    var fullNewspaperNews = document.createElement("div");
     fullNewspaperNews.classList.add("full-newspaper-news");
-    fullNewspaperNews.innerHTML = '<a class="twitter-timeline" href="https://twitter.com/CUTEFUNNYANIMAL?ref_src=twsrc%5Etfw"></a>';
+    fullNewspaperNews.innerHTML = '<a class="twitter-timeline" href="'+timeline+'"></a>';
     fullNewspaper.appendChild(fullNewspaperNews);
+
+    var addressBar = document.createElement("input");
+    addressBar.setAttribute("type", "text");
+    addressBar.setAttribute("placeholder", "Twitter Feed");
+    addressBar.setAttribute("value", timeline);
+    fullNewspaper.appendChild(addressBar);
+
+    var newspaperGoButton = document.createElement("div");
+
+    newspaperGoButton.innerHTML = '<i class="fas fa-arrow-right"></i>';
+    newspaperGoButton.classList.add("menu-button");
+    newspaperGoButton.classList.add("menu-button-newspaper-go");
+    newspaperGoButton.onclick = function(e) {
+        item.timeline = addressBar.value;
+        saveHouse();
+        fullNewspaper.parentNode.removeChild(fullNewspaper);
+        interactNewspaper(item, index);
+    }
+    fullNewspaper.appendChild(newspaperGoButton);
 
     document.body.appendChild(fullNewspaper);
 
@@ -5022,9 +5145,9 @@ function drawSpeaker(x, y, container, item) {
 
     if( item && item.power && item.audioData ) {
         if( !item.audio ) {
-            loadAudioData(item);
+            loadAudioData(item, function() { if( item.audio ) { item.audio.play(); } });
         }
-        if( item.audio ) {
+        else if( item.audio ) {
             item.audio.play();
         }
     }
@@ -5062,7 +5185,7 @@ function interactSpeaker(item, index) {
     audioPlayButton.onclick = function() {
         // If we have audio data but not audio we can play, get audio we can play
         if(item.audioData && !item.audio) {
-            loadAudioData(item);
+            loadAudioData(item, function() { if(item.audio) {audioPlayButton.onclick();} });
         }
         if(item.audio) {
             if(!item.audio.paused) {
@@ -5086,7 +5209,12 @@ function interactSpeaker(item, index) {
         reader.addEventListener("load", function () {
             var audio = new Audio(reader.result);
             item.audio = null; // this will be updated on playing
+
+            var audioHash = reader.result.hashCode();
             item.audioData = reader.result;
+            localforage.setItem(audioHash, reader.result);
+
+            item.audioFileName = file.name;
             turnOffSpeaker(item);
             audioFilePlaying.innerHTML = "Now playing:<br>" + item.audioFileName;
             audioPlayButton.innerHTML = '<i class="fas fa-play"></i>';
@@ -5095,7 +5223,6 @@ function interactSpeaker(item, index) {
 
         if (file) {
             reader.readAsDataURL(file);
-            item.audioFileName = file.name;
         }
     }
 
@@ -5113,9 +5240,12 @@ function interactSpeaker(item, index) {
     }
 }
 
-function loadAudioData(item) {
-    item.audio = new Audio(item.audioData);
-    item.audio.loop = true;
+function loadAudioData(item, callback) {
+    localforage.getItem( item.audioData, function() {
+        item.audio = new Audio(item.audioData);
+        item.audio.loop = true;
+        callback();
+    } );
 }
 
 function turnOffSpeaker(item) {
@@ -5145,6 +5275,31 @@ function drawTennisBallForHouse(x, y, container) {
     ballGroup.classList.add("house-item");
 
     return ballGroup;
+}
+
+/**
+ * Interact with the tennis ball
+ */
+function interactTennisBall(item, index) {
+    var startSpeed = -20
+    var speed = startSpeed;
+    var intervalTime = 30;
+    var houseItem = document.querySelectorAll(".inside-house .house-item")[index];
+    item.restoreFunctions = {};
+    var houseItemX = houseItem.getAttribute("x");
+    var houseItemY = houseItem.getAttribute("y");
+    var interval = setInterval( function() {
+        if( speed <= -startSpeed ) {
+            houseItem.setAttribute("y", parseFloat(houseItem.getAttribute("y"))+speed);
+            speed ++;
+        }
+        else {
+            houseItem.setAttribute("y", houseItemY);
+            houseItem.setAttribute("x", houseItemX);
+            restoreInteractionFuctions(item);
+            clearInterval(interval);
+        }
+    }, intervalTime);
 }
 
 /**
@@ -5278,6 +5433,23 @@ function toggleStore() {
     }
 }
 
+/**
+ * Hash code for a file
+ * Taken from here: https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
+ */
+String.prototype.hashCode = function() {
+    var hash = 0;
+    if (this.length == 0) {
+        return hash;
+    }
+    for (var irwaq = 0; irwaq < this.length; irwaq++) {
+        var char = this.charCodeAt(irwaq);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 ////////// Main Program ////////////
 
 // Movement
@@ -5370,6 +5542,7 @@ var mute = false;
 
 var screenScaleX = 1;
 var screenScaleY = 1;
+// Dog bed must be first
 var availableItems = [
     {
         "name": "Dog Bed",
@@ -5377,13 +5550,9 @@ var availableItems = [
         "price": 100,
     },
     {
-        "name": "Table",
-        "function": drawDesk,
-        "price": 120,
-    },
-    {
         "name": "Ball",
         "function": drawTennisBallForHouse,
+        "interact": interactTennisBall,
         "price": 50
     },
     {
@@ -5392,37 +5561,21 @@ var availableItems = [
         "price": 300
     },
     {
-        "name": "Computer",
-        "function": drawComputer,
-        "interact": interactComputer,
-        "price": 750
-    },
-    {
-        "name": "TV",
-        "function": drawTV,
-        "interact": interactTV,
-        "price": 500
-    },
-    {
-        "name": "Mary Poppins",
-        "function": function(x, y, container) { return drawBook(x, y, "steelblue", "Mary Poppins", container); }
-    },
-    {
-        "name": "Stickies",
-        "function": drawNotepad,
-        "interact": interactNotepad,
-        "price": 50
+        "name": "Calendar",
+        "function": drawCalendar,
+        "price": 200
     },
     {
         "name": "Clock",
         "function": drawClock,
-        "price": 150
+        "price": 150,
+        "interact": interactClock
     },
     {
-        "name": "Picture",
-        "function": drawPictureFrame,
-        "interact": interactPicture,
-        "price": 90
+        "name": "Computer",
+        "function": drawComputer,
+        "interact": interactComputer,
+        "price": 750
     },
     {
         "name": "Newspaper",
@@ -5431,17 +5584,267 @@ var availableItems = [
         "price": 100
     },
     {
+        "name": "Picture",
+        "function": drawPictureFrame,
+        "interact": interactPicture,
+        "price": 90
+    },
+    {
         "name": "Speaker",
         "function": drawSpeaker,
         "interact": interactSpeaker,
         "price": 300
     },
     {
-        "name": "Calendar",
-        "function": drawCalendar,
-        "price": 200
+        "name": "Stickies",
+        "function": drawNotepad,
+        "interact": interactNotepad,
+        "price": 50
+    },
+    {
+        "name": "Table",
+        "function": drawDesk,
+        "price": 120,
+    },
+    {
+        "name": "TV",
+        "function": drawTV,
+        "interact": interactTV,
+        "price": 500
+    },
+    {
+        "name": "Aesop's Fables",
+        "author": "Aesop/J. H. Stickney",
+        "src": "resources/books/aesopsfables.html",
+        "color": "#db890f",
+        "textColor": "black",
+        "price": 100,
+        "pages": 80,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Alice in Wonderland",
+        "author": "Lewis Carroll",
+        "src": "resources/books/aliceinwonderland.html",
+        "color": "#6b0000",
+        "textColor": "white",
+        "pages": 130,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "A Christmas Carol",
+        "author": "Charles Dickens",
+        "src": "resources/books/christmascarol.html",
+        "color": "#60470c",
+        "textColor": "#ffe099",
+        "price": 100,
+        "pages": 90,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "East of the Sun and West of the Moon",
+        "author": "Peter Christen Asbjørnsen and Jørgen Engebretsen Moe",
+        "src": "resources/books/eastofthesunwestofthemoon.html",
+        "color": "#d8d6b3",
+        "textColor": "#822900",
+        "price": 100,
+        "pages": 192,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Encyclopedia",
+        "author": "Collaboration",
+        "src": "https://en.wikipedia.org/wiki/Dog",
+        "color": "white",
+        "textColor": "black",
+        "price": 100,
+        "pages": 200,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Grimm's Fairy Stories",
+        "author": "Jacob and Wilhelm Grimm",
+        "src": "resources/books/grimmsfairystories.html",
+        "color": "#003010",
+        "textColor": "white",
+        "pages": 554,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Hans Andersen's Fairy Tales",
+        "author": "Hans Christian Andersen",
+        "src": "resources/books/hansandersensfairytales.html",
+        "color": "#afae95",
+        "textColor": "black",
+        "pages": 80,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Hans Andersen's Fairy Tales Second Series",
+        "author": "Hans Christian Andersen",
+        "src": "resources/books/hansandersensfairytales2.html",
+        "color": "#afae95",
+        "textColor": "black",
+        "pages": 100,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Hunchback of Notre Dame",
+        "author": "Victor Hugo",
+        "src": "resources/books/notredamedeparis.html",
+        "color": "#202a6b",
+        "textColor": "white",
+        "price": 100,
+        "pages": 940,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Jemima Puddle Duck",
+        "author": "Beatrix Potter",
+        "src": "resources/books/jemimapuddleduck.html",
+        "color": "#efefef",
+        "textColor": "black",
+        "pages": 64,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Jungle Book",
+        "author": "Rudyard Kipling",
+        "src": "resources/books/thejunglebook.html",
+        "color": "#446807",
+        "textColor": "#dbdba6",
+        "price": 100,
+        "pages": 104,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Little Women",
+        "author": "Louisa M. Alcott",
+        "src": "resources/books/littlewomen.html",
+        "color": "#0f4200",
+        "textColor": "#ad9600",
+        "price": 100,
+        "pages": 528,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Mothers's Nursery Tales",
+        "author": "Katherine Pyle",
+        "src": "resources/books/mothersnurserytales.html",
+        "color": "#03003f",
+        "textColor": "#ddd602",
+        "pages": 120,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Nonsense Drolleries",
+        "author": "Edward Lear",
+        "src": "resources/books/nonsensedrolleries.html",
+        "color": "#848383",
+        "textColor": "black",
+        "price": 100,
+        "pages": 24,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Peter Rabbit",
+        "author": "Beatrix Potter",
+        "src": "resources/books/peterrabbit.html",
+        "color": "#efefef",
+        "textColor": "black",
+        "pages": 72,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Peter and Wendy",
+        "author": "J. M. Barrie",
+        "src": "resources/books/peterpan.html",
+        "color": "#336600",
+        "textColor": "white",
+        "pages": 80,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Pied Piper of Hamlin",
+        "author": "Robert Browning",
+        "src": "resources/books/piedpiper.html",
+        "color": "#a31523",
+        "textColor": "#d6efbf",
+        "price": 100,
+        "pages": 48,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "Pinocchio",
+        "author": "Carlo Collodi",
+        "src": "resources/books/pinocchio.html",
+        "color": "#66380b",
+        "textColor": "white",
+        "price": 100,
+        "pages": 118,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Secret Garden",
+        "author": "Frances Hodgson Burnett",
+        "src": "resources/books/thesecretgarden.html",
+        "color": "#457519",
+        "textColor": "black",
+        "price": 100,
+        "pages": 126,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Wind in the Willows",
+        "author": "Kenneth Grahame",
+        "src": "resources/books/thewindinthewillows.html",
+        "color": "#f2c737",
+        "textColor": "#004768",
+        "pages": 104,
+        "price": 100,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
+    },
+    {
+        "name": "The Wonderful Wizard of Oz",
+        "author": "L. Frank Baum",
+        "src": "resources/books/thewizardofoz.html",
+        "color": "#e5d600",
+        "textColor": "black",
+        "price": 100,
+        "pages": 84,
+        "interact": interactBook,
+        "function": function(x, y, container, item) { return drawBook(x, y, item.color, item.textColor, item.name, item.pages, container); },
     }
 ];
+
 var inventory = [];
 var houseItems = [];
 var moveMode = false;
