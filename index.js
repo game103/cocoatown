@@ -1804,6 +1804,9 @@ function existEnemies() {
         // TODO encyclopedia
         // TODO test youtube playlist
         // TODO code review
+        // TODO look into music not stopping after saving and getting a new song.
+        // TODO look into quota
+        // TODO multiple music tracks
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
