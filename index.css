@@ -1056,7 +1056,7 @@ input {
     pointer-events: none;
 }
 
-.picture-select {
+.picture-select, .audio-select-container {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1066,6 +1066,40 @@ input {
     background-color: rgb(66, 37, 15);;
     color: white;
     width: 300px;
+}
+
+.audio-select-container {
+    background-color: rgb(34, 34, 34);
+}
+
+.audio-select {
+    display: block;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.audio-file-playing {
+    display:inline-block;
+    font-family: "Acme", serif;
+    font-size: 18px;
+    max-width: 275px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.menu-button-audio-play {
+    color: black;
+    text-align: center;
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+}
+
+.menu-button-audio-play:active {
+    position: absolute;
+    bottom: 10px;
+    top: auto;
 }
 
 .full-newspaper {
@@ -1084,11 +1118,17 @@ input {
     font-size: 48px;
     border-bottom: 5px solid black;
     margin: 20px;
-    margin-top: 40px;
+    margin-top: 20px;
     letter-spacing: 48px;
     text-align: center;
     margin-bottom: 0;
     padding-bottom: 10px;
     font-family: "Crimson Text", serif;
     vertical-align: bottom;
+}
+
+.full-newspaper-news {
+    margin:20px;
+    overflow-y: scroll;
+    height:440px;
 }

@@ -1801,8 +1801,9 @@ function existEnemies() {
         // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
         // TODO testing
-        // TODO door glitch on other browsers - chrome webkit glitch for iframe foreign objects.
         // TODO encyclopedia
+        // TODO test youtube playlist
+        // TODO code review
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2896,6 +2897,11 @@ function drawMenu() {
  * Enter the dog house
  */
 function enterHouse() {
+    if( !document.querySelector(".inside-house") ) {
+        drawInsideHouse();
+        document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
+        document.querySelector(".store-menu").style.display = "none"; // Hide the store after it is drawn so all the items are the right size
+    }
     document.querySelector(".world").style.display = "none";
     document.querySelector(".player").style.display = "none";
     document.querySelector(".world-overlay").style.display = "none";
@@ -2925,6 +2931,16 @@ function leaveHouse() {
     document.body.onmousedown = null;
     document.body.onmouseup = null;
     setMoveMode(false);
+    // Remove videos
+    document.querySelectorAll(".tv iframe").forEach( function(el) {
+        el.parentNode.removeChild(el);
+    });
+    // Stop all audio
+    for( var i=0; i<houseItems.length; i++ ) {
+        if(houseItems[i].audio) {
+            houseItems[i].audio.pause();
+        }
+    }
     document.querySelector(".inside-house").style.display = "none";
     document.querySelector(".menu-button-inner-house.back-button").style.display = "none";
     document.querySelector(".menu-button-inner-house.inventory-button").style.display = "none";
@@ -3367,9 +3383,6 @@ function reset() {
     mainTheme.currentTime = 0; // Start the main theme over
 
     drawWorld();
-    drawInsideHouse();
-    document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
-    document.querySelector(".store-menu").style.display = "none"; // Hide the store after it is drawn so all the items are the right size
     tick();
 
     document.body.onkeydown = function(e) {
@@ -3787,10 +3800,16 @@ function placeHouseItems(noRemove) {
     }
 
     // Close move mode on mouse down if inventory not open
+    // On mouse down, because whenever we stop dragging is a click,
+    // so click would stop move mode after every drag
     document.body.onmousedown = function(e) {
-        if( !document.querySelector(".inventory").classList.contains("inventory-expanded") ) {
-            setMoveMode(false);
+        if( document.querySelector(".inventory").classList.contains("inventory-expanded") ) {
+            document.querySelector(".inventory").classList.remove("inventory-expanded");
         }
+        if( !document.querySelector(".store-menu").classList.contains("store-menu-hidden") ) {
+            toggleStore();
+        }
+        setMoveMode(false);
     }
 
     saveHouse();
@@ -3811,6 +3830,11 @@ function setMoveMode(val) {
     else {
         if( insideHouse ) {
             insideHouse.classList.remove("move-mode");
+        }
+        // sanity check
+        var curMovingItem = document.querySelector(".house-item-moving");
+        if(curMovingItem) {
+            stopMovingItem(e, curMovingItem);
         }
         moveMode = false;
     }
@@ -3852,7 +3876,7 @@ function stopMovingItem(e, item) {
     var backInInventorySpot = document.querySelector(".inventory-item:last-child");
     var rect = backInInventorySpot.getBoundingClientRect();
 
-    if( e.clientY < rect.bottom
+    if( e && e.clientY < rect.bottom
         && e.clientY > rect.top
         && e.clientX < rect.right
         && e.clientX > rect.left ) {
@@ -3868,8 +3892,12 @@ function stopMovingItem(e, item) {
 
             // remove the item manually from the visual space (draw inventory will add it to the inventory)
             // do this so the TVs aren't interrupted from playing
-            var itemRepresentation = document.querySelectorAll(".inside-house .house-item")[index];
+            var allHouseItems = document.querySelectorAll(".inside-house .house-item");
+            var itemRepresentation = allHouseItems[index];
             itemRepresentation.parentNode.removeChild(itemRepresentation);
+            for( var i=index+1; i<allHouseItems.length; i++ ) {
+                allHouseItems[i].setAttribute("index", i-1);
+            }
 
             placeHouseItems(true);
             drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
@@ -3888,8 +3916,21 @@ function stopMovingItem(e, item) {
  * Save the current house configuration
  */
 function saveHouse() {
-    localStorage.cocoaTownHouseItems = JSON.stringify(houseItems);
-    localStorage.cocoaTownInventory = JSON.stringify(inventory);
+    // Don't save audio
+    var storeHouseItems = JSON.parse(JSON.stringify(houseItems));
+    for( var i=0; i<storeHouseItems.length; i++ ) {
+        if( storeHouseItems[i].audio ) {
+            delete storeHouseItems[i].audio;
+        }
+    }
+    var storeInventory = JSON.parse(JSON.stringify(inventory));
+    for( var i=0; i<storeInventory.length; i++ ) {
+        if( storeInventory[i].audio ) {
+            delete storeInventory[i].audio;
+        }
+    }
+    localStorage.cocoaTownHouseItems = JSON.stringify(storeHouseItems);
+    localStorage.cocoaTownInventory = JSON.stringify(storeInventory);
 }
 
 /**
@@ -3941,7 +3982,12 @@ function drawHouseButtons() {
     cart.classList.add("menu-button-inner-house");
     cart.innerHTML = '<i class="fas fa-shopping-cart"></i>';
 
-    cart.onclick = function() { if(!interacting) toggleStore(); };
+    cart.onclick = function(e) { if(!interacting) toggleStore(); };
+    cart.onmousedown = function(e) {
+        if( !interacting ) {
+            e.stopPropagation();
+        }
+    }
 
     document.body.appendChild(cart);
 
@@ -3962,6 +4008,11 @@ function drawHouseButtons() {
                 inventoryBar.classList.add("inventory-expanded");
                 setMoveMode(true);
             }
+        }
+    }
+    inventoryButton.onmousedown = function(e) {
+        if( !interacting ) {
+            e.stopPropagation();
         }
     }
 
@@ -3989,6 +4040,9 @@ function drawInventory(expanded, scrollTo) {
         inventoryContainer.classList.add("inventory-expanded");
     }
     document.body.appendChild(inventoryContainer);
+    inventoryContainer.onmousedown = function(e) {
+        e.stopPropagation();
+    }
 
     var inventorySlider = document.createElement("div");
     inventorySlider.classList.add("inventory-slider");
@@ -4002,6 +4056,10 @@ function drawInventory(expanded, scrollTo) {
         
         if( i < inventory.length ) {
             createItemIcon("inventory-svg", 50, 20, inventory[i], inventoryItem);
+
+            if(inventory[i].name == "Speaker" && inventory[i].audio) {
+                inventory[i].audio.pause();
+            }
 
             // Get ready to placeHouseItems
             // No need to check for interacting since can't interact on move mode
@@ -4035,6 +4093,11 @@ function drawInventory(expanded, scrollTo) {
     if( scrollTo ) {
         inventorySlider.scrollTo(scrollTo, 0);
     }
+
+    // Remove videos
+    inventoryContainer.querySelectorAll(".tv iframe").forEach( function(el) {
+        el.parentNode.removeChild(el);
+    });
 
     setClockTime();
 
@@ -4333,13 +4396,10 @@ function interactTV(item, index) {
     tvPowerButton.onclick = function(e) {
         var watchScreen = this.parentNode.querySelector("iframe");
         if( watchScreen.getAttribute("src") ) {
-            tvForeignObject.removeChild(tvIframe);
-            tvForeignObject.setAttribute("src", "");
             item.power = false;
+            watchScreen.setAttribute("src", "");
         }
         else {
-            tvForeignObject.appendChild(tvIframe);
-            item.power = true;
             gotoSiteTV(tvIframe, addressBar.value, item, tvPowerButton);
         }
         saveHouse();
@@ -4399,24 +4459,21 @@ function interactTV(item, index) {
  * @param {object} item - the item the computer corresponds to
  */
 function gotoSiteTV(iframe, val, item, powerButton) {
-    if( !iframe ) {
-        // This will recall gotoSiteTV once the power is on.
-        powerButton.click();
+    if( !iframe.getAttribute("src") ) {
+        item.power = true;
+    }
+    item.page = val;
+    val = "https://www.youtube.com/embed/" + val;
+    if(val.indexOf("?") != -1) {
+        val += "&"
     }
     else {
-        item.page = val;
-        val = "https://www.youtube.com/embed/" + val;
-        if(val.indexOf("?") != -1) {
-            val += "&"
-        }
-        else {
-            val += "?"
-        }
-        val += "autoplay=1";
-        val += "&loop=1";
-        saveHouse();
-        iframe.src = val;
+        val += "?playlist=" + item.page + "&";
     }
+    val += "autoplay=1";
+    val += "&loop=1";
+    saveHouse();
+    iframe.src = val;
 }
 
 /**
@@ -4901,7 +4958,7 @@ function interactNewspaper(item) {
 
     fullNewspaperNews = document.createElement("div");
     fullNewspaperNews.classList.add("full-newspaper-news");
-    fullNewspaperNews.innerHTML = '<a class="twitter-timeline" href="https://twitter.com/CUTEFUNNYANIMAL?ref_src=twsrc%5Etfw">Tweets by CUTEFUNNYANIMAL</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>';
+    fullNewspaperNews.innerHTML = '<a class="twitter-timeline" href="https://twitter.com/CUTEFUNNYANIMAL?ref_src=twsrc%5Etfw"></a>';
     fullNewspaper.appendChild(fullNewspaperNews);
 
     document.body.appendChild(fullNewspaper);
@@ -4920,6 +4977,17 @@ function interactNewspaper(item) {
         e.stopPropagation();
         return false;
     }
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "https://platform.twitter.com/widgets.js", true);
+    xhttp.onreadystatechange = function() {
+        if( this.readyState == 4 ) {
+            if( this.status == 200 ) {
+                eval(this.responseText);
+            }
+        }
+    }
+    xhttp.send();
 }
 
 /**
@@ -4929,7 +4997,7 @@ function interactNewspaper(item) {
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns an svg containing the item
  */
-function drawSpeaker(x, y, container) {
+function drawSpeaker(x, y, container, item) {
     var speakerGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     speakerGroup.classList.add("speaker");
     speakerGroup.setAttribute("x", x);
@@ -4949,7 +5017,109 @@ function drawSpeaker(x, y, container) {
 
     speakerGroup.classList.add("house-item");
 
+    if( item && item.power && item.audioData ) {
+        if( !item.audio ) {
+            loadAudioData(item);
+        }
+        if( item.audio ) {
+            item.audio.play();
+        }
+    }
+
     return speakerGroup;
+}
+
+/**
+ * Interact with the speaker
+ */
+function interactSpeaker(item, index) {
+    var audioContainer = document.createElement("div");
+    audioContainer.classList.add("audio-select-container");
+    document.body.appendChild(audioContainer);
+
+    var audioSelect = document.createElement("input");
+    audioSelect.setAttribute("type", "file");
+    audioSelect.classList.add("audio-select");
+    audioContainer.appendChild(audioSelect);
+
+    var audioFilePlaying = document.createElement("div");
+    audioFilePlaying.classList.add("audio-file-playing");
+    audioFilePlaying.innerHTML = item.audioFileName ? "Now playing:<br>" + item.audioFileName : "No audio loaded.";
+    audioContainer.appendChild(audioFilePlaying);
+
+    var audioPlayButton = document.createElement("div");
+    if( item.audio && !item.audio.paused ) {
+        audioPlayButton.innerHTML = '<i class="fas fa-pause"></i>';
+    }
+    else {
+        audioPlayButton.innerHTML = '<i class="fas fa-play"></i>';
+    }
+    audioPlayButton.classList.add("menu-button");
+    audioPlayButton.classList.add("menu-button-audio-play");
+    audioPlayButton.onclick = function() {
+        // If we have audio data but not audio we can play, get audio we can play
+        if(item.audioData && !item.audio) {
+            loadAudioData(item);
+        }
+        if(item.audio) {
+            if(!item.audio.paused) {
+                audioPlayButton.innerHTML = '<i class="fas fa-play"></i>';
+                turnOffSpeaker(item);
+            }
+            else {
+                audioPlayButton.innerHTML = '<i class="fas fa-pause"></i>';
+                item.audio.play();
+                item.power = true;
+            }
+            saveHouse();
+        }
+    }
+    audioContainer.appendChild(audioPlayButton);
+
+    audioSelect.onchange = function() {
+        var file = audioSelect.files[0];
+        var reader  = new FileReader();
+
+        reader.addEventListener("load", function () {
+            var audio = new Audio(reader.result);
+            item.audio = null; // this will be updated on playing
+            item.audioData = reader.result;
+            turnOffSpeaker(item);
+            audioFilePlaying.innerHTML = "Now playing:<br>" + item.audioFileName;
+            audioPlayButton.innerHTML = '<i class="fas fa-play"></i>';
+            saveHouse();
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);
+            item.audioFileName = file.name;
+        }
+    }
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        audioContainer.parentNode.removeChild(audioContainer);
+    }
+
+    audioContainer.onclick = function(e) {
+        e.stopPropagation();
+    }
+}
+
+function loadAudioData(item) {
+    item.audio = new Audio(item.audioData);
+    item.audio.loop = true;
+}
+
+function turnOffSpeaker(item) {
+    if( item.audio ) {
+        item.audio.pause();
+    }
+    item.power = false;
 }
 
 /**
@@ -4982,6 +5152,9 @@ function drawStore() {
     background.classList.add("store-menu");
     background.classList.add("store-menu-hidden"); // The store is hidden by default when you first enter the house
     document.body.appendChild(background);
+    background.onmousedown = function(e) {
+        e.stopPropagation();
+    }
 
     var menuTitle = document.createElement("div");
     menuTitle.classList.add("store-menu-title");
@@ -5257,6 +5430,7 @@ var availableItems = [
     {
         "name": "Speaker",
         "function": drawSpeaker,
+        "interact": interactSpeaker,
         "price": 300
     },
     {
