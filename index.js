@@ -1808,7 +1808,6 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO cocoa memorial videos
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -2436,7 +2435,7 @@ function drawMenu() {
 
     var menuSubtitle = document.createElement("div");
     menuSubtitle.classList.add("menu-subtitle");
-    menuSubtitle.innerText = "";
+    menuSubtitle.innerHTML = "In loving memory of Cocoa<br>1/2/2006-7/30/2018<br>A good and loyal dog";
     menuFrame.appendChild(menuSubtitle);
 
     var menuButtons = document.createElement("div");
@@ -4409,7 +4408,7 @@ function drawTV(x, y, container, item, index) {
     foreignObject.appendChild(iframe);
 
 
-    if( item && item.power && item.page ) {
+    if( item && item.power ) {
         gotoSiteTV(iframe, item.page, item);
     }
 
@@ -4474,7 +4473,7 @@ function interactTV(item, index) {
     var addressBar = document.createElement("input");
     addressBar.setAttribute("type", "text");
     addressBar.setAttribute("placeholder", "YouTube video URL (e.g. https://www.youtube.com/watch?v=ZjTnENSYAcM)");
-    var url = item.page ? item.page : "ZjTnENSYAcM";
+    var url = item.page ? item.page : "";
     addressBar.setAttribute("value", url);
     tvForeignObject.appendChild(addressBar);
 
@@ -4563,19 +4562,29 @@ function gotoSiteTV(iframe, val, item) {
     if( !iframe.getAttribute("src") ) {
         item.power = true; //Turn on the tv if necessary
     }
-    val = val.replace(/.*\/watch\?v=/, ""); // Allow a youtube url
-    item.page = val;
-    val = "https://www.youtube.com/embed/" + val;
-    if(val.indexOf("?") != -1) {
-        val += "&"
+    // Default to the video of Cocoa
+    if(!val) {
+        val = "resources/cocoa.mp4";
     }
     else {
-        val += "?playlist=" + item.page + "&";
+        val = val.replace(/.*\/watch\?v=/, ""); // Allow a youtube url
+        item.page = val;
+        val = "https://www.youtube.com/embed/" + val;
+        if(val.indexOf("?") != -1) {
+            val += "&"
+        }
+        else {
+            val += "?playlist=" + item.page + "&";
+        }
+        val += "autoplay=1";
+        val += "&loop=1";
     }
-    val += "autoplay=1";
-    val += "&loop=1";
     saveHouse();
     iframe.src = val;
+    if( val == "resources/cocoa.mp4" ) {
+        item.page = "";
+        saveHouse();
+    }
 }
 
 /**
@@ -4814,6 +4823,7 @@ function restoreInteractionFuctions(item) {
     document.querySelectorAll("body > .menu-button-inner-house").forEach( function(el) {
         el.style.display = "block";
     });
+    item.restoreFunctions = null;
 }
 
 /**
@@ -5055,7 +5065,7 @@ function drawPictureFrame(x, y, container, item) {
     picture.setAttribute("width", 61.875);
     picture.setAttribute("height", 110);
 
-    var href = "resources/elephant.jpg";
+    var href = "resources/cocoa.jpg";
     if( item && item.imgData ) {
         href = item.imgData;
     }
@@ -5185,6 +5195,8 @@ function interactNewspaper(item, index) {
     newspaperGoButton.classList.add("menu-button");
     newspaperGoButton.classList.add("menu-button-newspaper-go");
     newspaperGoButton.onclick = function(e) {
+        document.body.onclick = item.restoreFunctions.onclick;
+        document.body.onkeyup = item.restoreFunctions.onkeyup;
         item.timeline = addressBar.value;
         saveHouse();
         fullNewspaper.parentNode.removeChild(fullNewspaper);
@@ -5195,12 +5207,19 @@ function interactNewspaper(item, index) {
     document.body.appendChild(fullNewspaper);
 
     item.restoreFunctions = {
-        "onclick": document.body.onclick
+        "onclick": document.body.onclick,
+        "onkeyup": document.body.onkeyup
     }
 
     document.body.onclick = function() {
         restoreInteractionFuctions(item);
         fullNewspaper.parentNode.removeChild(fullNewspaper);
+    }
+
+    document.body.onkeyup = function(e) {
+        if( e.keyCode == 13 ) {
+            newspaperGoButton.click();
+        }
     }
 
     fullNewspaper.onclick = function(e) {
