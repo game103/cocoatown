@@ -234,15 +234,22 @@ function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber
     doorGroup.classList.add("door-group");
     doorGroup.style.transform = "translate(" + x + "px," + y + "px)";
 
+    // When we append to the transform of the door group, some browsers try to animate all the
+    // styles, event the translate that was previously there already. So we have one group
+    // for animated styles and one group for regular styles
+    var doorGroupInside = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    doorGroupInside.classList.add("door-group-inside");
+    doorGroup.appendChild(doorGroupInside);
+
     var doorInside = drawRectangle( width, height, x, y, container );
     doorInside.classList.add("door-inside"); 
 
     x = 0;
     y = 0;
-    var rectangle = drawRectangle( width, height, x, y, doorGroup );
+    var rectangle = drawRectangle( width, height, x, y, doorGroupInside );
     rectangle.classList.add("door"); 
     rectangle.style.fill = getRandomColor();
-    drawCircle( x+width-width/9, y+height/2, doorHandleRadius, doorGroup );
+    drawCircle( x+width-width/9, y+height/2, doorHandleRadius, doorGroupInside );
     var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.classList.add("door-text");
     text.setAttribute("x", x+width/2);
@@ -250,7 +257,7 @@ function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber
     text.innerHTML = houseNumber;
 
     container.appendChild(doorGroup);
-    doorGroup.appendChild(text);
+    doorGroupInside.appendChild(text);
 
     var textWidth = text.getBBox().width;
     text.setAttribute("x", x+width/2 - textWidth/2);
@@ -264,7 +271,7 @@ function drawDoor( width, height, x, y, container, doorHandleRadius, houseNumber
  */
 function openDoor(doorGroup) {
     // at scaleX = 0, the skew would be 90deg, at 1, 0 deg
-    doorGroup.style.transform += "scaleX(0.8)skew(0, 18deg)"; 
+    doorGroup.querySelector(".door-group-inside").style.transform = "scaleX(0.8)skew(0, 18deg)"; 
 }
 
 /**
@@ -272,24 +279,14 @@ function openDoor(doorGroup) {
  * @param {HTMLElement} doorGroup - the group element containing a door
  */
 function closeDoor(doorGroup) {
-    doorGroup.style.transform = doorGroup.style.transform.replace(/scaleX.*/,"");
-}
-
-// Draw a recntangle below the house
-function drawMat(door, container) {
-   var matHeight = 10;
-   var mat = document.querySelector(".mat");
-   if( mat ) {
-       mat.parentElement.removeChild(mat);
-   }
-   mat = drawRectangle( door.x2 - door.x1, matHeight, door.x1, door.y2, container );
-   mat.classList.add("mat");
+    doorGroup.querySelector(".door-group-inside").style.transform = "";
 }
 
 /**
  * Test for a collision between two boxes
  * @param {object} obj1 - an object with x1, y1, x2, and y2 values 
  * @param {object} obj2  - an object with x1, y1, x2, and y2 values 
+ * @returns whether or not the collision occurred
  * An object looks like the following
  * (x1,y1)-------(x2,y1)
  *    |             |
@@ -951,7 +948,7 @@ function drawDogFrame8(x, y, container) {
     // Front
     var leg = document.createElementNS("http://www.w3.org/2000/svg", "path");
     var d = [];
-    var legOffset = x+2;
+    var legOffset = x;
     d.push("M " + (17+legOffset) + " " + (y+28));
     d.push("C " + (18+legOffset) + " " + (y+32) + "," + (23+legOffset) + " " + (y+39) + "," + (27+legOffset) + " " + (y+41));
     d.push("C " + (30+legOffset) + " " + (y+42) + "," + (33+legOffset) + " " + (y+41) + "," + (38+legOffset) + " " + (y+51));
@@ -1219,6 +1216,9 @@ function drawTree(x, y, container) {
 
 /**
  * Draw flowers
+ * @param {number} x - the x coordinate of the center of the flowers
+ * @param {number} y - the y coordinate of the center of the flowers
+ * @param {HTMLElement} container - the svg container on which to draw
  */
 function drawFlowers(x, y, container) {
     var flower1 = drawCircle( x-flowerRadius, y-flowerRadius/2, flowerRadius, container );
@@ -1233,7 +1233,7 @@ function drawFlowers(x, y, container) {
 }
 
 /**
- * Draw a rectange
+ * Draw Cocoa's house
  * @param {number} width - the width of the house
  * @param {number} height - the height of the house
  * @param {number} x - the x coordinate of the house
@@ -1445,7 +1445,6 @@ function drawWorld() {
     spawnFlowers(numFlowers, container);
     spawnEnemies(numEnemies, container);
     spawnPowerups(numPowerups, container);
-    //drawMat(objects[currentBuilding].door, container);
     openDoor(objects[currentBuilding].door.shape);
 
     // We have a seperate container for the player
@@ -1461,6 +1460,18 @@ function drawWorld() {
     drawMenu();
 }
 
+/**
+ * Add objects to the objects array (used for collision) for the roof 
+ * of a building. We have multiple square objects to create the triangular
+ * of trapezoid roofs.
+ * @param {number} buildingX - the x coordinate of the left of the building
+ * @param {number} buildingY - the y coordinate of the top of the building
+ * @param {number} buildingWidth - the width of the building
+ * @param {number} roofOut - the amount the roof sticks out from the building
+ * @param {number} roofHeight - the height of the roof
+ * @param {number} roofEndingWidth - the width of the top of the roof
+ * @param {number} roofBarrierHeight - the height of each object for the roof
+ */
 function addRoofObjects(buildingX, buildingY, buildingWidth, roofOut, roofHeight, roofEndingWidth, roofBarrierHeight) {
     var startingWidth = roofOut * 2 + buildingWidth;
 
@@ -1797,13 +1808,7 @@ function existEnemies() {
         
         var enemySightedObject = { x1: enemy.x1 - enemySightedDistanceX, x2: enemy.x2 + enemySightedDistanceX, y1: enemy.y1 - enemySightedDistanceY, y2: enemy.y2 + enemySightedDistanceY };
         var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-        // TODO - mobile house place items.. touch events > make sure you don't overwrite the other touch event/ or do just overwrite them temporarily while in the house
         // TODO cocoa memorial videos
-        // TODO testing
-        // TODO code review - make sure you're saving house in all the right places after interact and movement.
-        // TODO look into music not stopping after saving and getting a new song.
-        // TODO look into quota/localforage > store more data
-        // TODO door glitch on other browsers
 
         // If this hits the player
         if( !powerups.invincible && collisionTest(enemy, playerObject) ) {
@@ -1880,6 +1885,7 @@ function submitScores() {
 /**
  * Move an enemy
  * @param {number} amount - the number of pixels to move horizontally and vertically {x: <int>, y: <int>}
+ * @returns whether or not the enemy is colliding with a barrier
  */
 function moveEnemy(amount, enemy, noActualMove) {
 
@@ -2094,19 +2100,6 @@ function chasePlayer(enemy) {
     else if ( yCollided && !xCollided && xMove ) {
         moveEnemy({x: xMove/Math.abs(xMove) * (enemyMovementAmount - diagonal), y:0}, enemy);
     }
-
-    // Consider the following
-    // The player is on the opposite side of the house just above
-    // the transition from roof to building. The enemy is in the corner, and has
-    // both a moveX and moveY to get to the player. Since both X and Y are colliding,
-    // we'll flip the x direction until we can move on the Y axis.
-    // We do this, and then move up as necessary to get to the player.
-    // However, once we get to the same vertical level as the player, we are now "stuck"
-    // since we need only to move horizontally, but we can't. As such, we calculate the
-    // quickest distance to no longer be stuck moving horizontally. Which, is, moving down.
-    // But then, we'll move towards the player until we get stuck in the corner again and repeat.
-    // To combat this, we do our checks assuming there might be a roof, so when we check
-    // which y direction to go, we add and subtract some values to X too.
 }
 
 /**
@@ -2143,7 +2136,6 @@ function deliver() {
         var newIceCream = drawIceCream(-1, 0, null); // Use a null container so it is not added
         player.replaceChild(newIceCream, iceCream);
 
-        //drawMat(objects[currentBuilding].door, document.querySelector(".world"));
         openDoor(objects[currentBuilding].door.shape);
 
         closeDoor(door.shape);
@@ -2162,7 +2154,8 @@ function deliver() {
  * Draw the pointer of the compass
  * @param {number} x - the x coordinate of the CENTER of the compass (not the needle/pointer of the compass)
  * @param {number} y - the y coordinate of the CENTER of the compass (not the needle/pointer of the compass)
- * @param {number} radius - the radius of the enemy
+ * @param {number} container - the svg element on which to draw
+ * @returns - the pointer (a path element)
  */
 function drawPointer(x, y, container) {
     var pointerWidth = 10;
@@ -2329,8 +2322,6 @@ function drawBar() {
     var barRow = document.createElement("div");
     barRow.classList.add("bar-row");
 
-    /*barRow.innerHTML += '<i class="fas fa-paw"></i>';*/
-
     var heartsDiv = document.createElement("div");
     heartsDiv.classList.add("bar-div");
     heartsDiv.classList.add("bar-hearts");
@@ -2356,15 +2347,11 @@ function drawBar() {
     moneyDiv.classList.add("bar-money");
     barRow.appendChild(moneyDiv);
 
-    //barRow.innerHTML += '<i class="fas fa-paw"></i>';
-
     barColumn.appendChild(barRow);
 
     // Second row - powerups
     barRow = document.createElement("div");
     barRow.classList.add("bar-row");
-
-    /*barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';*/
 
     var powerupKeys = Object.keys(powerups);
     for(var i=0; i<powerupKeys.length; i++) {
@@ -2374,8 +2361,6 @@ function drawBar() {
         powerupDiv.classList.add("bar-powerup-" + powerupKeys[i]);
         barRow.appendChild(powerupDiv);
     }
-
-//    barRow.innerHTML += '<i class="fas fa-ice-cream"></i>';
 
     barColumn.appendChild(barRow);
 
@@ -2440,7 +2425,7 @@ function drawMenu() {
     menu.appendChild(menuBackButton);
 
     // Main menu frame
-    var menuFrame = document.createElement("menu-frame");
+    var menuFrame = document.createElement("div");
     menuFrame.classList.add("menu-frame");
     menuFrame.classList.add("menu-frame-main");
 
@@ -2498,7 +2483,7 @@ function drawMenu() {
     menu.appendChild(menuFrame);
 
     // Credits menu frame
-    menuFrame = document.createElement("menu-frame");
+    menuFrame = document.createElement("div");
     menuFrame.classList.add("menu-frame");
     menuFrame.classList.add("menu-frame-credits");
 
@@ -2514,13 +2499,18 @@ function drawMenu() {
     Icons: <a target='blank' rel='noopener' href='https://fontawesome.com/'>Font Awesome</a><br>\
     Fonts: <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Crimson+Text'>Crimson Text by Sebastian Kosch</a>, <a target='blank' rel='noopener' href='https://fonts.google.com/specimen/Acme'>Acme by Huerta Tipográfica</a><br>\
     Barking Sounds: <a target='blank' rel='noopener' href='https://www.youtube.com/c/crazymonkeymusic'>Crazy Monkey</a><br>\
+    Books: <a target='blank' rel='noopener' href='https://www.gutenberg.org/'>Project Gutenberg</a><br>\
+    Videos: <a target='blank' rel='noopener' href='https://www.youtube.com/'>YouTube</a><br>\
+    News: <a target='blank' rel='noopener' href='https://twitter.com/'>Twitter</a><br>\
+    Storage Helper: <a target='blank' rel='noopener' href='https://github.com/localForage/localForage'>Mozilla</a><br>\
+    Mobile Double Click: <a target='black' rel='noopener' href='https://github.com/mckamey/doubleTap.js'>Stephen M. McKamey</a>\
     <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='resources/logo.png'/><br>© 2019 Game 103 (game103.net)</a>";
     menuFrame.appendChild(credits);
     
     menu.appendChild(menuFrame);
 
     // Instructions menu frame
-    menuFrame = document.createElement("menu-frame");
+    menuFrame = document.createElement("div");
     menuFrame.classList.add("menu-frame");
     menuFrame.classList.add("menu-frame-instructions");
 
@@ -2585,7 +2575,7 @@ function drawMenu() {
     menu.appendChild(menuFrame);
 
     // High scores menu frame
-    menuFrame = document.createElement("menu-frame");
+    menuFrame = document.createElement("div");
     menuFrame.classList.add("menu-frame");
     menuFrame.classList.add("menu-frame-high-scores");
 
@@ -2930,6 +2920,10 @@ function leaveHouse() {
     document.body.onmousemove = null;
     document.body.onmousedown = null;
     document.body.onmouseup = null;
+    document.body.ontouchmove = null;
+    document.body.ontouchstart = null;
+    document.body.ontouchend = null;
+    addGameTouchMoveFunctions();
     setMoveMode(false);
     // Remove videos
     document.querySelectorAll(".tv iframe").forEach( function(el) {
@@ -3399,7 +3393,7 @@ function reset() {
         if( e.keyCode == 80 || e.keyCode == 32 ) {
             if( document.activeElement.tagName != "INPUT"  && 
             document.activeElement.tagName != "TEXTAREA" &&
-            document.querySelector(".inside-house").style.display != "block" ) {
+            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
                 togglePause();
                 // Prevent keyboard browser control
                 e.preventDefault();
@@ -3410,7 +3404,8 @@ function reset() {
         // On m press
         if( e.keyCode == 77 ) {
             if( document.activeElement.tagName != "INPUT"  && 
-            document.activeElement.tagName != "TEXTAREA" ) {
+            document.activeElement.tagName != "TEXTAREA" && 
+            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
                 toggleMute();
             }
         }
@@ -3427,6 +3422,54 @@ function reset() {
             }
         }
     };
+    addGameTouchMoveFunctions();
+    // Prevent scroll on ios
+    document.addEventListener('touchmove', function(e) {
+        var allowDefault = false;
+        var changeTouchMoveX = Math.abs(ts.x- e.touches[0].clientX);
+        var changeTouchMoveY = Math.abs(ts.y- e.touches[0].clientY);
+
+        var node = e.target;
+        while( node != document.body ) {
+            var computedStyle = window.getComputedStyle(node);
+            var overflowY = computedStyle.getPropertyValue("overflow-y");
+            var overflowX = computedStyle.getPropertyValue("overflow-x");
+            if( 
+                (overflowY == "scroll" && changeTouchMoveY > changeTouchMoveX) || 
+                (overflowX == "scroll" && changeTouchMoveX > changeTouchMoveY) || 
+                ( overflowY == "auto" && node.scrollHeight > node.offsetHeight && changeTouchMoveY > changeTouchMoveX ) ||
+                ( overflowX == "auto" && node.scrollWidth > node.offsetWidth && changeTouchMoveX > changeTouchMoveY )
+            ) 
+            {
+                allowDefault = true;
+            }
+            node = node.parentElement;
+        }
+
+        if( !allowDefault ) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    document.addEventListener("touchstart", function(e) {setTs(e)}, { passive: false });
+
+}
+
+/**
+ * Set the touch start coordinates used to determine the direction of scroll and whether it is allowed
+ * This is due to us only allowing scroll on certain elements in iOS, but we also only want to allow it
+ * either only vertically or horizontally
+ * @param {TouchEvent} e - the touch start event
+ */
+function setTs(e) {
+    if( e.touches && e.touches.length ) {
+        ts = { y: e.touches[0].clientY, x: e.touches[0].clientX };
+    }
+}
+
+/**
+ * Add game touch move functions
+ */
+function addGameTouchMoveFunctions() {
     document.body.ontouchstart = function(e) { if(!pauseButtonIsPressed && !stopped) { touchMove(e); } };
     document.body.ontouchmove = function(e) { if(!stopped) { touchMove(e); } };
     document.body.ontouchend = function(e) {
@@ -3435,7 +3478,6 @@ function reset() {
         keyDown.up = false;
         keyDown.down = false;
     }
-
 }
 
 /**
@@ -3454,6 +3496,7 @@ function scaleToScreen() {
     screenScaleY = y/675;
     document.body.style.transform = "scaleX("+(x/1200)+")";
     document.body.style.transform += "scaleY("+(y/675)+")";
+    w.scrollTo(0,0);
 }
 
 // High scores
@@ -3671,6 +3714,8 @@ function drawInsideHouse() {
     // Idempotent
     placeHouseItems();
     drawInventory();
+
+    paintHouse();
 }
 
 /**
@@ -3697,11 +3742,11 @@ function placeHouseItems(noRemove) {
         var item;
         if( i >= curHouseItems.length ) {
             item = houseItems[i].function(houseItems[i].x, houseItems[i].y, container, houseItems[i], i);
-            item.setAttribute("index", i);
         }
         else {
             item = curHouseItems[i];
         }
+        item.setAttribute("index", i);
 
         // On mouse down, the the item to moving
         item.onmousedown = function(e) {
@@ -3715,24 +3760,27 @@ function placeHouseItems(noRemove) {
                 }
                 // We don't want to end move mode
                 e.stopPropagation();
-                e.preventDefault();
+                setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
             }
         }
+        // House Mobile events
+        item.ontouchstart = item.onmousedown;
 
-        // on double click, bring the item to the front
+        doubleTap(item);
+        // on double click, bring the item to the back
         item.ondblclick = function(e) {
             if( !interacting ) {
                 clearTimeout(interactTimeout);
                 interactTimeout = null;
                 var parent = this.parentElement;
                 parent.removeChild(this);
-                parent.appendChild(this);
+                parent.insertBefore(this, document.querySelector(".inside-house-wall").nextSibling);
                 // Needed for saving
                 var index = parseInt(this.getAttribute("index"));
                 var tempItem = houseItems[index];
-                houseItems.push(tempItem);
                 houseItems.splice(index, 1);
-                placeHouseItems(); // We can't avoid restarting the videos here since we are reodering items.
+                houseItems.unshift(tempItem);
+                placeHouseItems(true); // We can't avoid restarting the videos here since we are reodering items. saves
             }
         }
 
@@ -3765,15 +3813,15 @@ function placeHouseItems(noRemove) {
                         }
                     }
                     interactTimeout = null;
-                }, 150 );
+                }, 300 );
             }
         }
     }
 
     // On mouse move, move the item
     document.body.onmousemove = function(e) {
-        var x = e.clientX;
-        var y = e.clientY;
+        var x = e.clientX != undefined ? e.clientX : e.touches[0].clientX;
+        var y = e.clientY != undefined ? e.clientY : e.touches[0].clientY;
         x = x/screenScaleX;
         y = y/screenScaleY;
         if( moveMode ) {
@@ -3784,6 +3832,8 @@ function placeHouseItems(noRemove) {
             }
         }
     }
+    // House Mobile events
+    document.body.ontouchmove = document.body.onmousemove;
 
     // On mouse up, save the item's position
     document.body.onmouseup = function(e) {
@@ -3798,6 +3848,8 @@ function placeHouseItems(noRemove) {
             moveModeTimeout = null;
         }
     }
+    // House Mobile events
+    document.body.ontouchend = document.body.onmouseup;
 
     // Close move mode on mouse down if inventory not open
     // On mouse down, because whenever we stop dragging is a click,
@@ -3811,6 +3863,8 @@ function placeHouseItems(noRemove) {
         }
         setMoveMode(false);
     }
+    // House Mobile events
+    document.body.ontouchstart = document.body.onmousedown;
 
     setClockTime();
     saveHouse();
@@ -3819,6 +3873,7 @@ function placeHouseItems(noRemove) {
 
 /**
  * Set move mode
+ * @param {boolean} val - the value to set move mode to
  */
 function setMoveMode(val) {
     var insideHouse = document.querySelector(".inside-house");
@@ -3854,8 +3909,8 @@ function startMovingItem(e, item) {
         stopMovingItem(e, curMovingItem);
     }
 
-    var x = e.clientX;
-    var y = e.clientY;
+    var x = e.clientX != undefined ? e.clientX : e.touches[0].clientX;
+    var y = e.clientY != undefined ? e.clientY : e.touches[0].clientY;
     x = x/screenScaleX;
     y = y/screenScaleY;
     item.classList.add("house-item-moving");
@@ -3877,10 +3932,13 @@ function stopMovingItem(e, item) {
     var backInInventorySpot = document.querySelector(".inventory-item:last-child");
     var rect = backInInventorySpot.getBoundingClientRect();
 
-    if( e && e.clientY < rect.bottom
-        && e.clientY > rect.top
-        && e.clientX < rect.right
-        && e.clientX > rect.left ) {
+    var x = e.clientX != undefined ? e.clientX : e.touches.length ? e.touches[0].clientX : e.changedTouches[e.changedTouches.length-1].clientX;
+    var y = e.clientY != undefined ? e.clientY : e.touches.length ? e.touches[0].clientY : e.changedTouches[e.changedTouches.length-1].clientY;
+
+    if( e && y < rect.bottom
+        && y > rect.top
+        && x < rect.right
+        && x > rect.left ) {
 
         var index = parseInt(item.getAttribute("index"));
         var item = houseItems[index];
@@ -3900,16 +3958,16 @@ function stopMovingItem(e, item) {
                 allHouseItems[i].setAttribute("index", i-1);
             }
 
-            placeHouseItems(true);
+            placeHouseItems(true); // saves
             drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
 
         }
         else {
-            saveHouse();
+            saveHouse(); // saves
         }
     }
     else {
-        saveHouse();
+        saveHouse(); //saves
     }
 }
 
@@ -3923,11 +3981,17 @@ function saveHouse() {
         if( storeHouseItems[i].audio ) {
             delete storeHouseItems[i].audio;
         }
+        if( storeHouseItems[i].audioLoading ) {
+            delete storeHouseItems[i].audioLoading;
+        }
     }
     var storeInventory = JSON.parse(JSON.stringify(inventory));
     for( var i=0; i<storeInventory.length; i++ ) {
         if( storeInventory[i].audio ) {
             delete storeInventory[i].audio;
+        }
+        if( storeInventory[i].audioLoading ) {
+            delete storeInventory[i].audioLoading;
         }
     }
     localStorage.cocoaTownHouseItems = JSON.stringify(storeHouseItems);
@@ -3989,8 +4053,11 @@ function drawHouseButtons() {
     cart.onmousedown = function(e) {
         if( !interacting ) {
             e.stopPropagation();
+            setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
         }
     }
+    // House Mobile events
+    cart.ontouchstart = cart.onmousedown;
 
     document.body.appendChild(cart);
 
@@ -4019,8 +4086,11 @@ function drawHouseButtons() {
     inventoryButton.onmousedown = function(e) {
         if( !interacting ) {
             e.stopPropagation();
+            setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
         }
     }
+    // House Mobile events
+    inventoryButton.ontouchstart = inventoryButton.onmousedown;
 
     document.body.appendChild(inventoryButton);
 }
@@ -4048,7 +4118,9 @@ function drawInventory(expanded, scrollTo) {
     document.body.appendChild(inventoryContainer);
     inventoryContainer.onmousedown = function(e) {
         e.stopPropagation();
+        setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
     }
+    inventoryContainer.ontouchstart = inventoryContainer.onmousedown;
 
     var inventorySlider = document.createElement("div");
     inventorySlider.classList.add("inventory-slider");
@@ -4073,26 +4145,40 @@ function drawInventory(expanded, scrollTo) {
             inventoryItem.onmousedown=function(e) {
                 var index = parseInt(this.getAttribute("index"));
                 var item = inventory[index];
+                var x = e.clientX != undefined ? e.clientX : e.touches[0].clientX;
+                var y = e.clientY != undefined ? e.clientY : e.touches[0].clientY;
 
                 houseItems.push(item);
                 inventory.splice(index, 1);
-                item.x = e.clientX-10;
-                item.y = e.clientY-10;
+                item.x = x-10;
+                item.y = y-10;
                 item.x = item.x/screenScaleX;
                 item.y = item.y/screenScaleY;
 
-                placeHouseItems(true);
-                drawInventory(true, document.querySelector(".inventory-slider").scrollLeft);
+                placeHouseItems(true); // saves
+                // It would be nice to draw inventory here, but the problem is that removing the inventory item
+                // will end the touch event and not allow us to drag the item. So, we just need to hide it and basically
+                // banish it from ever potentially coming back into existence (by hiding it extensively).
+                // The next "drawInventory" will delete it.
+                var inventoryItems = document.querySelectorAll(".inventory .inventory-item");
+                inventoryItems[index].setAttribute("index", "");
+                inventoryItems[index].classList.remove("inventory-item");
+                inventoryItems[index].style.display = "none";
+                for( var i=index+1; i<inventoryItems.length; i++ ) {
+                    inventoryItems[i].setAttribute("index", i-1);
+                }
 
                 var curHouseItems = document.querySelectorAll(".inside-house .house-item");
                 var newHouseItem = curHouseItems[curHouseItems.length-1];
 
                 startMovingItem(e, newHouseItem);
-
                 // We don't want to end move mode
                 e.stopPropagation();
                 e.preventDefault();
+                setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
             }
+            // House Mobile Events
+            inventoryItem.ontouchstart = inventoryItem.onmousedown;
         }
     } 
 
@@ -4116,6 +4202,7 @@ function drawInventory(expanded, scrollTo) {
  * @param {number} padding - the padding for the icon
  * @param {object} item - the item object (see available items, inventory, or houseItems)
  * @param {HTMLElement} container - the element on which to draw the icon
+ * @returns an svg containing the icon
  */
 function createItemIcon(className, size, padding, item, container) {
     var inventorySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -4207,6 +4294,7 @@ function drawComputer(x, y, container) {
 
 /**
  * Interact with the computer
+ * @param {object} - the json representation of the computer
  */
 function interactComputer(item) {
     var fullComputer = document.createElement("div");
@@ -4222,6 +4310,7 @@ function interactComputer(item) {
 
     var addressBar = document.createElement("input");
     addressBar.setAttribute("type", "text");
+    addressBar.setAttribute("placeholder", "Enter an address or search term")
     var url = item.page ? item.page : "https://game103.net";
     addressBar.setAttribute("value", url);
     screen.appendChild(addressBar);
@@ -4277,7 +4366,7 @@ function gotoSite(button, item) {
         }
     }
     item.page = val;
-    saveHouse();
+    saveHouse(); // save
     button.parentNode.querySelector("iframe").src = val;
 }
 
@@ -4286,6 +4375,8 @@ function gotoSite(button, item) {
  * @param {number} x - the x coordinate of the left side of the item 
  * @param {number} y - the y coordinate of the top of the item
  * @param {HTMLElement} container - the svg container on which to draw
+ * @param {object} item - the json representation of the TV
+ * @param {number} index - the index of the item in the houseItems or inventory array
  * @returns an svg containing the item
  */
 function drawTV(x, y, container, item, index) {
@@ -4308,27 +4399,32 @@ function drawTV(x, y, container, item, index) {
     tvGroup.appendChild(foreignObject);
 
     // Create the iframe
-    var iframe = document.querySelector("iframe[index='"+index+"']");
-    if( !iframe ) {
-        iframe = document.createElementNS("http://www.w3.org/1999/xhtml", "iframe");
-    }
+    // Note we should never call drawTV for a TV that already exists
+    // Remember when we put an item back or take one out, we are actually deleting
+    // the item and re-adding it in another location
+    var iframe = document.createElementNS("http://www.w3.org/1999/xhtml", "iframe");
     iframe.classList.remove("full-tv-screen-site");
     iframe.classList.add("tv-iframe");
     iframe.setAttribute("index", index);
     foreignObject.appendChild(iframe);
 
+
     if( item && item.power && item.page ) {
-        gotoSiteTV(iframe, item.page, item, null);
+        gotoSiteTV(iframe, item.page, item);
     }
 
     tvGroup.classList.add("house-item");
     container.appendChild(tvGroup);
+
+    // When called from drawInventory, the function will remove all iframes at the end.
 
     return tvGroup;
 }
 
 /**
  * Interact with the TV
+ * @param {object} item - the json representation of the tv object
+ * @param {number} index - the index of the item in houseItems or inventory
  */
 function interactTV(item, index) {
     var tv = document.querySelectorAll(".inside-house .house-item")[index];
@@ -4336,8 +4432,6 @@ function interactTV(item, index) {
     var tvScreen = document.querySelectorAll(".inside-house .house-item")[index].querySelector(".tv-screen");
     var tvForeignObject = document.querySelectorAll(".inside-house .house-item")[index].querySelector("foreignObject");
     var tvIframe = tvForeignObject.querySelector("iframe");
-
-    
 
     // Clone all items and put before the TV
     var items = document.querySelectorAll(".inside-house .house-item");
@@ -4379,7 +4473,7 @@ function interactTV(item, index) {
 
     var addressBar = document.createElement("input");
     addressBar.setAttribute("type", "text");
-    addressBar.setAttribute("placeholder", "YouTube watch string (e.g. ZjTnENSYAcM)");
+    addressBar.setAttribute("placeholder", "YouTube video URL (e.g. https://www.youtube.com/watch?v=ZjTnENSYAcM)");
     var url = item.page ? item.page : "ZjTnENSYAcM";
     addressBar.setAttribute("value", url);
     tvForeignObject.appendChild(addressBar);
@@ -4392,7 +4486,7 @@ function interactTV(item, index) {
     tvGoButton.classList.add("menu-button-tv-go");
     tvGoButton.onclick = function(e) {
         // Try to find the iframe to see if it is visible
-        gotoSiteTV(this.parentNode.querySelector("iframe"), addressBar.value, item, tvPowerButton);
+        gotoSiteTV(this.parentNode.querySelector("iframe"), addressBar.value, item);
     }
     tvForeignObject.appendChild(tvGoButton);
 
@@ -4406,7 +4500,7 @@ function interactTV(item, index) {
             watchScreen.setAttribute("src", "");
         }
         else {
-            gotoSiteTV(tvIframe, addressBar.value, item, tvPowerButton);
+            gotoSiteTV(tvIframe, addressBar.value, item);
         }
         saveHouse();
     }
@@ -4462,12 +4556,14 @@ function interactTV(item, index) {
 /**
  * Go to a youtube video on the tv
  * @param {HTMLElement} button - the go button for the computer
- * @param {object} item - the item the computer corresponds to
+ * @param {string} val - the value of the video to go to (a youtube url or watch string)
+ * @param {object} item - the item the tv corresponds to
  */
-function gotoSiteTV(iframe, val, item, powerButton) {
+function gotoSiteTV(iframe, val, item) {
     if( !iframe.getAttribute("src") ) {
-        item.power = true;
+        item.power = true; //Turn on the tv if necessary
     }
+    val = val.replace(/.*\/watch\?v=/, ""); // Allow a youtube url
     item.page = val;
     val = "https://www.youtube.com/embed/" + val;
     if(val.indexOf("?") != -1) {
@@ -4486,6 +4582,9 @@ function gotoSiteTV(iframe, val, item, powerButton) {
  * Draw a book
  * @param {number} x - the x coordinate of the left side of the item 
  * @param {number} y - the y coordinate of the top of the item
+ * @param {string} fill - the color to fill the book
+ * @param {string} textFill - the color of the text on the book
+ * @param {number} pages - the number of pages in the book (helps determine width)
  * @param {HTMLElement} container - the svg container on which to draw
  * @returns an svg containing the item
  */
@@ -4525,6 +4624,7 @@ function drawBook(x, y, fill, textFill, text, pages, container) {
 
 /**
  * Interact with a book
+ * @param {object} item - the json representation of the book
  */
 function interactBook(item) {
     var fullBook = document.createElement("div");
@@ -4665,6 +4765,7 @@ function drawNotepad(x, y, container) {
 
 /**
  * Interact with the notepad
+ * @param {object} - the json representation of the notepad
  */
 function interactNotepad(item) {
     var fullNotepad = document.createElement("div");
@@ -4763,6 +4864,7 @@ function drawClock(x, y, container) {
 
 /**
  * Interact with the clock
+ * @param {object} item - the json representation of the clock
  */
 function interactClock(item) {
     if( !item.offset ) {
@@ -4795,15 +4897,13 @@ function setClockTime() {
         if( clocks[i].parentNode.classList.contains("inside-house") ) {
             var index = clocks[i].getAttribute("index");
             if( index && houseItems[index] && houseItems[index].offset ) {
-                tempHoursRotate = (2*Math.PI)/12 * (houseItems[index].offset+hours) - Math.PI/2;
-                console.log(hours);
-                console.log(houseItems[index].offset);
+                tempHoursRotate = (2*Math.PI)/12 * (houseItems[index].offset+hours) - Math.PI/2 + minutesRotate/12;
             }
         }
         else if( clocks[i].parentNode.classList.contains("inventory-svg") ) {
             var index = clocks[i].parentNode.parentNode.getAttribute("index");
             if( index && inventory[index] && inventory[index].offset ) {
-                tempHoursRotate = (2*Math.PI)/12 * (inventory[index].offset+hours) - Math.PI/2;
+                tempHoursRotate = (2*Math.PI)/12 * (inventory[index].offset+hours) - Math.PI/2 + minutesRotate/12;
             }
         }
 
@@ -4934,6 +5034,7 @@ function drawCalendar(x, y, container) {
  * @param {number} x - the x coordinate of the left side of the item 
  * @param {number} y - the y coordinate of the top of the item
  * @param {HTMLElement} container - the svg container on which to draw
+ * @param {object} item - the json representation of the picture frame
  * @returns an svg containing the item
  */
 function drawPictureFrame(x, y, container, item) {
@@ -4971,6 +5072,8 @@ function drawPictureFrame(x, y, container, item) {
 
 /**
  * Interact with the picture frame
+ * @param {object} item - the json representation of picture frame
+ * @param {number} index - the index of the picture in the houseItems or the inventory array
  */
 function interactPicture(item, index) {
     var pictureSelect = document.createElement("input");
@@ -5051,6 +5154,8 @@ function drawNewspaper(x, y, container) {
 
 /**
  * Interact with the newspaper
+ * @param {object} item - the json representation of the newspaper
+ * @param {object} index - the index of the newspaper in the houseItems or inventory array
  */
 function interactNewspaper(item, index) {
     var fullNewspaper = document.createElement("div");
@@ -5070,7 +5175,7 @@ function interactNewspaper(item, index) {
 
     var addressBar = document.createElement("input");
     addressBar.setAttribute("type", "text");
-    addressBar.setAttribute("placeholder", "Twitter Feed");
+    addressBar.setAttribute("placeholder", "Twitter feed (e.g. https://twitter.com/game103games)");
     addressBar.setAttribute("value", timeline);
     fullNewspaper.appendChild(addressBar);
 
@@ -5121,6 +5226,7 @@ function interactNewspaper(item, index) {
  * @param {number} x - the x coordinate of the left side of the item 
  * @param {number} y - the y coordinate of the top of the item
  * @param {HTMLElement} container - the svg container on which to draw
+ * @param {object} item - the json representation of the speaker
  * @returns an svg containing the item
  */
 function drawSpeaker(x, y, container, item) {
@@ -5143,9 +5249,10 @@ function drawSpeaker(x, y, container, item) {
 
     speakerGroup.classList.add("house-item");
 
-    if( item && item.power && item.audioData ) {
+    if( item && item.power && item.audioData && !item.audioLoading ) {
         if( !item.audio ) {
-            loadAudioData(item, function() { if( item.audio ) { item.audio.play(); } });
+            // Only load audio if the node is inside-house i.e. not in inventory
+            loadAudioData(item, function() { if( item.audio && container.classList.contains("inside-house") ) { item.audio.play(); } });
         }
         else if( item.audio ) {
             item.audio.play();
@@ -5157,8 +5264,9 @@ function drawSpeaker(x, y, container, item) {
 
 /**
  * Interact with the speaker
+ * @param {object} item - the json representation of the speaker
  */
-function interactSpeaker(item, index) {
+function interactSpeaker(item) {
     var audioContainer = document.createElement("div");
     audioContainer.classList.add("audio-select-container");
     document.body.appendChild(audioContainer);
@@ -5184,7 +5292,7 @@ function interactSpeaker(item, index) {
     audioPlayButton.classList.add("menu-button-audio-play");
     audioPlayButton.onclick = function() {
         // If we have audio data but not audio we can play, get audio we can play
-        if(item.audioData && !item.audio) {
+        if(item.audioData && !item.audio && !item.audioLoading) {
             loadAudioData(item, function() { if(item.audio) {audioPlayButton.onclick();} });
         }
         if(item.audio) {
@@ -5207,15 +5315,19 @@ function interactSpeaker(item, index) {
         var reader  = new FileReader();
 
         reader.addEventListener("load", function () {
+            turnOffSpeaker(item);
+            if( item.audioData ) {
+                localforage.removeItem(item.audioData);
+            }
+
             var audio = new Audio(reader.result);
             item.audio = null; // this will be updated on playing
 
-            var audioHash = reader.result.hashCode();
-            item.audioData = reader.result;
+            var audioHash = makeId(16);
+            item.audioData = audioHash;
             localforage.setItem(audioHash, reader.result);
 
             item.audioFileName = file.name;
-            turnOffSpeaker(item);
             audioFilePlaying.innerHTML = "Now playing:<br>" + item.audioFileName;
             audioPlayButton.innerHTML = '<i class="fas fa-play"></i>';
             saveHouse();
@@ -5240,14 +5352,25 @@ function interactSpeaker(item, index) {
     }
 }
 
+/**
+ * load audio data from localforage
+ * @param {object} item - the json representation of the speaker - it should have an audioData value
+ * @param {function} callback - a callback function to run after the audio loads
+ */
 function loadAudioData(item, callback) {
-    localforage.getItem( item.audioData, function() {
-        item.audio = new Audio(item.audioData);
+    item.audioLoading = true;
+    localforage.getItem( item.audioData.toString(), function(err, value) {
+        item.audio = new Audio(value);
         item.audio.loop = true;
+        item.audioLoading = false;
         callback();
     } );
 }
 
+/**
+ * Turn of speaker
+ * @param {object} item - the json representation of the speaker object
+ */
 function turnOffSpeaker(item) {
     if( item.audio ) {
         item.audio.pause();
@@ -5279,6 +5402,8 @@ function drawTennisBallForHouse(x, y, container) {
 
 /**
  * Interact with the tennis ball
+ * @param {object} item - the json representation of the ball
+ * @param {object} index - the index of the ball in the houseItems or inventory array
  */
 function interactTennisBall(item, index) {
     var startSpeed = -20
@@ -5303,6 +5428,125 @@ function interactTennisBall(item, index) {
 }
 
 /**
+ * Draw a paint bucket
+ * @param {number} x - the x coordinate of the left side of the item 
+ * @param {number} y - the y coordinate of the top of the item
+ * @param {HTMLElement} container - the svg container on which to draw
+ * @returns an svg containing the item
+ */
+function drawPaintBucket(x, y, container) {
+    var paintBucketGroup = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    paintBucketGroup.classList.add("paint-bucket");
+    paintBucketGroup.setAttribute("x", x);
+    paintBucketGroup.setAttribute("y", y);
+
+    var paintBucketCan = drawRectangle(50, 60, 0, 20, paintBucketGroup);
+    paintBucketCan.classList.add("paint-bucket-can");
+
+    var paintBucketLabel = drawRectangle(30, 15, 10, 35, paintBucketGroup);
+    paintBucketLabel.classList.add("paint-bucket-label");
+
+    //background-image: linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet); 
+    var paintBucketDef = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    var paintGradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    paintGradient.setAttribute("id", "rainbow-gradient");
+    paintBucketDef.appendChild(paintGradient);
+
+    var colors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+    for(var i=0; i<colors.length; i++) {
+        var stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop.setAttribute("offset", 100/6*i + "%");
+        stop.setAttribute("stop-color", colors[i]);
+        paintGradient.appendChild(stop);
+    }
+
+    paintBucketGroup.appendChild(paintBucketDef);
+
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    var d = [];
+    d.push("M 0 20");
+    d.push("C 5 -5, 45 -5, 50 20");
+    path.setAttribute("d", d.join(" "));
+    paintBucketGroup.appendChild( path );
+    paintBucketGroup.classList.add("paint-bucket-handle");
+    
+    container.appendChild(paintBucketGroup);
+
+    paintBucketGroup.classList.add("house-item");
+
+    return paintBucketGroup;
+}
+
+/**
+ * Interact with the paint bucket
+ * @param {object} item - the json representation of paint bucket
+ * @param {number} index - the index of the picture in the houseItems or the inventory array
+ */
+function interactPaintBucket(item, index) {
+    var paintContainer = document.createElement("div");
+    paintContainer.classList.add("paint-select-container");
+    document.body.appendChild(paintContainer);
+
+    var wallLabel = document.createElement("div");
+    wallLabel.classList.add("paint-wall-label");
+    wallLabel.innerText = "Wall Color: ";
+    paintContainer.appendChild(wallLabel);
+
+    var wallSelect = document.createElement("input");
+    wallSelect.setAttribute("type", "color");
+    wallSelect.classList.add("paint-select-wall");
+    paintContainer.appendChild(wallSelect);
+    wallSelect.value = localStorage.cocoaTownWallColor;
+    wallSelect.onchange = function() {
+        localStorage.cocoaTownWallColor = this.value;
+        paintHouse();
+    }
+    wallSelect.oninput = wallSelect.onchange;
+
+    var floorLabel = document.createElement("div");
+    floorLabel.classList.add("paint-floor-label");
+    floorLabel.innerText = "Floor Color: ";
+    paintContainer.appendChild(floorLabel);
+
+    var floorSelect = document.createElement("input");
+    floorSelect.setAttribute("type", "color");
+    floorSelect.classList.add("paint-select-floor");
+    paintContainer.appendChild(floorSelect);
+    floorSelect.value = localStorage.cocoaTownFloorColor;
+    floorSelect.onchange = function() {
+        localStorage.cocoaTownFloorColor = this.value;
+        paintHouse();
+    }
+    floorSelect.oninput = floorSelect.onchange;
+
+    item.restoreFunctions = {
+        "onclick": document.body.onclick
+    }
+
+    document.body.onclick = function() {
+        restoreInteractionFuctions(item);
+        paintContainer.parentNode.removeChild(paintContainer);
+    }
+
+    paintContainer.onclick = function(e) {
+        e.stopPropagation();
+    }
+}
+
+/**
+ * Paint the walls and floor
+ */
+function paintHouse() {
+    if( localStorage.cocoaTownWallColor ) {
+        document.querySelector(".inside-house-wall").style.fill = localStorage.cocoaTownWallColor;
+        document.querySelector(".inside-house").style.backgroundColor = localStorage.cocoaTownWallColor;
+    }
+    if( localStorage.cocoaTownFloorColor ) {
+        document.querySelector(".inside-house-floor").style.fill = localStorage.cocoaTownFloorColor;
+    }
+}
+
+/**
  * Draw the store
  */
 function drawStore() {
@@ -5312,7 +5556,9 @@ function drawStore() {
     document.body.appendChild(background);
     background.onmousedown = function(e) {
         e.stopPropagation();
+        setTs(e); // Make sure we set the touch start location since the propagation stop won't allow us to
     }
+    background.ontouchstart = background.onmousedown;
 
     var menuTitle = document.createElement("div");
     menuTitle.classList.add("store-menu-title");
@@ -5434,26 +5680,25 @@ function toggleStore() {
 }
 
 /**
- * Hash code for a file
- * Taken from here: https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
+ * Create a random id
+ * Taken from here: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+ * @param {number} length - the length of the id
+ * @returns the new id
  */
-String.prototype.hashCode = function() {
-    var hash = 0;
-    if (this.length == 0) {
-        return hash;
+function makeId(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    for (var irwaq = 0; irwaq < this.length; irwaq++) {
-        var char = this.charCodeAt(irwaq);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-}
+    return result;
+ }
 
 ////////// Main Program ////////////
 
 // Movement
-var fps = 30
+var fps = 30;
 var tickRate = 1000/fps; // every 33 ms ~ 30fps
 var keyDown = {};
 var keyMap = {
@@ -5466,6 +5711,7 @@ var keyMap = {
     68: "right",
     83: "down"
 };
+var ts;
 var playerStartingWidth = 82;
 var playerStartingHeight = 72;
 var playerWidth;
@@ -5588,6 +5834,12 @@ var availableItems = [
         "function": drawPictureFrame,
         "interact": interactPicture,
         "price": 90
+    },
+    {
+        "name": "Paint Bucket",
+        "function": drawPaintBucket,
+        "interact": interactPaintBucket,
+        "price": 200
     },
     {
         "name": "Speaker",
@@ -5907,6 +6159,16 @@ if( !localStorage.cocoaTownHighScore ) {
 if( !localStorage.cocoaTownCoins ) {
     localStorage.cocoaTownCoins = 0;
 }
+// Make sure the house colors are set
+// make sure this matches the css
+if( !localStorage.cocoaTownWallColor ) {
+    // white
+    localStorage.cocoaTownWallColor = "#FFFFFF";
+}
+if( !localStorage.cocoaTownFloorColor ) {
+    // tan
+    localStorage.cocoaTownFloorColor = "#D2B48C";
+}
 
 // make sure we have a game103 id
 if( !localStorage.game103Id ) {
@@ -5944,5 +6206,5 @@ else {
 scaleToScreen();
 document.oncontextmenu = new Function("return false;"); // disable right click
 document.body.onresize = scaleToScreen;
-setTimeout(function() {window.scrollTo(0,0)}, 50);
+window.setInterval( scaleToScreen, 50 ); // When you reload on ios with the address bar visible, the resize event doesn't get called like when it appears after load, so you have to scale when you can.
 load();

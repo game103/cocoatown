@@ -28,6 +28,8 @@ html {
     overflow: hidden;
     margin: 0;
     position: absolute;
+    height: 100%;
+    width: 100%;
 }
 
 html > body {
@@ -121,7 +123,7 @@ html > body {
     fill: tan;
 }
 
-.door-group {
+.door-group, .door-group-inside {
     overflow: visible;
     transition: transform 1s ease;
 }
@@ -630,7 +632,7 @@ input {
     display: none;
 }
 
-.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog, .calendar, .ball {
+.inside-house-floor, .inside-house-wall, .desk-body, .desk-leg, .computer-frame, .computer-screen, .tv-frame, .tv-screen, .book, .dog-bed, .dog-bed-inner, .notepad, .clock, .clock-hand, .bookshelf, .bookshelf-background, .picture-frame, .newspaper, .speaker, .inside-dog, .calendar, .ball, .paint-bucket, .paint-bucket-handle, .paint-bucket-can, .paint-bucket-label {
     stroke: black;
     stroke-width: 2px;
     overflow: visible;
@@ -640,6 +642,7 @@ input {
     fill: transparent;
 }
 
+/*make sure these match the js*/
 .inside-house-floor {
     fill: tan;
 }
@@ -866,8 +869,12 @@ input {
     opacity: 0.7;
 }
 
-.inventory-item:first-child, .store-item:first-child {
+.inventory-item, .store-item:first-child {
     margin-left: 0;
+}
+
+.inventory-item ~ .inventory-item {
+    margin-left: 15px;
 }
 
 .inventory-item:last-child, .store-item:last-child {
@@ -1045,7 +1052,7 @@ input {
 }
 
 .tv input {
-    width: 500px;
+    width: 813px;
     border: 2px solid black;
     margin-left: 5px;
     position: absolute;
@@ -1061,7 +1068,7 @@ input {
     pointer-events: none;
 }
 
-.picture-select, .audio-select-container {
+.picture-select, .audio-select-container, .paint-select-container {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1087,7 +1094,7 @@ input {
     display:inline-block;
     font-family: "Acme", serif;
     font-size: 18px;
-    max-width: 275px;
+    max-width: 225px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -1134,11 +1141,12 @@ input {
 .full-newspaper-news {
     margin:20px;
     overflow-y: scroll;
-    height:405px;
+    height:410px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .full-newspaper input {
-    width: 500px;
+    width: 660px;
     border: 2px solid black;
     margin-left: 5px;
     position: absolute;
@@ -1203,4 +1211,38 @@ input {
     border: 2px solid black;
     height:500px;
     width: calc(100% - 24px);
+}
+
+.paint-bucket-can {
+    fill: rgb(190, 190, 190);
+}
+
+.paint-bucket-label {
+    fill: url(#rainbow-gradient);
+}
+
+.paint-bucket-handle {
+    fill: transparent;
+}
+
+.paint-select-container {
+    background-color: rgb(190, 190, 190);
+    width: 150px;
+}
+
+.paint-wall-label {
+    margin-bottom: 20px;
+}
+
+.paint-floor-label, .paint-wall-label {
+    display: inline-block;
+    font-family: "Acme", sans-serif;
+    color: black;
+    width: 90px;
+}
+
+.paint-select-wall, .paint-select-floor {
+    width: 50px;
+    border-radius: 0;
+    height: 25px;
 }
