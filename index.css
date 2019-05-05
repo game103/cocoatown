@@ -1246,3 +1246,13 @@ input {
     border-radius: 0;
     height: 25px;
 }
+
+@supports (-webkit-overflow-scrolling: touch) {
+    * {
+        cursor: pointer;
+    }
+    .full-book-page, .full-computer, .full-newspaper {
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+  }

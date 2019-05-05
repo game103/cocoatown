@@ -3363,6 +3363,7 @@ function reset() {
     tickTimeoutRemaining = null;
     enemySightedDistanceX = 450;
     enemySightedDistanceY = 253;
+    enemyMovementAmount = 6;
     if( tickTimeout ) { clearTimeout(tickTimeout); tickTimeout = null; }
     keyDown = {};
     powerups = {
@@ -5762,7 +5763,7 @@ var enemyRadius = 15;
 var enemySightedDistanceX;
 var enemySightedDistanceY;
 var maxSightedDistanceXIncrease = 130; // Scale is maintained at 16/9, Y is increased accordingly
-var enemyMovementAmount = 6;
+var enemyMovementAmount;
 var enemyPadding = 25; // Distance an enemy must remain from an object beyond a direct collision
 var currentDifficulty;
 var maxDifficulty = 50;
@@ -5785,8 +5786,9 @@ var flowerRadius = 5;
 var numFlowers = 50;
 
 var spawnPlayerPadding = 20;
+// These need to be >= enemyPlayerPadding
 var spawnOverlapHorizontal = 30;
-var spawnOverlapDown = 20;
+var spawnOverlapDown = 25;
 var spawnOverlapUp = 60;
 
 var interacting = false;
