@@ -1031,6 +1031,10 @@ input {
     border-top: 2px solid black;
 }
 
+.tv foreignObject {
+    overflow: visible;
+}
+
 .tv .menu-button {
     text-align: center;
     position: absolute;

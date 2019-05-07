@@ -1513,8 +1513,8 @@ function spawnEnemies(enemyCount, container) {
 
             enemy = { x1: x - enemyRadius, y1: y - enemyRadius, x2: x + enemyRadius, y2: y+enemyRadius };
             var overlaps = false;
-            for(var j=0; j<objects.length; j++) {
-                var curOverlapObject = { x1: objects[j].x1-spawnOverlapHorizontal, y1: objects[j].y1-spawnOverlapUp, x2: objects[j].x2+spawnOverlapHorizontal, y2: objects[j].y2+playerAllowedHouseOverlap+spawnOverlapDown };
+            for(var j=0; j<enemyBuildings.length; j++) {
+                var curOverlapObject = { x1: enemyBuildings[j].x1-spawnOverlapHorizontal, y1: enemyBuildings[j].y1-spawnOverlapUp, x2: enemyBuildings[j].x2+spawnOverlapHorizontal, y2: enemyBuildings[j].y2+spawnOverlapDown };
                 if( collisionTest(enemy, curOverlapObject) ) {
                     overlaps = true;
                 }
@@ -2886,6 +2886,8 @@ function drawMenu() {
  * Enter the dog house
  */
 function enterHouse() {
+    removeGameKeyMoveFunctions();
+
     if( !document.querySelector(".inside-house") ) {
         drawInsideHouse();
         document.querySelector(".inventory").style.display = "none"; // Since we recreate the invenotry a lot, we want it block displayed by default, so display it none manually
@@ -2922,6 +2924,7 @@ function leaveHouse() {
     document.body.ontouchmove = null;
     document.body.ontouchstart = null;
     document.body.ontouchend = null;
+    addGameKeyMoveFunctions();
     addGameTouchMoveFunctions();
     setMoveMode(false);
     // Remove videos
@@ -3379,49 +3382,7 @@ function reset() {
     drawWorld();
     tick();
 
-    document.body.onkeydown = function(e) {
-        keyDown[keyMap[e.which]] = true;
-        if( document.activeElement.tagName != "INPUT"  && 
-            document.activeElement.tagName != "TEXTAREA" ) {
-            return false; // No keyboard browser control
-        }
-    };
-    document.body.onkeyup = function(e) {
-        keyDown[keyMap[e.which]] = false; // This is not for just press
-
-        // On p press or space
-        if( e.keyCode == 80 || e.keyCode == 32 ) {
-            if( document.activeElement.tagName != "INPUT"  && 
-            document.activeElement.tagName != "TEXTAREA" &&
-            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
-                togglePause();
-                // Prevent keyboard browser control
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-
-        // On m press
-        if( e.keyCode == 77 ) {
-            if( document.activeElement.tagName != "INPUT"  && 
-            document.activeElement.tagName != "TEXTAREA" && 
-            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
-                toggleMute();
-            }
-        }
-
-        // On enter press
-        if( e.keyCode == 13 ) {
-            if( !stopped ) {
-                var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
-                var cocoaHouseDoorObject = objects[0].door;
-                if( collisionTest(playerObject, cocoaHouseDoorObject) ) {
-                    togglePause();
-                    enterHouse();
-                }
-            }
-        }
-    };
+    addGameKeyMoveFunctions();
     addGameTouchMoveFunctions();
     // Prevent scroll on ios
     document.addEventListener('touchmove', function(e) {
@@ -3478,6 +3439,63 @@ function addGameTouchMoveFunctions() {
         keyDown.up = false;
         keyDown.down = false;
     }
+}
+
+/**
+ * Add game key move functions
+ */
+function addGameKeyMoveFunctions() {
+    document.body.onkeydown = function(e) {
+        keyDown[keyMap[e.which]] = true;
+        if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" ) {
+            return false; // No keyboard browser control
+        }
+    };
+    document.body.onkeyup = function(e) {
+        keyDown[keyMap[e.which]] = false; // This is not for just press
+
+        // On p press or space
+        if( e.keyCode == 80 || e.keyCode == 32 ) {
+            if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" &&
+            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
+                togglePause();
+                // Prevent keyboard browser control
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+
+        // On m press
+        if( e.keyCode == 77 ) {
+            if( document.activeElement.tagName != "INPUT"  && 
+            document.activeElement.tagName != "TEXTAREA" && 
+            ( !document.querySelector(".inside-house") || document.querySelector(".inside-house").style.display != "block" ) ) {
+                toggleMute();
+            }
+        }
+
+        // On enter press
+        if( e.keyCode == 13 ) {
+            if( !stopped ) {
+                var playerObject = { x1: playerX + playerHitboxReduction, y1: playerY + playerHitboxReduction, x2: playerX + playerWidth - playerHitboxReduction, y2: playerY + playerHeight - playerHitboxReduction };
+                var cocoaHouseDoorObject = objects[0].door;
+                if( collisionTest(playerObject, cocoaHouseDoorObject) ) {
+                    togglePause();
+                    enterHouse();
+                }
+            }
+        }
+    };
+}
+
+/**
+ * Remove game key down functions
+ */
+function removeGameKeyMoveFunctions() {
+    document.body.onkeyup = null;
+    document.body.onkeydown = null;
 }
 
 /**
