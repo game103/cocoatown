@@ -2503,7 +2503,7 @@ function drawMenu() {
     News: <a target='blank' rel='noopener' href='https://twitter.com/'>Twitter</a><br>\
     Storage Helper: <a target='blank' rel='noopener' href='https://github.com/localForage/localForage'>Mozilla</a><br>\
     Mobile Double Click: <a target='black' rel='noopener' href='https://github.com/mckamey/doubleTap.js'>Stephen M. McKamey</a>\
-    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='resources/logo.png'/><br>© 2019 Game 103 (game103.net)</a>";
+    <a class='menu-credits-game103' target='blank' rel='noopener' href='https://game103.net'><img src='resources/logo.png'/><br><i class='far fa-copyright'></i> 2019 Game 103 (game103.net)</a>";
     menuFrame.appendChild(credits);
     
     menu.appendChild(menuFrame);
@@ -2526,7 +2526,7 @@ function drawMenu() {
     <div class='menu-instructions-column'><div class='menu-instructions-key'>W</div><div class='menu-instructions-key'>A</div><div class='menu-instructions-key'>S</div><div class='menu-instructions-key'>D</div></div>\
     <div class='menu-instructions-column menu-instructions-column-hand'><i class='fas fa-hand-point-up'></i></div>\
     <div class='menu-instructions-sub-title'>Follow your compass and note the house numbers to find your destination.</div>\
-    <div class='menu-instructions-sub-title'>Powerups</div>";
+    <div class='menu-instructions-sub-title'>Power-ups</div>";
 
     var powerupKeys = Object.keys(powerups);
     for( var i=0; i<powerupKeys.length; i++) {
@@ -2565,7 +2565,7 @@ function drawMenu() {
 
     var powerupDescription = document.createElement("div");
     powerupDescription.classList.add("menu-instructions-powerup-description");
-    powerupDescription.innerText = "Hover over a powerup to see what it does!";
+    powerupDescription.innerText = "Hover over a power-up to see what it does!";
 
     instructions.appendChild(powerupDescription);
 
